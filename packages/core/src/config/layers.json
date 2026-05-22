@@ -1,7 +1,7 @@
 [
   {
-    "id": "aviation-layer",
-    "name": "Real-Time Aviation (ADS-B)",
+    "id": "earthquakes",
+    "name": "USGS Earthquakes",
     "source_type": "GeoJSON",
     "paint": {
       "circle-radius": 6,
@@ -10,7 +10,7 @@
       "circle-stroke-color": "#ffffff"
     },
     "layout": {
-      "visibility": "visible"
+      "visibility": "none"
     },
     "minZoom": 1,
     "maxZoom": 20,
@@ -18,164 +18,112 @@
     "tier": 0,
     "legend": {
       "type": "circle",
-      "label": "Active Flight Vector",
+      "label": "Seismic Epicenter",
       "color": "#e74c3c"
     }
   },
   {
-    "id": "maritime-layer",
-    "name": "Maritime Tracking (AIS)",
+    "id": "weather",
+    "name": "Open-Meteo Climate Cells",
     "source_type": "GeoJSON",
     "paint": {
-      "circle-radius": 5,
-      "circle-color": "#2ecc71",
-      "circle-stroke-width": 1.5,
-      "circle-stroke-color": "#000000"
+      "circle-radius": 8,
+      "circle-color": "#3498db",
+      "circle-stroke-width": 1,
+      "circle-stroke-color": "#ffffff"
     },
     "layout": {
-      "visibility": "visible"
+      "visibility": "none"
     },
-    "minZoom": 2,
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.75,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Atmospheric Grid Node",
+      "color": "#3498db"
+    }
+  },
+  {
+    "id": "wildfires",
+    "name": "NASA FIRMS Wildfires",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 6,
+      "circle-color": "#e67e22",
+      "circle-stroke-width": 1.5,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
     "maxZoom": 20,
     "opacity": 0.9,
     "tier": 0,
     "legend": {
       "type": "circle",
-      "label": "Cargo/Vessel Vector",
-      "color": "#2ecc71"
-    }
-  },
-  {
-    "id": "congestion-heatmap",
-    "name": "Global Ground Congestion Grid",
-    "source_type": "heatmap",
-    "paint": {
-      "heatmap-weight": [
-        "interpolate",
-        ["linear"],
-        ["get", "score"],
-        0, 0,
-        4, 1
-      ],
-      "heatmap-intensity": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        0, 1,
-        9, 3
-      ],
-      "heatmap-color": [
-        "interpolate",
-        ["linear"],
-        ["heatmap-density"],
-        0, "rgba(33,102,172,0)",
-        0.2, "rgb(103,169,207)",
-        0.4, "rgb(209,229,240)",
-        0.6, "rgb(253,219,199)",
-        0.8, "rgb(239,138,98)",
-        1.0, "rgb(178,24,43)"
-      ],
-      "heatmap-radius": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        0, 2,
-        9, 20
-      ]
-    },
-    "layout": {
-      "visibility": "visible"
-    },
-    "minZoom": 3,
-    "maxZoom": 18,
-    "opacity": 0.75,
-    "tier": 1,
-    "legend": {
-      "type": "gradient",
-      "label": "Transit Delay Congestion Density",
-      "color": "linear-gradient(to right, rgb(103,169,207), rgb(239,138,98), rgb(178,24,43))"
-    }
-  },
-  {
-    "id": "conflict-zones",
-    "name": "Conflict Frontline Boundaries",
-    "source_type": "GeoJSON",
-    "paint": {
-      "fill-color": "#f1c40f",
-      "fill-opacity": 0.25,
-      "fill-outline-color": "#d35400"
-    },
-    "layout": {
-      "visibility": "visible"
-    },
-    "minZoom": 1,
-    "maxZoom": 20,
-    "opacity": 0.6,
-    "tier": -1,
-    "legend": {
-      "type": "polygon",
-      "label": "Active Combat Zone / FRONT",
-      "color": "#f1c40f"
-    }
-  },
-  {
-    "id": "disaster-footprints",
-    "name": "NASA Wildfire Boundaries",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 7,
-      "circle-color": "#e67e22",
-      "circle-stroke-width": 2,
-      "circle-stroke-color": "#f39c12"
-    },
-    "layout": {
-      "visibility": "visible"
-    },
-    "minZoom": 2,
-    "maxZoom": 20,
-    "opacity": 0.85,
-    "tier": 0,
-    "legend": {
-      "type": "circle",
-      "label": "Thermal Wildfire Anomaly",
+      "label": "Active Thermal Anomaly",
       "color": "#e67e22"
     }
   },
   {
-    "id": "sensor-networks",
-    "name": "Crowd-Sourced PurpAir Nodes",
+    "id": "airquality",
+    "name": "OpenAQ Air Stations",
     "source_type": "GeoJSON",
     "paint": {
-      "circle-radius": 4,
+      "circle-radius": 5,
       "circle-color": "#9b59b6",
       "circle-stroke-width": 1,
       "circle-stroke-color": "#ffffff"
     },
     "layout": {
-      "visibility": "visible"
+      "visibility": "none"
     },
-    "minZoom": 4,
+    "minZoom": 3,
     "maxZoom": 20,
-    "opacity": 0.7,
-    "tier": -1,
+    "opacity": 0.8,
+    "tier": 0,
     "legend": {
       "type": "circle",
-      "label": "IoT Environmental Station",
+      "label": "IoT Particulate Monitor",
       "color": "#9b59b6"
     }
   },
   {
-    "id": "news-pins",
-    "name": "Deduplicated News Geolocation",
+    "id": "terminator",
+    "name": "Solar Terminator",
     "source_type": "GeoJSON",
     "paint": {
-      "circle-radius": 8,
+      "fill-color": "#070c18",
+      "fill-opacity": 0.35
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.5,
+    "tier": -1,
+    "legend": {
+      "type": "polygon",
+      "label": "Day/Night Boundary Shadow",
+      "color": "#070c18"
+    }
+  },
+  {
+    "id": "gdelt",
+    "name": "GDELT Events Monitor",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 7,
       "circle-color": "#3498db",
-      "circle-stroke-width": 2,
+      "circle-stroke-width": 1.5,
       "circle-stroke-color": "#ffffff"
     },
     "layout": {
-      "visibility": "visible"
+      "visibility": "none"
     },
     "minZoom": 1,
     "maxZoom": 20,
@@ -185,6 +133,2881 @@
       "type": "circle",
       "label": "C2 Verified News Event",
       "color": "#3498db"
+    }
+  },
+  {
+    "id": "acled",
+    "name": "ACLED Conflict Reports",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 7,
+      "circle-color": "#e74c3c",
+      "circle-stroke-width": 1.5,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.95,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Armed Engagement / Protest",
+      "color": "#e74c3c"
+    }
+  },
+  {
+    "id": "aircraft",
+    "name": "OpenSky ADS-B Feeds",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#f1c40f",
+      "circle-stroke-width": 1,
+      "circle-stroke-color": "#000000"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.9,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Active Transponder Beacon",
+      "color": "#f1c40f"
+    }
+  },
+  {
+    "id": "webcams",
+    "name": "Global CCTV Network",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 6,
+      "circle-color": "#1abc9c",
+      "circle-stroke-width": 1,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 2,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Surveillance Stream Terminal",
+      "color": "#1abc9c"
+    }
+  },
+  {
+    "id": "recon",
+    "name": "OSINT Cyber Recon",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 6,
+      "circle-color": "#9b59b6",
+      "circle-stroke-width": 1,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 2,
+    "maxZoom": 20,
+    "opacity": 0.8,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Network Port Traceback",
+      "color": "#9b59b6"
+    }
+  },
+  {
+    "id": "space",
+    "name": "Satellite Tracking Network",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#00f0ff",
+      "circle-stroke-width": 1,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.9,
+    "tier": 2,
+    "legend": {
+      "type": "circle",
+      "label": "Orbit Ground Propagation",
+      "color": "#00f0ff"
+    }
+  },
+  {
+    "id": "climate-add-0",
+    "name": "Methane Super-Emitter Plume",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#2ecc71",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Methane Super-Emitter Plume Node",
+      "color": "#2ecc71"
+    }
+  },
+  {
+    "id": "climate-add-1",
+    "name": "Carbon Dioxide Columns Grid",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#1abc9c",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Carbon Dioxide Columns Grid Node",
+      "color": "#1abc9c"
+    }
+  },
+  {
+    "id": "climate-add-2",
+    "name": "Arctic Sea-Ice Melt Boundary",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#52be80",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Arctic Sea-Ice Melt Boundary Node",
+      "color": "#52be80"
+    }
+  },
+  {
+    "id": "climate-add-3",
+    "name": "Ozone Stratosphere Depletion",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#48c9b0",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Ozone Stratosphere Depletion Node",
+      "color": "#48c9b0"
+    }
+  },
+  {
+    "id": "climate-add-4",
+    "name": "Solar Ultraviolet Absorption",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#117a65",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Solar Ultraviolet Absorption Node",
+      "color": "#117a65"
+    }
+  },
+  {
+    "id": "climate-add-5",
+    "name": "Acid Rain Acidification Vector",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#145a32",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Acid Rain Acidification Vector Node",
+      "color": "#145a32"
+    }
+  },
+  {
+    "id": "climate-add-6",
+    "name": "Geothermal Core Fissure Outflow",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#2ecc71",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Geothermal Core Fissure Outflow Node",
+      "color": "#2ecc71"
+    }
+  },
+  {
+    "id": "climate-add-7",
+    "name": "Ocean Coral Bleaching Index",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#1abc9c",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Ocean Coral Bleaching Index Node",
+      "color": "#1abc9c"
+    }
+  },
+  {
+    "id": "climate-add-8",
+    "name": "Desertification Line Expansion",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#52be80",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Desertification Line Expansion Node",
+      "color": "#52be80"
+    }
+  },
+  {
+    "id": "climate-add-9",
+    "name": "Permafrost Organic Release",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#48c9b0",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Permafrost Organic Release Node",
+      "color": "#48c9b0"
+    }
+  },
+  {
+    "id": "climate-add-10",
+    "name": "Glacier Structural Fractures",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#117a65",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Glacier Structural Fractures Node",
+      "color": "#117a65"
+    }
+  },
+  {
+    "id": "climate-add-11",
+    "name": "Coastal Sea-Rise Flood Threat",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#145a32",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Coastal Sea-Rise Flood Threat Node",
+      "color": "#145a32"
+    }
+  },
+  {
+    "id": "climate-add-12",
+    "name": "Atmospheric River Vapor Route",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#2ecc71",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Atmospheric River Vapor Route Node",
+      "color": "#2ecc71"
+    }
+  },
+  {
+    "id": "climate-add-13",
+    "name": "Dust Storm Particulate Spread",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#1abc9c",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Dust Storm Particulate Spread Node",
+      "color": "#1abc9c"
+    }
+  },
+  {
+    "id": "climate-add-14",
+    "name": "El Nino Thermal Swell Boundary",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#52be80",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "El Nino Thermal Swell Boundary Node",
+      "color": "#52be80"
+    }
+  },
+  {
+    "id": "climate-add-15",
+    "name": "Nitrous Oxide Agricultural Out",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#48c9b0",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Nitrous Oxide Agricultural Out Node",
+      "color": "#48c9b0"
+    }
+  },
+  {
+    "id": "climate-add-16",
+    "name": "Seabed Hydrothermal Vent Gas",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#117a65",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Seabed Hydrothermal Vent Gas Node",
+      "color": "#117a65"
+    }
+  },
+  {
+    "id": "climate-add-17",
+    "name": "Rainforest Deforestation Rate",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#145a32",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Rainforest Deforestation Rate Node",
+      "color": "#145a32"
+    }
+  },
+  {
+    "id": "climate-add-18",
+    "name": "Urban Heat Island Core",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#2ecc71",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Urban Heat Island Core Node",
+      "color": "#2ecc71"
+    }
+  },
+  {
+    "id": "climate-add-19",
+    "name": "Jet Stream Turbulence Flow",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#1abc9c",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Jet Stream Turbulence Flow Node",
+      "color": "#1abc9c"
+    }
+  },
+  {
+    "id": "climate-add-20",
+    "name": "Tidal Surge High-Velocity Path",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#52be80",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Tidal Surge High-Velocity Path Node",
+      "color": "#52be80"
+    }
+  },
+  {
+    "id": "climate-add-21",
+    "name": "Soil Salinization Ingress Grid",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#48c9b0",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Soil Salinization Ingress Grid Node",
+      "color": "#48c9b0"
+    }
+  },
+  {
+    "id": "climate-add-22",
+    "name": "Microplastic Concentration Zone",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#117a65",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Microplastic Concentration Zone Node",
+      "color": "#117a65"
+    }
+  },
+  {
+    "id": "climate-add-23",
+    "name": "Volcanic Ash Column Dispersion",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#145a32",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Volcanic Ash Column Dispersion Node",
+      "color": "#145a32"
+    }
+  },
+  {
+    "id": "climate-add-24",
+    "name": "Active Tsunami Threat Vector",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#2ecc71",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Active Tsunami Threat Vector Node",
+      "color": "#2ecc71"
+    }
+  },
+  {
+    "id": "climate-add-25",
+    "name": "Wildfire Pyrocumulus Formation",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#1abc9c",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Wildfire Pyrocumulus Formation Node",
+      "color": "#1abc9c"
+    }
+  },
+  {
+    "id": "climate-add-26",
+    "name": "Stratospheric Sulfur Injection",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#52be80",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Stratospheric Sulfur Injection Node",
+      "color": "#52be80"
+    }
+  },
+  {
+    "id": "climate-add-27",
+    "name": "Hydropower Reservoir Low Water",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#48c9b0",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Hydropower Reservoir Low Water Node",
+      "color": "#48c9b0"
+    }
+  },
+  {
+    "id": "climate-add-28",
+    "name": "Peatland Combustion Outflow",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#117a65",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Peatland Combustion Outflow Node",
+      "color": "#117a65"
+    }
+  },
+  {
+    "id": "climate-add-29",
+    "name": "Arctic Jet Stream Divergence",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#145a32",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 1,
+    "legend": {
+      "type": "circle",
+      "label": "Arctic Jet Stream Divergence Node",
+      "color": "#145a32"
+    }
+  },
+  {
+    "id": "geopol-add-0",
+    "name": "Border Patrol Sector Alpha",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e74c3c",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Border Patrol Sector Alpha Node",
+      "color": "#e74c3c"
+    }
+  },
+  {
+    "id": "geopol-add-1",
+    "name": "Border Patrol Sector Beta",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e67e22",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Border Patrol Sector Beta Node",
+      "color": "#e67e22"
+    }
+  },
+  {
+    "id": "geopol-add-2",
+    "name": "Border Patrol Sector Gamma",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#f39c12",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Border Patrol Sector Gamma Node",
+      "color": "#f39c12"
+    }
+  },
+  {
+    "id": "geopol-add-3",
+    "name": "Combat Frontline Perimeter A",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#cb4335",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Combat Frontline Perimeter A Node",
+      "color": "#cb4335"
+    }
+  },
+  {
+    "id": "geopol-add-4",
+    "name": "Combat Frontline Perimeter B",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d35400",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Combat Frontline Perimeter B Node",
+      "color": "#d35400"
+    }
+  },
+  {
+    "id": "geopol-add-5",
+    "name": "Tactical Infiltration Corridors",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#922b21",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Tactical Infiltration Corridors Node",
+      "color": "#922b21"
+    }
+  },
+  {
+    "id": "geopol-add-6",
+    "name": "Naval Sea Blockade Sector 1",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e74c3c",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Naval Sea Blockade Sector 1 Node",
+      "color": "#e74c3c"
+    }
+  },
+  {
+    "id": "geopol-add-7",
+    "name": "Naval Sea Blockade Sector 2",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e67e22",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Naval Sea Blockade Sector 2 Node",
+      "color": "#e67e22"
+    }
+  },
+  {
+    "id": "geopol-add-8",
+    "name": "Rebel Inscription Outposts",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#f39c12",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Rebel Inscription Outposts Node",
+      "color": "#f39c12"
+    }
+  },
+  {
+    "id": "geopol-add-9",
+    "name": "Demilitarized Zone Buffer Grid",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#cb4335",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Demilitarized Zone Buffer Grid Node",
+      "color": "#cb4335"
+    }
+  },
+  {
+    "id": "geopol-add-10",
+    "name": "UN Humanitarian Guard Route",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d35400",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "UN Humanitarian Guard Route Node",
+      "color": "#d35400"
+    }
+  },
+  {
+    "id": "geopol-add-11",
+    "name": "Strategic Diplomatic Outposts",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#922b21",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Strategic Diplomatic Outposts Node",
+      "color": "#922b21"
+    }
+  },
+  {
+    "id": "geopol-add-12",
+    "name": "Civil Unrest Assembly Enclaves",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e74c3c",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Civil Unrest Assembly Enclaves Node",
+      "color": "#e74c3c"
+    }
+  },
+  {
+    "id": "geopol-add-13",
+    "name": "Tactical Flight Space Corridor",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e67e22",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Tactical Flight Space Corridor Node",
+      "color": "#e67e22"
+    }
+  },
+  {
+    "id": "geopol-add-14",
+    "name": "Munitions Storage Depots",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#f39c12",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Munitions Storage Depots Node",
+      "color": "#f39c12"
+    }
+  },
+  {
+    "id": "geopol-add-15",
+    "name": "Artillery Barrage Impact Radius",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#cb4335",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Artillery Barrage Impact Radius Node",
+      "color": "#cb4335"
+    }
+  },
+  {
+    "id": "geopol-add-16",
+    "name": "Drone Swarm Ingress Corridor",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d35400",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Drone Swarm Ingress Corridor Node",
+      "color": "#d35400"
+    }
+  },
+  {
+    "id": "geopol-add-17",
+    "name": "Electronic Jamming Dome Sector",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#922b21",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Electronic Jamming Dome Sector Node",
+      "color": "#922b21"
+    }
+  },
+  {
+    "id": "geopol-add-18",
+    "name": "Refugee Transit Inflow Vector",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e74c3c",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Refugee Transit Inflow Vector Node",
+      "color": "#e74c3c"
+    }
+  },
+  {
+    "id": "geopol-add-19",
+    "name": "Coastal Radar Defenses Network",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e67e22",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Coastal Radar Defenses Network Node",
+      "color": "#e67e22"
+    }
+  },
+  {
+    "id": "geopol-add-20",
+    "name": "Mobile SAM Battery Deployments",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#f39c12",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Mobile SAM Battery Deployments Node",
+      "color": "#f39c12"
+    }
+  },
+  {
+    "id": "geopol-add-21",
+    "name": "Submarine Patrol Sectors Grid",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#cb4335",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Submarine Patrol Sectors Grid Node",
+      "color": "#cb4335"
+    }
+  },
+  {
+    "id": "geopol-add-22",
+    "name": "Military Logistics Transit Hub",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d35400",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Military Logistics Transit Hub Node",
+      "color": "#d35400"
+    }
+  },
+  {
+    "id": "geopol-add-23",
+    "name": "Garrison Deployment Centers",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#922b21",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Garrison Deployment Centers Node",
+      "color": "#922b21"
+    }
+  },
+  {
+    "id": "geopol-add-24",
+    "name": "Active Hostage Crisis Outposts",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e74c3c",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Active Hostage Crisis Outposts Node",
+      "color": "#e74c3c"
+    }
+  },
+  {
+    "id": "geopol-add-25",
+    "name": "Propaganda Transmission Towers",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e67e22",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Propaganda Transmission Towers Node",
+      "color": "#e67e22"
+    }
+  },
+  {
+    "id": "geopol-add-26",
+    "name": "Special Operations Drop Zone",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#f39c12",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Special Operations Drop Zone Node",
+      "color": "#f39c12"
+    }
+  },
+  {
+    "id": "geopol-add-27",
+    "name": "Minefield Threat Enclave Radius",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#cb4335",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Minefield Threat Enclave Radius Node",
+      "color": "#cb4335"
+    }
+  },
+  {
+    "id": "geopol-add-28",
+    "name": "Air Defense Identification Zone",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d35400",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Air Defense Identification Zone Node",
+      "color": "#d35400"
+    }
+  },
+  {
+    "id": "geopol-add-29",
+    "name": "Naval Surface Fleet Anchorage",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#922b21",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "Naval Surface Fleet Anchorage Node",
+      "color": "#922b21"
+    }
+  },
+  {
+    "id": "cyber-add-0",
+    "name": "Submarine Fiber Landing Points",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#3498db",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Submarine Fiber Landing Points Node",
+      "color": "#3498db"
+    }
+  },
+  {
+    "id": "cyber-add-1",
+    "name": "Submarine Fiber Cable Route",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#9b59b6",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Submarine Fiber Cable Route Node",
+      "color": "#9b59b6"
+    }
+  },
+  {
+    "id": "cyber-add-2",
+    "name": "BGP Hijacking Alert Enclaves",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#8e44ad",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "BGP Hijacking Alert Enclaves Node",
+      "color": "#8e44ad"
+    }
+  },
+  {
+    "id": "cyber-add-3",
+    "name": "Satcom Satellite Uplink Nodes",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#2980b9",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Satcom Satellite Uplink Nodes Node",
+      "color": "#2980b9"
+    }
+  },
+  {
+    "id": "cyber-add-4",
+    "name": "Darknet Onion Relay Transits",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#5b2c6f",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Darknet Onion Relay Transits Node",
+      "color": "#5b2c6f"
+    }
+  },
+  {
+    "id": "cyber-add-5",
+    "name": "Critical Server Infrastructure",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#1b4f72",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Critical Server Infrastructure Node",
+      "color": "#1b4f72"
+    }
+  },
+  {
+    "id": "cyber-add-6",
+    "name": "IMSI Catcher Mobile Sniffers",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#3498db",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "IMSI Catcher Mobile Sniffers Node",
+      "color": "#3498db"
+    }
+  },
+  {
+    "id": "cyber-add-7",
+    "name": "GPS Signal Spoofing Centers",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#9b59b6",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "GPS Signal Spoofing Centers Node",
+      "color": "#9b59b6"
+    }
+  },
+  {
+    "id": "cyber-add-8",
+    "name": "Ransomware Infiltration Clusters",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#8e44ad",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Ransomware Infiltration Clusters Node",
+      "color": "#8e44ad"
+    }
+  },
+  {
+    "id": "cyber-add-9",
+    "name": "High-Frequency Trade Towers",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#2980b9",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "High-Frequency Trade Towers Node",
+      "color": "#2980b9"
+    }
+  },
+  {
+    "id": "cyber-add-10",
+    "name": "Cyber Threat IP Honey Pools",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#5b2c6f",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Cyber Threat IP Honey Pools Node",
+      "color": "#5b2c6f"
+    }
+  },
+  {
+    "id": "cyber-add-11",
+    "name": "Open Port Vulnerability Nodes",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#1b4f72",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Open Port Vulnerability Nodes Node",
+      "color": "#1b4f72"
+    }
+  },
+  {
+    "id": "cyber-add-12",
+    "name": "Decentralized Torrent Swarms",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#3498db",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Decentralized Torrent Swarms Node",
+      "color": "#3498db"
+    }
+  },
+  {
+    "id": "cyber-add-13",
+    "name": "Domain Name Server Top Hier",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#9b59b6",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Domain Name Server Top Hier Node",
+      "color": "#9b59b6"
+    }
+  },
+  {
+    "id": "cyber-add-14",
+    "name": "Fiber Trunk Intercept Access",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#8e44ad",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Fiber Trunk Intercept Access Node",
+      "color": "#8e44ad"
+    }
+  },
+  {
+    "id": "cyber-add-15",
+    "name": "SCADA Industrial Control Vulner",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#2980b9",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "SCADA Industrial Control Vulner Node",
+      "color": "#2980b9"
+    }
+  },
+  {
+    "id": "cyber-add-16",
+    "name": "Satellite Downlink Ground Term",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#5b2c6f",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Satellite Downlink Ground Term Node",
+      "color": "#5b2c6f"
+    }
+  },
+  {
+    "id": "cyber-add-17",
+    "name": "Microwave Telemetry Linkage",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#1b4f72",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Microwave Telemetry Linkage Node",
+      "color": "#1b4f72"
+    }
+  },
+  {
+    "id": "cyber-add-18",
+    "name": "Botanical Sensor Signals Grid",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#3498db",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Botanical Sensor Signals Grid Node",
+      "color": "#3498db"
+    }
+  },
+  {
+    "id": "cyber-add-19",
+    "name": "Government Intranet Gateways",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#9b59b6",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Government Intranet Gateways Node",
+      "color": "#9b59b6"
+    }
+  },
+  {
+    "id": "cyber-add-20",
+    "name": "Encrypted Messaging Node Load",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#8e44ad",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Encrypted Messaging Node Load Node",
+      "color": "#8e44ad"
+    }
+  },
+  {
+    "id": "cyber-add-21",
+    "name": "Ransomware Payment Wallet Geoloc",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#2980b9",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Ransomware Payment Wallet Geoloc Node",
+      "color": "#2980b9"
+    }
+  },
+  {
+    "id": "cyber-add-22",
+    "name": "Corporate VPN Ingress Gateway",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#5b2c6f",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Corporate VPN Ingress Gateway Node",
+      "color": "#5b2c6f"
+    }
+  },
+  {
+    "id": "cyber-add-23",
+    "name": "Dark Web Marketplace Hosts",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#1b4f72",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Dark Web Marketplace Hosts Node",
+      "color": "#1b4f72"
+    }
+  },
+  {
+    "id": "cyber-add-24",
+    "name": "Phishing Ingress Origin Points",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#3498db",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Phishing Ingress Origin Points Node",
+      "color": "#3498db"
+    }
+  },
+  {
+    "id": "cyber-add-25",
+    "name": "Cryptocurrency Miner Operations",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#9b59b6",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Cryptocurrency Miner Operations Node",
+      "color": "#9b59b6"
+    }
+  },
+  {
+    "id": "cyber-add-26",
+    "name": "AI Model Compute Datacenters",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#8e44ad",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "AI Model Compute Datacenters Node",
+      "color": "#8e44ad"
+    }
+  },
+  {
+    "id": "cyber-add-27",
+    "name": "Wireless Rogue Access Point",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#2980b9",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Wireless Rogue Access Point Node",
+      "color": "#2980b9"
+    }
+  },
+  {
+    "id": "cyber-add-28",
+    "name": "Military Comm Relay Towers",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#5b2c6f",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Military Comm Relay Towers Node",
+      "color": "#5b2c6f"
+    }
+  },
+  {
+    "id": "cyber-add-29",
+    "name": "Undersea Acoustic Hydrophones",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#1b4f72",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "Undersea Acoustic Hydrophones Node",
+      "color": "#1b4f72"
+    }
+  },
+  {
+    "id": "infra-add-0",
+    "name": "Suez Canal Anchor Congestion",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d35400",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Suez Canal Anchor Congestion Node",
+      "color": "#d35400"
+    }
+  },
+  {
+    "id": "infra-add-1",
+    "name": "Panama Canal Transit Backlog",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e67e22",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Panama Canal Transit Backlog Node",
+      "color": "#e67e22"
+    }
+  },
+  {
+    "id": "infra-add-2",
+    "name": "Crude Oil Pipeline Gate Valve",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d4ac0d",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Crude Oil Pipeline Gate Valve Node",
+      "color": "#d4ac0d"
+    }
+  },
+  {
+    "id": "infra-add-3",
+    "name": "Natural Gas Compression Hubs",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#a04000",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Natural Gas Compression Hubs Node",
+      "color": "#a04000"
+    }
+  },
+  {
+    "id": "infra-add-4",
+    "name": "High-Voltage Grid Main Pylons",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#7d6608",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "High-Voltage Grid Main Pylons Node",
+      "color": "#7d6608"
+    }
+  },
+  {
+    "id": "infra-add-5",
+    "name": "Railway Freight Trunk Routes",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#784212",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Railway Freight Trunk Routes Node",
+      "color": "#784212"
+    }
+  },
+  {
+    "id": "infra-add-6",
+    "name": "Deep Sea Container Terminal",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d35400",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Deep Sea Container Terminal Node",
+      "color": "#d35400"
+    }
+  },
+  {
+    "id": "infra-add-7",
+    "name": "Grain Strategic Megasilos",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e67e22",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Grain Strategic Megasilos Node",
+      "color": "#e67e22"
+    }
+  },
+  {
+    "id": "infra-add-8",
+    "name": "Lithium Hydroxide Mining Zone",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d4ac0d",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Lithium Hydroxide Mining Zone Node",
+      "color": "#d4ac0d"
+    }
+  },
+  {
+    "id": "infra-add-9",
+    "name": "Semiconductor Foundry Enclaves",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#a04000",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Semiconductor Foundry Enclaves Node",
+      "color": "#a04000"
+    }
+  },
+  {
+    "id": "infra-add-10",
+    "name": "Hydropower Generation Turbines",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#7d6608",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Hydropower Generation Turbines Node",
+      "color": "#7d6608"
+    }
+  },
+  {
+    "id": "infra-add-11",
+    "name": "Strategic Bridge Load Points",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#784212",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Strategic Bridge Load Points Node",
+      "color": "#784212"
+    }
+  },
+  {
+    "id": "infra-add-12",
+    "name": "Liquefied Gas Maritime Route",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d35400",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Liquefied Gas Maritime Route Node",
+      "color": "#d35400"
+    }
+  },
+  {
+    "id": "infra-add-13",
+    "name": "Supercarrier Cargo Terminals",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e67e22",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Supercarrier Cargo Terminals Node",
+      "color": "#e67e22"
+    }
+  },
+  {
+    "id": "infra-add-14",
+    "name": "Iron Ore Bulk Storage Yards",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d4ac0d",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Iron Ore Bulk Storage Yards Node",
+      "color": "#d4ac0d"
+    }
+  },
+  {
+    "id": "infra-add-15",
+    "name": "Cobalt Extraction Processing",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#a04000",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Cobalt Extraction Processing Node",
+      "color": "#a04000"
+    }
+  },
+  {
+    "id": "infra-add-16",
+    "name": "Uranium Enrichment Facilities",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#7d6608",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Uranium Enrichment Facilities Node",
+      "color": "#7d6608"
+    }
+  },
+  {
+    "id": "infra-add-17",
+    "name": "Water Treatment Aqua Reservoirs",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#784212",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Water Treatment Aqua Reservoirs Node",
+      "color": "#784212"
+    }
+  },
+  {
+    "id": "infra-add-18",
+    "name": "Nuclear Fuel Cell Core Grid",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d35400",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Nuclear Fuel Cell Core Grid Node",
+      "color": "#d35400"
+    }
+  },
+  {
+    "id": "infra-add-19",
+    "name": "Telecom Fiber Routing Conduit",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e67e22",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Telecom Fiber Routing Conduit Node",
+      "color": "#e67e22"
+    }
+  },
+  {
+    "id": "infra-add-20",
+    "name": "Tactical Fuel Pipeline Splice",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d4ac0d",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Tactical Fuel Pipeline Splice Node",
+      "color": "#d4ac0d"
+    }
+  },
+  {
+    "id": "infra-add-21",
+    "name": "Freight Runway Runway Vectors",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#a04000",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Freight Runway Runway Vectors Node",
+      "color": "#a04000"
+    }
+  },
+  {
+    "id": "infra-add-22",
+    "name": "Coal Terminal Offloading Port",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#7d6608",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Coal Terminal Offloading Port Node",
+      "color": "#7d6608"
+    }
+  },
+  {
+    "id": "infra-add-23",
+    "name": "Heavy Machine Assembly Plant",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#784212",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Heavy Machine Assembly Plant Node",
+      "color": "#784212"
+    }
+  },
+  {
+    "id": "infra-add-24",
+    "name": "Defense Manufacturing Complex",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d35400",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Defense Manufacturing Complex Node",
+      "color": "#d35400"
+    }
+  },
+  {
+    "id": "infra-add-25",
+    "name": "Critical Gas Storage Salt Dome",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#e67e22",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Critical Gas Storage Salt Dome Node",
+      "color": "#e67e22"
+    }
+  },
+  {
+    "id": "infra-add-26",
+    "name": "Underground Logistics Tunnel",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#d4ac0d",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Underground Logistics Tunnel Node",
+      "color": "#d4ac0d"
+    }
+  },
+  {
+    "id": "infra-add-27",
+    "name": "Offshore Drilling Platform Rig",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#a04000",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Offshore Drilling Platform Rig Node",
+      "color": "#a04000"
+    }
+  },
+  {
+    "id": "infra-add-28",
+    "name": "Geothermal Megawatt Turbines",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#7d6608",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Geothermal Megawatt Turbines Node",
+      "color": "#7d6608"
+    }
+  },
+  {
+    "id": "infra-add-29",
+    "name": "Global Shipping Fleet Routing",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#784212",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Global Shipping Fleet Routing Node",
+      "color": "#784212"
     }
   }
 ]

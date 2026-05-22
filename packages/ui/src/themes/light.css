@@ -1,0 +1,78 @@
+/* ============================================================================
+ * @panopticon/ui — Light Theme
+ * "Control Room Light Mode" — Premium, highly legible military-grade C2.
+ * Applied via [data-theme='light'].
+ * ============================================================================ */
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+
+  /* Theme metadata */
+  --theme-name: 'light';
+
+  /* Background layers */
+  --color-bg-deepest:  #f8f9fa;
+  --color-bg-base:     #ffffff;
+  --color-bg-surface:  #ffffff;
+  --color-bg-elevated: #f1f3f5;
+  --color-bg-hover:    #e9ecef;
+  --color-bg-active:   #dee2e6;
+
+  /* Text hierarchy */
+  --color-text-primary:   #1a202c;
+  --color-text-secondary: #4a5568;
+  --color-text-tertiary:  #718096;
+  --color-text-disabled:  #a0aec0;
+  --color-text-heading:   #111827;
+
+  /* Borders */
+  --color-border-weak:   #e2e8f0;
+  --color-border-medium: #cbd5e0;
+  --color-border-strong: #a0aec0;
+
+  /* Accent */
+  --color-accent:        #0066cc;
+  --color-accent-hover:  #0052a3;
+  --color-accent-active: #003d7a;
+
+  /* Glassmorphism */
+  --glass-bg:       rgba(255, 255, 255, 0.7);
+  --glass-border:   rgba(0, 0, 0, 0.08);
+  --glass-blur:     16px;
+  --glass-shadow:   0 8px 32px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================================================
+ * Light Theme: Subtle Grid Pattern
+ * Faint grid lines reminiscent of a blueprint or precision drawing.
+ * Applied to the html element for global effect.
+ * ============================================================================ */
+
+:root[data-theme='light'] {
+  background-color: #f8f9fa;
+  background-image:
+    /* Vertical grid lines */
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 79px,
+      rgba(0, 102, 204, 0.015) 79px,
+      rgba(0, 102, 204, 0.015) 80px
+    ),
+    /* Horizontal grid lines */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 79px,
+      rgba(0, 102, 204, 0.015) 79px,
+      rgba(0, 102, 204, 0.015) 80px
+    ),
+    /* Faint radial vignette — darker edges, lighter center */
+    radial-gradient(
+      ellipse at 50% 50%,
+      rgba(0, 102, 204, 0.01) 0%,
+      transparent 70%
+    );
+  background-attachment: fixed;
+}

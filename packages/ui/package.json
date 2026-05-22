@@ -9,6 +9,7 @@
     "./styles": "./src/index.css",
     "./themes/midnight": "./src/themes/midnight.css",
     "./themes/amoled": "./src/themes/amoled.css",
+    "./themes/light": "./src/themes/light.css",
     "./themes/high-contrast": "./src/themes/high-contrast.css"
   },
   "devDependencies": {

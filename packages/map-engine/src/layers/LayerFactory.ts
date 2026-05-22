@@ -110,9 +110,13 @@ export class LayerManager {
   }
 
   // Orchestrates high-frequency layer updates matching viewport state
-  public reconcileViewport(currentZoom: number, activeLayerIds: Set<string>) {
+  public reconcileViewport(currentZoom: number, layerStates: Record<string, any>) {
     this.configs.forEach((layer) => {
-      const isVisibleInCatalog = activeLayerIds.has(layer.id)
+      const isCustomLayer = layer.id.includes('-add-')
+      const isVisibleInCatalog = isCustomLayer
+        ? layerStates[layer.id]?.visible === true
+        : layerStates[layer.id]?.visible !== false
+
       const isWithinZoom =
         currentZoom >= (layer.minZoom ?? 0) && currentZoom <= (layer.maxZoom ?? 24)
 

@@ -19,24 +19,45 @@ import { useMapStore, useAppStore } from '@panopticon/core/stores'
 export default function IntelPanel() {
   const { flyTo, setSelectedEntityId, layerStates, setLayerEntityCount } = useMapStore()
   const { globalRefreshPaused } = useAppStore()
-  const [searchQuery, setSearchQuery] = React.useState('protest')
+  const [searchQuery, setSearchQuery] = React.useState('')
 
-  // Fetch GDELT geopolitical events using SWR
+  // Fetch GDELT geopolitical events once using SWR
   const { data: events, error, isLoading, mutate } = useSWR(
-    ['gdelt-events', searchQuery],
-    () => fetchGdeltEvents(searchQuery),
+    'gdelt-events-panel',
+    () => fetchGdeltEvents('protest'),
     {
       refreshInterval: globalRefreshPaused ? 0 : 300000, // Refresh every 5 minutes if not paused
       revalidateOnFocus: false,
     }
   )
 
-  // Sync entity count to map store
+  // Local query filtering
+  const filteredEvents = React.useMemo(() => {
+    if (!events) return []
+    const query = searchQuery.toLowerCase().trim()
+    if (!query) return events
+
+    return events.filter((ev) => {
+      const label = (ev.label || '').toLowerCase()
+      const actor1 = (ev.actor1 || '').toLowerCase()
+      const actor2 = (ev.actor2 || '').toLowerCase()
+      const eventCode = (ev.eventCode || '').toLowerCase()
+
+      return (
+        label.includes(query) ||
+        actor1.includes(query) ||
+        actor2.includes(query) ||
+        eventCode.includes(query)
+      )
+    })
+  }, [events, searchQuery])
+
+  // Sync entity count to map store (reflecting the filtered count)
   React.useEffect(() => {
-    if (events) {
-      setLayerEntityCount('gdelt', events.length)
+    if (filteredEvents) {
+      setLayerEntityCount('gdelt', filteredEvents.length)
     }
-  }, [events, setLayerEntityCount])
+  }, [filteredEvents, setLayerEntityCount])
 
   const [expandedIds, setExpandedIds] = React.useState<Record<string, boolean>>({})
 
@@ -57,15 +78,15 @@ export default function IntelPanel() {
 
   // Deduplicated / Grouped events
   const groupedEvents = React.useMemo(() => {
-    if (!events) return []
+    if (!filteredEvents) return []
 
-    const groups: Record<string, typeof events> = {}
-    
-    events.forEach((ev) => {
+    const groups: Record<string, typeof filteredEvents> = {}
+
+    filteredEvents.forEach((ev) => {
       // Group stories by their actor1 + eventCode + general vicinity (rounded coordinates to 1 decimal place)
       const coordsKey = ev.coordinates ? `${ev.coordinates[0].toFixed(1)}_${ev.coordinates[1].toFixed(1)}` : 'unknown'
       const key = `${ev.actor1.toLowerCase()}_${ev.eventCode}_${coordsKey}`
-      
+
       if (!groups[key]) {
         groups[key] = []
       }
@@ -89,7 +110,7 @@ export default function IntelPanel() {
       if (allSources.length === 1) {
         const isCritical = primaryEvent.severity === 'critical' || primaryEvent.severity === 'high'
         const mockCount = isCritical ? 2 : 1
-        
+
         const alternativeAgencies = [
           { name: 'Reuters Wire', toneOffset: -0.5, scaleOffset: 0 },
           { name: 'Associated Press', toneOffset: 0.2, scaleOffset: -0.5 },
@@ -115,7 +136,7 @@ export default function IntelPanel() {
         allSources,
       }
     })
-  }, [events])
+  }, [filteredEvents])
 
   const getSeverityBorderColor = (severity?: string) => {
     switch (severity) {

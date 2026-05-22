@@ -9,16 +9,17 @@ import {
   Globe,
   Radio,
   Eye,
-  EyeOff,
-  Sun,
-  Moon,
   AlertTriangle,
   Plane,
   Wind,
   ShieldAlert,
   Satellite,
+  ChevronDown,
+  ChevronRight,
+  Sun,
 } from 'lucide-react'
 import { useMapStore } from '@panopticon/core/stores'
+import layersConfig from '@panopticon/core/src/config/layers.json'
 
 interface LayerRowProps {
   id: string
@@ -30,8 +31,11 @@ interface LayerRowProps {
 function LayerRow({ id, label, icon, description }: LayerRowProps) {
   const { layerStates, toggleLayer } = useMapStore()
   
-  // Layer is active by default if not explicitly turned off
-  const isVisible = layerStates[id]?.visible !== false
+  // Layer is active by default if not explicitly turned off (except for custom add-ons)
+  const isCustom = id.includes('-add-')
+  const isVisible = isCustom
+    ? layerStates[id]?.visible === true
+    : layerStates[id]?.visible !== false
   const entityCount = layerStates[id]?.entityCount ?? 0
   const error = layerStates[id]?.error
 
@@ -91,6 +95,58 @@ function LayerRow({ id, label, icon, description }: LayerRowProps) {
 }
 
 export default function LayerPanel() {
+  const [mainOpen, setMainOpen] = React.useState(false)
+  const [climateOpen, setClimateOpen] = React.useState(false)
+  const [geopolOpen, setGeopolOpen] = React.useState(false)
+  const [cyberOpen, setCyberOpen] = React.useState(false)
+  const [infraOpen, setInfraOpen] = React.useState(false)
+
+  const customLayers = React.useMemo(() => {
+    return (layersConfig as any[]).filter((l) => l.id.includes('-add-'))
+  }, [])
+  
+  const climateLayers = React.useMemo(() => customLayers.filter(l => l.id.startsWith('climate-add-')), [customLayers])
+  const geopolLayers = React.useMemo(() => customLayers.filter(l => l.id.startsWith('geopol-add-')), [customLayers])
+  const cyberLayers = React.useMemo(() => customLayers.filter(l => l.id.startsWith('cyber-add-')), [customLayers])
+  const infraLayers = React.useMemo(() => customLayers.filter(l => l.id.startsWith('infra-add-')), [customLayers])
+
+  const renderSubAccordion = (
+    title: string,
+    isOpen: boolean,
+    setIsOpen: (val: boolean) => void,
+    layers: any[],
+    icon: React.ReactNode
+  ) => {
+    return (
+      <div className="flex flex-col border-b border-weak border-opacity-60">
+        <div
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center justify-between px-4 py-2 hover:bg-hover hover:bg-opacity-20 cursor-pointer select-none bg-deepest bg-opacity-30 transition-all"
+        >
+          <div className="flex items-center gap-2 font-mono text-[9px] font-bold text-secondary uppercase tracking-wider">
+            {icon}
+            <span>{title} ({layers.length})</span>
+          </div>
+          {isOpen ? <ChevronDown className="w-3.5 h-3.5 text-secondary" /> : <ChevronRight className="w-3.5 h-3.5 text-secondary" />}
+        </div>
+        
+        {isOpen && (
+          <div className="flex flex-col bg-deepest bg-opacity-10 pl-2 max-h-72 overflow-y-auto custom-scrollbar">
+            {layers.map((layer) => (
+              <LayerRow
+                key={layer.id}
+                id={layer.id}
+                label={layer.name}
+                icon={icon}
+                description={layer.legend.label}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col h-full overflow-hidden select-none">
       {/* Drawer Title Header */}
@@ -226,6 +282,58 @@ export default function LayerPanel() {
             icon={<Satellite className="w-3.5 h-3.5" />}
             description="Real-time orbital propagation and sweep sensor swathes"
           />
+        </div>
+
+        {/* ── SECTION: DYNAMIC THREAT CHANNELS (120+ ADD-ON LAYERS) ── */}
+        <div className="flex flex-col border-t border-weak">
+          <div
+            onClick={() => setMainOpen(!mainOpen)}
+            className="flex items-center justify-between px-4 py-3 bg-deepest bg-opacity-80 hover:bg-hover hover:bg-opacity-30 cursor-pointer select-none border-b border-weak transition-all"
+          >
+            <div className="flex items-center gap-2 text-primary font-display text-xs font-bold uppercase tracking-wider">
+              <Layers className="w-4 h-4 text-accent" />
+              <span>Dynamic Threat Channels</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[8px] font-mono font-semibold uppercase px-1 py-0.5 rounded border border-weak text-secondary bg-deepest">
+                120 LAYERS
+              </span>
+              {mainOpen ? <ChevronDown className="w-4 h-4 text-secondary" /> : <ChevronRight className="w-4 h-4 text-secondary" />}
+            </div>
+          </div>
+
+          {mainOpen && (
+            <div className="flex flex-col">
+              {renderSubAccordion(
+                "Climate & Atmosphere",
+                climateOpen,
+                setClimateOpen,
+                climateLayers,
+                <Thermometer className="w-3.5 h-3.5" />
+              )}
+              {renderSubAccordion(
+                "Geopolitical & Threat",
+                geopolOpen,
+                setGeopolOpen,
+                geopolLayers,
+                <ShieldAlert className="w-3.5 h-3.5" />
+              )}
+              {renderSubAccordion(
+                "OSINT & Cyber Recon",
+                cyberOpen,
+                setCyberOpen,
+                cyberLayers,
+                <Radio className="w-3.5 h-3.5" />
+              )}
+              {renderSubAccordion(
+                "Logistics & Infrastructure",
+                infraOpen,
+                setInfraOpen,
+                infraLayers,
+                <Layers className="w-3.5 h-3.5" />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

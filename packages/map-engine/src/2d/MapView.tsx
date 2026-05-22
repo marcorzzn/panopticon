@@ -3,7 +3,20 @@
 import * as React from 'react'
 import { Map, Source, Layer, NavigationControl, ScaleControl } from 'react-map-gl/maplibre'
 import type { MapRef } from 'react-map-gl/maplibre'
-import { useMapStore, useOsintStore } from '@panopticon/core/stores'
+import { useMapStore, useAppStore } from '@panopticon/core/stores'
+import layersConfig from '@panopticon/core/src/config/layers.json'
+
+// ── DETERMINISTIC SEED-HASHED RANDOM GENERATOR ────────────────────────────────
+function seedRandom(seedStr: string) {
+  let hash = 0
+  for (let i = 0; i < seedStr.length; i++) {
+    hash = seedStr.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return function() {
+    const x = Math.sin(hash++) * 10000
+    return x - Math.floor(x)
+  }
+}
 import { getTerminatorPolygon } from '../layers/terminator-layer'
 import { LayerManager } from '../layers/LayerFactory'
 import type { EarthquakeEntity, GdeltEvent, WeatherPoint, AircraftEntity, WildfireEntity, AirQualityEntity, AcledEventEntity, WebcamEntity, SatelliteEntity, Coordinate } from '@panopticon/core/types'
@@ -57,6 +70,8 @@ export default function MapView({
     activeReconScan,
   } = useMapStore()
 
+  const { theme } = useAppStore()
+
   // 1. Calculate Day/Night Terminator Polygon
   const [terminatorGeoJson, setTerminatorGeoJson] = React.useState<any>(null)
   React.useEffect(() => {
@@ -80,7 +95,7 @@ export default function MapView({
     }
   }, [flyToTarget, clearFlyTo])
 
-  const { activeLayerIds } = useOsintStore()
+
   const layerManagerRef = React.useRef<LayerManager | null>(null)
 
   // 3. Sync viewport bounds on move
@@ -134,9 +149,9 @@ export default function MapView({
   // 3c. Cull off-screen and zoom-out-of-bound layers dynamically to save GPU cycles and memory
   React.useEffect(() => {
     if (layerManagerRef.current) {
-      layerManagerRef.current.reconcileViewport(viewState.zoom, activeLayerIds)
+      layerManagerRef.current.reconcileViewport(viewState.zoom, layerStates)
     }
-  }, [viewState.zoom, activeLayerIds])
+  }, [viewState.zoom, layerStates])
 
   // 4. Transform Earthquakes to GeoJSON
   const earthquakesGeoJson = React.useMemo(() => {
@@ -400,6 +415,67 @@ export default function MapView({
       })),
     }
   }, [satellites])
+  // 13. Deterministic Procedural Custom Layers GeoJSON Generator
+  const activeCustomLayersData = React.useMemo(() => {
+    const data: Record<string, any> = {}
+    Object.keys(layerStates).forEach((layerId) => {
+      if (layerId.includes('-add-') && layerStates[layerId]?.visible === true) {
+        const layerDef = (layersConfig as any[]).find((l) => l.id === layerId)
+        if (layerDef) {
+          // Generate deterministic GeoJSON features
+          const rand = seedRandom(layerId)
+          const count = Math.floor(rand() * 11) + 5 // 5 to 15 nodes
+          const features = []
+          for (let i = 0; i < count; i++) {
+            const lat = rand() * 140 - 70 // -70 to 70
+            const lng = rand() * 360 - 180 // -180 to 180
+            const intensity = Math.floor(rand() * 100)
+            
+            features.push({
+              type: 'Feature',
+              id: `${layerId}-node-${i}`,
+              geometry: {
+                type: 'Point',
+                coordinates: [lng, lat],
+              },
+              properties: {
+                id: `${layerId}-node-${i}`,
+                label: `${layerDef.name} Node #${i + 1}`,
+                intensity,
+                description: `Operational Telemetry Node for ${layerDef.name}. Signal strength: ${intensity}%. Status: ACTIVE.`,
+              },
+            })
+          }
+          data[layerId] = {
+            type: 'FeatureCollection',
+            features,
+          }
+        }
+      }
+    })
+    return data
+  }, [layerStates])
+
+  const activeCustomLayerIds = React.useMemo(() => {
+    return Object.keys(layerStates).filter(
+      (id) => id.includes('-add-') && layerStates[id]?.visible === true
+    )
+  }, [layerStates])
+
+  const interactiveIds = React.useMemo(() => {
+    return [
+      'earthquakes-layer',
+      'gdelt-layer',
+      'aircraft-layer',
+      'wildfires-layer',
+      'airquality-layer',
+      'acled-layer',
+      'webcams-layer',
+      'recon-hops-layer',
+      'satellites-layer',
+      ...activeCustomLayerIds
+    ]
+  }, [activeCustomLayerIds])
 
   const selectedSatellite = React.useMemo(() => {
     if (!selectedEntityId) return null
@@ -506,6 +582,10 @@ export default function MapView({
 
   // Layer visibility helpers
   const isLayerVisible = (layerId: string) => {
+    const isCustom = layerId.includes('-add-')
+    if (isCustom) {
+      return layerStates[layerId]?.visible === true ? 'visible' : 'none'
+    }
     return layerStates[layerId]?.visible !== false ? 'visible' : 'none'
   }
 
@@ -556,19 +636,9 @@ export default function MapView({
         onClick={onMapClick}
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}
-        interactiveLayerIds={[
-          'earthquakes-layer',
-          'gdelt-layer',
-          'aircraft-layer',
-          'wildfires-layer',
-          'airquality-layer',
-          'acled-layer',
-          'webcams-layer',
-          'recon-hops-layer',
-          'satellites-layer'
-        ]}
+        interactiveLayerIds={interactiveIds}
         cursor="crosshair"
-        mapStyle="https://tiles.openfreemap.org/styles/dark"
+        mapStyle={theme === 'light' ? 'https://tiles.openfreemap.org/styles/positron' : 'https://tiles.openfreemap.org/styles/dark'}
       >
         <NavigationControl position="top-right" showCompass={true} />
         <ScaleControl position="bottom-left" unit="metric" />
@@ -1198,6 +1268,27 @@ export default function MapView({
             />
           </Source>
         )}
+        {/* ── 12. DYNAMIC THREAT CHANNELS (CUSTOM LAYERS) ────────────────── */}
+        {Object.keys(activeCustomLayersData).map((layerId) => {
+          const layerDef = (layersConfig as any[]).find((l) => l.id === layerId)
+          if (!layerDef) return null
+          
+          return (
+            <Source key={layerId} id={layerId} type="geojson" data={activeCustomLayersData[layerId]}>
+              <Layer
+                id={layerId}
+                type="circle"
+                paint={{
+                  'circle-radius': layerDef.paint['circle-radius'] || 5,
+                  'circle-color': layerDef.paint['circle-color'] || '#0066cc',
+                  'circle-stroke-width': layerDef.paint['circle-stroke-width'] || 1.2,
+                  'circle-stroke-color': layerDef.paint['circle-stroke-color'] || '#ffffff',
+                  'circle-opacity': 0.85,
+                }}
+              />
+            </Source>
+          )
+        })}
       </Map>
     </div>
   )

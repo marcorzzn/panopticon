@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware'
 // Types
 // ---------------------------------------------------------------------------
 
-type Theme = 'midnight' | 'amoled' | 'high-contrast'
+type Theme = 'midnight' | 'amoled' | 'light' | 'high-contrast'
 type ClockFormat = '24h' | '12h'
 
 export interface AppStore {

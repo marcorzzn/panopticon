@@ -47,7 +47,8 @@ export default function TopBar() {
 
   const cycleTheme = () => {
     if (theme === 'midnight') setTheme('amoled')
-    else if (theme === 'amoled') setTheme('high-contrast')
+    else if (theme === 'amoled') setTheme('light')
+    else if (theme === 'light') setTheme('high-contrast')
     else setTheme('midnight')
   }
 
