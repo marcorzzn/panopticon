@@ -4,8 +4,8 @@ const isProd = process.env.NODE_ENV === "production";
 
 const nextConfig: NextConfig = {
   output: 'export',
+  trailingSlash: true,
   basePath: isProd ? '/panopticon' : '',
-  // assetPrefix: isProd ? '/panopticon/' : '', // Let Next.js handle asset prefix relative to basePath automatically
   images: {
     unoptimized: true,
   },
@@ -18,3 +18,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+

@@ -514,7 +514,7 @@ export default function MapView({
           'recon-hops-layer',
           'satellites-layer'
         ]}
-        cursor={mapRef.current?.getMap().getCanvas().style.cursor || 'crosshair'}
+        cursor="crosshair"
         mapStyle="https://tiles.openfreemap.org/styles/dark"
       >
         <NavigationControl position="top-right" showCompass={true} />

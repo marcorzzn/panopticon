@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono, Outfit } from 'next/font/google'
+import { Suspense } from 'react'
 import '@panopticon/ui/styles'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 const sansFont = Inter({
   subsets: ['latin'],
@@ -34,8 +36,13 @@ export default function RootLayout({
       data-theme="midnight"
     >
       <body className="font-sans antialiased bg-deepest text-primary h-screen w-screen overflow-hidden">
-        {children}
+        <ErrorBoundary>
+          <Suspense>
+            {children}
+          </Suspense>
+        </ErrorBoundary>
       </body>
     </html>
   )
 }
+
