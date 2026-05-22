@@ -1,7 +1,26 @@
 import type { WebcamEntity } from '@panopticon/core/types'
 import { IntelligenceDomain } from '@panopticon/core/types'
 
+function shouldBypassFetch(): boolean {
+	if (typeof window === 'undefined') return false
+	const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+	const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL
+	
+	// If we are on a remote deployment (e.g. GitHub Pages) and don't have a secure production backend configured,
+	// we bypass fetch and immediately trigger the client-side simulation.
+	if (!isLocal) {
+		if (!backendUrl || !backendUrl.startsWith('https://')) {
+			return true
+		}
+	}
+	return false
+}
+
 export async function fetchWebcams(): Promise<WebcamEntity[]> {
+	if (shouldBypassFetch()) {
+		return getMockWebcams()
+	}
+
 	const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080/api/v1'
 	
 	try {
@@ -43,23 +62,27 @@ export async function fetchWebcams(): Promise<WebcamEntity[]> {
 		})
 	} catch (err) {
 		console.warn("Webcams backend unreachable. Engaging client-side simulation fallback:", err)
-		
-		const baseWebcams = [
-			{ id: "cam-1", name: "New York - Times Square Central", lat: 40.7580, lon: -73.9855, status: "healthy" as const, streamUrl: "https://images.webcams.travel/preview/1173873454.jpg" },
-			{ id: "cam-2", name: "Tokyo - Shibuya Crossing Feed", lat: 35.6596, lon: 139.7018, status: "healthy" as const, streamUrl: "https://images.webcams.travel/preview/1301984218.jpg" },
-			{ id: "cam-3", name: "London - Piccadilly Circus Surveillance", lat: 51.5101, lon: -0.1349, status: "healthy" as const, streamUrl: "https://images.webcams.travel/preview/1402849021.jpg" },
-			{ id: "cam-4", name: "Venice - Rialto Bridge Live Stream", lat: 45.4380, lon: 12.3359, status: "healthy" as const, streamUrl: "https://images.webcams.travel/preview/1502948209.jpg" },
-			{ id: "cam-5", name: "Rome - Colosseum Security Camera", lat: 41.8902, lon: 12.4922, status: "degraded" as const, streamUrl: "https://images.webcams.travel/preview/1209348291.jpg" }
-		]
-		
-		return baseWebcams.map((cam) => ({
-			id: cam.id,
-			coordinates: [cam.lon, cam.lat],
-			domain: IntelligenceDomain.GEOPOLITICAL,
-			timestamp: Date.now(),
-			label: `CCTV: ${cam.name} [${cam.status.toUpperCase()}]`,
-			streamUrl: cam.streamUrl,
-			status: cam.status,
-		}))
+		return getMockWebcams()
 	}
 }
+
+function getMockWebcams(): WebcamEntity[] {
+	const baseWebcams = [
+		{ id: "cam-1", name: "New York - Times Square Central", lat: 40.7580, lon: -73.9855, status: "healthy" as const, streamUrl: "https://images.webcams.travel/preview/1173873454.jpg" },
+		{ id: "cam-2", name: "Tokyo - Shibuya Crossing Feed", lat: 35.6596, lon: 139.7018, status: "healthy" as const, streamUrl: "https://images.webcams.travel/preview/1301984218.jpg" },
+		{ id: "cam-3", name: "London - Piccadilly Circus Surveillance", lat: 51.5101, lon: -0.1349, status: "healthy" as const, streamUrl: "https://images.webcams.travel/preview/1402849021.jpg" },
+		{ id: "cam-4", name: "Venice - Rialto Bridge Live Stream", lat: 45.4380, lon: 12.3359, status: "healthy" as const, streamUrl: "https://images.webcams.travel/preview/1502948209.jpg" },
+		{ id: "cam-5", name: "Rome - Colosseum Security Camera", lat: 41.8902, lon: 12.4922, status: "degraded" as const, streamUrl: "https://images.webcams.travel/preview/1209348291.jpg" }
+	]
+	
+	return baseWebcams.map((cam) => ({
+		id: cam.id,
+		coordinates: [cam.lon, cam.lat],
+		domain: IntelligenceDomain.GEOPOLITICAL,
+		timestamp: Date.now(),
+		label: `CCTV: ${cam.name} [${cam.status.toUpperCase()}]`,
+		streamUrl: cam.streamUrl,
+		status: cam.status,
+	}))
+}
+

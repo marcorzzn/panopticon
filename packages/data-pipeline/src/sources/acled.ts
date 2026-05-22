@@ -1,7 +1,26 @@
 import type { AcledEventEntity } from '@panopticon/core/types'
 import { IntelligenceDomain } from '@panopticon/core/types'
 
+function shouldBypassFetch(): boolean {
+	if (typeof window === 'undefined') return false
+	const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+	const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL
+	
+	// If we are on a remote deployment (e.g. GitHub Pages) and don't have a secure production backend configured,
+	// we bypass fetch and immediately trigger the client-side simulation.
+	if (!isLocal) {
+		if (!backendUrl || !backendUrl.startsWith('https://')) {
+			return true
+		}
+	}
+	return false
+}
+
 export async function fetchAcledEvents(): Promise<AcledEventEntity[]> {
+	if (shouldBypassFetch()) {
+		return getMockConflicts()
+	}
+
 	const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080/api/v1'
 	
 	try {
@@ -58,33 +77,37 @@ export async function fetchAcledEvents(): Promise<AcledEventEntity[]> {
 		})
 	} catch (err) {
 		console.warn("ACLED geopolitical events backend unreachable. Engaging client-side simulation fallback:", err)
-		
-		const baseConflicts = [
-			{ id: "c-1", type: "Explosions/Remote violence", actor1: "Military Forces of Russia", actor2: "Military Forces of Ukraine", lat: 48.3794, lon: 38.0803, fatalities: 8, notes: "Artillery exchange registered in the eastern frontline." },
-			{ id: "c-2", type: "Battles", actor1: "Houthi Reformists", actor2: "Naval Forces of the US", lat: 15.0000, lon: 42.5000, fatalities: 2, notes: "Drone intercept confirmed in the southern Red Sea transit corridor." },
-			{ id: "c-3", type: "Protests", actor1: "Civilians (Taiwan)", actor2: "", lat: 25.0330, lon: 121.5654, fatalities: 0, notes: "Demonstration regarding maritime security updates in Taipei." },
-			{ id: "c-4", type: "Strategic developments", actor1: "Military Forces of South Korea", actor2: "Military Forces of North Korea", lat: 37.8920, lon: 126.7050, fatalities: 0, notes: "Border telemetry surveillance radar units activated near DMZ." },
-			{ id: "c-5", type: "Battles", actor1: "Drug Cartel", actor2: "State Police (Mexico)", lat: 19.4326, lon: -99.1332, fatalities: 5, notes: "Armed encounter during tactical checkpoint operation." }
-		]
-		
-		return baseConflicts.map((c) => {
-			const label = `${c.type} (${c.actor1}${c.actor2 ? ' vs ' + c.actor2 : ''}) - Fatalities: ${c.fatalities}`
-			return {
-				id: c.id,
-				coordinates: [c.lon, c.lat],
-				domain: IntelligenceDomain.GEOPOLITICAL,
-				timestamp: Date.now(),
-				label,
-				eventType: c.type,
-				subEventType: c.type,
-				actor1: c.actor1,
-				actor2: c.actor2,
-				country: 'Operational Area',
-				location: 'Hotspot Zone',
-				fatalities: c.fatalities,
-				notes: c.notes,
-				source: 'ACLED (Static Sim)',
-			}
-		})
+		return getMockConflicts()
 	}
 }
+
+function getMockConflicts(): AcledEventEntity[] {
+	const baseConflicts = [
+		{ id: "c-1", type: "Explosions/Remote violence", actor1: "Military Forces of Russia", actor2: "Military Forces of Ukraine", lat: 48.3794, lon: 38.0803, fatalities: 8, notes: "Artillery exchange registered in the eastern frontline." },
+		{ id: "c-2", type: "Battles", actor1: "Houthi Reformists", actor2: "Naval Forces of the US", lat: 15.0000, lon: 42.5000, fatalities: 2, notes: "Drone intercept confirmed in the southern Red Sea transit corridor." },
+		{ id: "c-3", type: "Protests", actor1: "Civilians (Taiwan)", actor2: "", lat: 25.0330, lon: 121.5654, fatalities: 0, notes: "Demonstration regarding maritime security updates in Taipei." },
+		{ id: "c-4", type: "Strategic developments", actor1: "Military Forces of South Korea", actor2: "Military Forces of North Korea", lat: 37.8920, lon: 126.7050, fatalities: 0, notes: "Border telemetry surveillance radar units activated near DMZ." },
+		{ id: "c-5", type: "Battles", actor1: "Drug Cartel", actor2: "State Police (Mexico)", lat: 19.4326, lon: -99.1332, fatalities: 5, notes: "Armed encounter during tactical checkpoint operation." }
+	]
+	
+	return baseConflicts.map((c) => {
+		const label = `${c.type} (${c.actor1}${c.actor2 ? ' vs ' + c.actor2 : ''}) - Fatalities: ${c.fatalities}`
+		return {
+			id: c.id,
+			coordinates: [c.lon, c.lat],
+			domain: IntelligenceDomain.GEOPOLITICAL,
+			timestamp: Date.now(),
+			label,
+			eventType: c.type,
+			subEventType: c.type,
+			actor1: c.actor1,
+			actor2: c.actor2,
+			country: 'Operational Area',
+			location: 'Hotspot Zone',
+			fatalities: c.fatalities,
+			notes: c.notes,
+			source: 'ACLED (Static Sim)',
+		}
+	})
+}
+

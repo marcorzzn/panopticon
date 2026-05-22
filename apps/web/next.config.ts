@@ -1,20 +1,15 @@
 import type { NextConfig } from "next";
 
-const isProd = process.env.NODE_ENV === "production";
-
 const nextConfig: NextConfig = {
-  output: 'export',
-  trailingSlash: true,
-  basePath: isProd ? '/panopticon' : '',
+  output: 'export', // Force static HTML/JS/CSS generation
+  trailingSlash: true, // Maintain trailing slashes on exported paths
+  basePath: '/panopticon', // Match GitHub Pages subfolder subdirectory
+  assetPrefix: '/panopticon/', // Ensure asset paths map correctly to the repository name
   images: {
-    unoptimized: true,
+    unoptimized: true, // Disables Next.js dynamic image resizing dependency
   },
-  transpilePackages: [
-    "@panopticon/core",
-    "@panopticon/ui",
-    "@panopticon/map-engine",
-    "@panopticon/data-pipeline"
-  ],
+  // Transpile workspace packages for clean monorepo bundling
+  transpilePackages: ["@panopticon/core", "@panopticon/ui", "@panopticon/map-engine", "@panopticon/data-pipeline"]
 };
 
 export default nextConfig;

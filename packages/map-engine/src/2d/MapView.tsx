@@ -74,6 +74,18 @@ export default function MapView({
   const syncBounds = React.useCallback(() => {
     if (mapRef.current) {
       const map = mapRef.current.getMap()
+      
+      // Silence missing sprite images from public styles
+      map.on('styleimagemissing', (e) => {
+        const id = e.id
+        if (!map.hasImage(id)) {
+          const width = 1
+          const height = 1
+          const data = new Uint8Array(4) // Transparent 1x1 pixel
+          map.addImage(id, { width, height, data })
+        }
+      })
+
       const mapBounds = map.getBounds()
       if (mapBounds) {
         setBounds([
