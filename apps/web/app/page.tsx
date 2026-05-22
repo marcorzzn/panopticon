@@ -35,28 +35,26 @@ const MapView = dynamic(
   }
 )
 
+const EMPTY_ARRAY: any[] = []
+
 export default function Home() {
-  const {
-    viewState,
-    setViewState,
-    toggleLayer,
-    setSelectedEntityId,
-    setLayerEntityCount,
-  } = useMapStore()
+  const viewState = useMapStore((s) => s.viewState)
+  const setViewState = useMapStore((s) => s.setViewState)
+  const toggleLayer = useMapStore((s) => s.toggleLayer)
+  const setSelectedEntityId = useMapStore((s) => s.setSelectedEntityId)
+  const setLayerEntityCount = useMapStore((s) => s.setLayerEntityCount)
 
-  const {
-    toggleLayerPanel,
-    toggleIntelPanel,
-    toggleMapFullscreen,
-    collapseAll,
-  } = usePanelStore()
+  const toggleLayerPanel = usePanelStore((s) => s.toggleLayerPanel)
+  const toggleIntelPanel = usePanelStore((s) => s.toggleIntelPanel)
+  const toggleMapFullscreen = usePanelStore((s) => s.toggleMapFullscreen)
+  const collapseAll = usePanelStore((s) => s.collapseAll)
 
-  const { globalRefreshPaused } = useAppStore()
+  const globalRefreshPaused = useAppStore((s) => s.globalRefreshPaused)
 
   // ── 1. BACKGROUND SWR POLLING PIPELINE ────────────────────────────────────
 
   // USGS Earthquakes
-  const { data: earthquakes = [] } = useSWR(
+  const { data: earthquakes = EMPTY_ARRAY } = useSWR(
     'usgs-earthquakes-core',
     fetchEarthquakes,
     {
@@ -66,7 +64,7 @@ export default function Home() {
   )
 
   // Global Weather Stations
-  const { data: weatherPoints = [] } = useSWR(
+  const { data: weatherPoints = EMPTY_ARRAY } = useSWR(
     'global-weather-core',
     fetchGlobalWeatherGrid,
     {
@@ -76,7 +74,7 @@ export default function Home() {
   )
 
   // GDELT Geopolitical Feed (Default 'protest' query for map sync)
-  const { data: gdeltEvents = [] } = useSWR(
+  const { data: gdeltEvents = EMPTY_ARRAY } = useSWR(
     ['gdelt-events-core', 'protest'],
     () => fetchGdeltEvents('protest'),
     {
@@ -86,7 +84,7 @@ export default function Home() {
   )
 
   // OpenSky Aviation (Phase 2 Additions)
-  const { data: aircraft = [] } = useSWR(
+  const { data: aircraft = EMPTY_ARRAY } = useSWR(
     'opensky-aircraft-core',
     fetchAircraft,
     {
@@ -96,7 +94,7 @@ export default function Home() {
   )
 
   // NASA FIRMS Wildfires (Phase 2 Additions)
-  const { data: wildfires = [] } = useSWR(
+  const { data: wildfires = EMPTY_ARRAY } = useSWR(
     'nasa-wildfires-core',
     fetchWildfires,
     {
@@ -106,7 +104,7 @@ export default function Home() {
   )
 
   // OpenAQ Air Quality (Phase 3 Additions)
-  const { data: airquality = [] } = useSWR(
+  const { data: airquality = EMPTY_ARRAY } = useSWR(
     'openaq-airquality-core',
     fetchAirQuality,
     {
@@ -116,7 +114,7 @@ export default function Home() {
   )
 
   // ACLED Conflicts (Phase 3 Additions)
-  const { data: acledEvents = [] } = useSWR(
+  const { data: acledEvents = EMPTY_ARRAY } = useSWR(
     'acled-conflicts-core',
     fetchAcledEvents,
     {
@@ -126,7 +124,7 @@ export default function Home() {
   )
 
   // CCTV Webcams (Phase 4 Additions)
-  const { data: webcams = [] } = useSWR(
+  const { data: webcams = EMPTY_ARRAY } = useSWR(
     'webcams-core',
     fetchWebcams,
     {
@@ -136,7 +134,7 @@ export default function Home() {
   )
 
   // Space & Orbital Satellites (Phase 5 Additions)
-  const { data: satellites = [] } = useSWR(
+  const { data: satellites = EMPTY_ARRAY } = useSWR(
     'space-satellites-core',
     fetchSatellites,
     {

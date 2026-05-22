@@ -50,7 +50,7 @@ export default class ErrorBoundary extends React.Component<
             {this.state.error?.message ?? 'An unexpected error occurred during rendering.'}
           </div>
           <button
-            onClick={() => this.setState({ hasError: false, error: null })}
+            onClick={() => window.location.reload()}
             style={{
               marginTop: '8px',
               padding: '8px 24px',

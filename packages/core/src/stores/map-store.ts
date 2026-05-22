@@ -155,9 +155,15 @@ export const useMapStore = create<MapStore>()(
       })),
 
     setLayerEntityCount: (layerId, count) =>
-      set((s) => ({
-        layerStates: patchLayer(s.layerStates, layerId, 'entityCount', count),
-      })),
+      set((s) => {
+        const base = ensureLayerState(s.layerStates, layerId)
+        if (base[layerId]?.entityCount === count) {
+          return {}
+        }
+        return {
+          layerStates: patchLayer(s.layerStates, layerId, 'entityCount', count),
+        }
+      }),
 
     setLayerError: (layerId, error) =>
       set((s) => ({
