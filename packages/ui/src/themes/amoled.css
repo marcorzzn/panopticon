@@ -1,0 +1,97 @@
+/* ============================================================================
+ * @panopticon/ui — AMOLED Theme
+ * True-black theme for OLED displays. Maximum battery savings, minimal light.
+ * Applied via [data-theme='amoled'].
+ * ============================================================================ */
+
+[data-theme='amoled'] {
+  color-scheme: dark;
+
+  /* Theme metadata */
+  --theme-name: 'amoled';
+
+  /* Background layers — true black */
+  --color-bg-deepest:  #000000;
+  --color-bg-base:     #000000;
+  --color-bg-surface:  #0a0a0a;
+  --color-bg-elevated: #141414;
+  --color-bg-hover:    #1e1e1e;
+  --color-bg-active:   #252525;
+  --color-bg-selected: rgba(52, 152, 219, 0.12);
+  --color-bg-disabled: rgba(10, 10, 10, 0.5);
+  --color-bg-overlay:  rgba(0, 0, 0, 0.92);
+  --color-bg-scrim:    rgba(0, 0, 0, 0.75);
+  --color-bg-inverse:  #e0e0e0;
+
+  /* Text hierarchy — slightly increased contrast on pure black */
+  --color-text-primary:   #d0d8e2;
+  --color-text-secondary: #7a8a9a;
+  --color-text-tertiary:  #5a6a7a;
+  --color-text-disabled:  #404a55;
+  --color-text-heading:   #e0e8f0;
+  --color-text-inverse:   #000000;
+  --color-text-link:      #3498db;
+  --color-text-link-hover: #5aa6e3;
+
+  /* Borders — very subtle on AMOLED */
+  --color-border-weak:    rgba(255, 255, 255, 0.06);
+  --color-border-medium:  rgba(255, 255, 255, 0.10);
+  --color-border-strong:  rgba(255, 255, 255, 0.15);
+  --color-border-focus:   #3498db;
+  --color-border-error:   #b10000;
+  --color-border-success: #27ae60;
+
+  /* Accent — unchanged */
+  --color-accent:        #3498db;
+  --color-accent-hover:  #5aa6e3;
+  --color-accent-active: #2980b9;
+  --color-accent-subtle: rgba(52, 152, 219, 0.10);
+  --color-accent-muted:  rgba(52, 152, 219, 0.20);
+
+  /* Glassmorphism — reduced blur for AMOLED */
+  --glass-bg:            rgba(255, 255, 255, 0.04);
+  --glass-bg-level-2:    rgba(255, 255, 255, 0.06);
+  --glass-bg-level-3:    rgba(255, 255, 255, 0.09);
+  --glass-border:        rgba(255, 255, 255, 0.06);
+  --glass-border-level-2: rgba(255, 255, 255, 0.09);
+  --glass-border-level-3: rgba(255, 255, 255, 0.12);
+  --glass-blur:          8px;
+  --glass-blur-heavy:    12px;
+  --glass-blur-light:    4px;
+  --glass-shadow:        0 8px 32px 0 rgba(0, 0, 0, 0.6);
+  --glass-shadow-lg:     0 16px 48px 0 rgba(0, 0, 0, 0.7);
+  --glass-shadow-sm:     0 4px 16px 0 rgba(0, 0, 0, 0.5);
+
+  /* Shadows — deeper on true black */
+  --shadow-xs:   0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm:   0 2px 4px rgba(0, 0, 0, 0.5);
+  --shadow-md:   0 4px 8px rgba(0, 0, 0, 0.6);
+  --shadow-lg:   0 8px 16px rgba(0, 0, 0, 0.65);
+  --shadow-xl:   0 16px 32px rgba(0, 0, 0, 0.7);
+  --shadow-2xl:  0 24px 48px rgba(0, 0, 0, 0.75);
+
+  /* Scrollbar */
+  --color-scrollbar-track: #000000;
+  --color-scrollbar-thumb: #1e1e1e;
+  --color-scrollbar-thumb-hover: #2a2a2a;
+
+  /* Selection */
+  --color-selection-bg:   rgba(52, 152, 219, 0.30);
+  --color-selection-text: #ffffff;
+
+  /* Input */
+  --color-input-bg:           #0a0a0a;
+  --color-input-bg-hover:     #141414;
+  --color-input-border:       rgba(255, 255, 255, 0.10);
+  --color-input-border-focus: #3498db;
+  --color-input-placeholder:  #404a55;
+
+  /* Status colors — same as midnight, backgrounds adjusted for true black */
+  --color-status-ok-bg:       rgba(39, 174, 96, 0.10);
+  --color-status-warning-bg:  rgba(232, 176, 15, 0.10);
+  --color-status-critical-bg: rgba(177, 0, 0, 0.10);
+  --color-status-info-bg:     rgba(52, 152, 219, 0.10);
+
+  /* No background pattern on AMOLED — pure black */
+  background-image: none;
+}

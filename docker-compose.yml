@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: panopticon-postgis
+    restart: always
+    environment:
+      POSTGRES_DB: panopticon
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: >
+      postgres
+      -c shared_buffers=256MB
+      -c work_mem=16MB
+      -c maintenance_work_mem=64MB
+      -c max_connections=50
+
+volumes:
+  postgres_data:

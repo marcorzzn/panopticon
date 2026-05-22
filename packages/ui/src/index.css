@@ -1,0 +1,197 @@
+/* ============================================================================
+ * @panopticon/ui — Core Stylesheet
+ * Imports design tokens and defines shared layout, status, and feedback components.
+ * ============================================================================ */
+
+@import './tokens/index.css';
+
+/* Global reset adjustments for fullscreen control room application */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg-deepest);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom premium scrollbars for terminal aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb);
+  border-radius: var(--radius-full, 9999px);
+  transition: background var(--duration-fast) var(--ease-default);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-thumb-hover);
+}
+
+/* ============================================================================
+ * Design System Components & Utilities
+ * ============================================================================ */
+
+/* Glass Panels with distinct elevation levels */
+.glass-panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--glass-shadow);
+  border-radius: 4px;
+  transition: background var(--duration-normal) var(--ease-default),
+              border-color var(--duration-normal) var(--ease-default),
+              box-shadow var(--duration-normal) var(--ease-default);
+}
+
+.glass-panel--level-2 {
+  background: var(--glass-bg-level-2);
+  border-color: var(--glass-border-level-2);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+.glass-panel--level-3 {
+  background: var(--glass-bg-level-3);
+  border-color: var(--glass-border-level-3);
+}
+
+/* Pulsing Status Indicators */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-status-unknown);
+  box-shadow: 0 0 6px var(--color-status-unknown);
+  transition: background-color var(--duration-fast) var(--ease-default),
+              box-shadow var(--duration-fast) var(--ease-default);
+}
+
+.status-dot--ok {
+  background-color: var(--color-status-ok);
+  box-shadow: 0 0 8px var(--color-status-ok);
+}
+
+.status-dot--warning {
+  background-color: var(--color-status-warning);
+  box-shadow: 0 0 8px var(--color-status-warning);
+  animation: pulse-subtle 2s infinite var(--ease-default);
+}
+
+.status-dot--critical {
+  background-color: var(--color-status-critical);
+  box-shadow: 0 0 10px var(--color-status-critical);
+  animation: pulse-glow 1.5s infinite var(--ease-default);
+}
+
+.status-dot--unknown {
+  background-color: var(--color-status-unknown);
+  box-shadow: 0 0 6px var(--color-status-unknown);
+}
+
+/* Badges for status, metadata, tags */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1, 4px);
+  padding: var(--space-0-5, 2px) var(--space-1-5, 6px);
+  border-radius: 3px;
+  font-size: var(--text-2xs);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  background-color: var(--color-status-unknown-bg);
+  border: 1px solid var(--color-status-unknown-border);
+  color: var(--color-status-unknown-text);
+  line-height: var(--leading-none);
+}
+
+.badge--ok {
+  background-color: var(--color-status-ok-bg);
+  border-color: var(--color-status-ok-border);
+  color: var(--color-status-ok-text);
+}
+
+.badge--warning {
+  background-color: var(--color-status-warning-bg);
+  border-color: var(--color-status-warning-border);
+  color: var(--color-status-warning-text);
+}
+
+.badge--critical {
+  background-color: var(--color-status-critical-bg);
+  border-color: var(--color-status-critical-border);
+  color: var(--color-status-critical-text);
+}
+
+.badge--info {
+  background-color: var(--color-status-info-bg);
+  border-color: var(--color-status-info-border);
+  color: var(--color-status-info-text);
+}
+
+/* Accessibility hidden class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Resizable panels splitter handles styles */
+.resize-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-border-weak);
+  transition: background-color var(--duration-fast) var(--ease-default);
+  position: relative;
+  z-index: 100;
+}
+
+.resize-handle:hover,
+.resize-handle:active {
+  background-color: var(--color-accent);
+}
+
+/* Micro-animations and effects */
+.glow {
+  box-shadow: 0 0 16px var(--color-accent-glow-soft);
+}
+
+.fade-in {
+  animation: fade-in var(--duration-normal) var(--ease-out) forwards;
+}
+
+.slide-up {
+  animation: slide-up var(--duration-normal) var(--ease-out) forwards;
+}
+
+/* High density data grid containers */
+.data-grid {
+  display: grid;
+  width: 100%;
+}

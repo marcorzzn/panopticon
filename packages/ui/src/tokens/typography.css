@@ -1,0 +1,136 @@
+/* ============================================================================
+ * @panopticon/ui — Typography Tokens
+ * Font families, size scale, weights, line heights, letter spacing, utilities.
+ * ============================================================================ */
+
+:root {
+  /* --------------------------------------------------------------------------
+   * Font Families
+   * -------------------------------------------------------------------------- */
+
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:    'JetBrains Mono', 'IBM Plex Mono', 'Fira Code', 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace;
+  --font-display: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* --------------------------------------------------------------------------
+   * Font Size Scale
+   * xs → 3xl, 10 stops for fine-grained control
+   * -------------------------------------------------------------------------- */
+
+  --text-2xs:  0.625rem;  /* 10px */
+  --text-xs:   0.6875rem; /* 11px */
+  --text-sm:   0.75rem;   /* 12px */
+  --text-base: 0.8125rem; /* 13px — dense data default */
+  --text-md:   0.875rem;  /* 14px */
+  --text-lg:   1rem;      /* 16px */
+  --text-xl:   1.125rem;  /* 18px */
+  --text-2xl:  1.375rem;  /* 22px */
+  --text-3xl:  1.875rem;  /* 30px */
+  --text-4xl:  2.25rem;   /* 36px */
+
+  /* --------------------------------------------------------------------------
+   * Font Weights
+   * -------------------------------------------------------------------------- */
+
+  --font-weight-light:    300;
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  /* --------------------------------------------------------------------------
+   * Line Heights
+   * -------------------------------------------------------------------------- */
+
+  --leading-none:    1;
+  --leading-tight:   1.2;
+  --leading-snug:    1.35;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.65;
+  --leading-loose:   1.8;
+
+  /* --------------------------------------------------------------------------
+   * Letter Spacing
+   * -------------------------------------------------------------------------- */
+
+  --tracking-tighter: -0.05em;
+  --tracking-tight:   -0.025em;
+  --tracking-normal:   0;
+  --tracking-wide:     0.025em;
+  --tracking-wider:    0.05em;
+  --tracking-widest:   0.1em;
+
+  /* --------------------------------------------------------------------------
+   * Paragraph spacing
+   * -------------------------------------------------------------------------- */
+
+  --paragraph-spacing: 1em;
+}
+
+/* ============================================================================
+ * Utility Classes
+ * ============================================================================ */
+
+/* Font family utilities */
+.font-sans    { font-family: var(--font-sans); }
+.font-mono    { font-family: var(--font-mono); }
+.font-display { font-family: var(--font-display); }
+
+/* Font size utilities */
+.text-2xs { font-size: var(--text-2xs); line-height: var(--leading-tight); }
+.text-xs  { font-size: var(--text-xs);  line-height: var(--leading-tight); }
+.text-sm  { font-size: var(--text-sm);  line-height: var(--leading-snug); }
+.text-base { font-size: var(--text-base); line-height: var(--leading-snug); }
+.text-md  { font-size: var(--text-md);  line-height: var(--leading-normal); }
+.text-lg  { font-size: var(--text-lg);  line-height: var(--leading-normal); }
+.text-xl  { font-size: var(--text-xl);  line-height: var(--leading-snug); }
+.text-2xl { font-size: var(--text-2xl); line-height: var(--leading-tight); }
+.text-3xl { font-size: var(--text-3xl); line-height: var(--leading-tight); }
+.text-4xl { font-size: var(--text-4xl); line-height: var(--leading-none); }
+
+/* Font weight utilities */
+.font-light    { font-weight: var(--font-weight-light); }
+.font-normal   { font-weight: var(--font-weight-normal); }
+.font-medium   { font-weight: var(--font-weight-medium); }
+.font-semibold { font-weight: var(--font-weight-semibold); }
+.font-bold     { font-weight: var(--font-weight-bold); }
+
+/* Line height utilities */
+.leading-none    { line-height: var(--leading-none); }
+.leading-tight   { line-height: var(--leading-tight); }
+.leading-snug    { line-height: var(--leading-snug); }
+.leading-normal  { line-height: var(--leading-normal); }
+.leading-relaxed { line-height: var(--leading-relaxed); }
+
+/* Letter spacing utilities */
+.tracking-tighter { letter-spacing: var(--tracking-tighter); }
+.tracking-tight   { letter-spacing: var(--tracking-tight); }
+.tracking-normal  { letter-spacing: var(--tracking-normal); }
+.tracking-wide    { letter-spacing: var(--tracking-wide); }
+.tracking-wider   { letter-spacing: var(--tracking-wider); }
+.tracking-widest  { letter-spacing: var(--tracking-widest); }
+
+/* Tabular / monospace number alignment */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Uppercase label style (for small labels, section headers) */
+.label-caps {
+  font-size: var(--text-2xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+/* Code / preformatted text */
+.code-inline {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-sm, 4px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+}

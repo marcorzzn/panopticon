@@ -1,0 +1,9 @@
+/* ============================================================================
+ * @panopticon/ui — Design Tokens
+ * Aggregates all token layers in dependency order.
+ * ============================================================================ */
+
+@import './colors.css';
+@import './typography.css';
+@import './spacing.css';
+@import './animation.css';

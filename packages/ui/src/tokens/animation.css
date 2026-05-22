@@ -1,0 +1,234 @@
+/* ============================================================================
+ * @panopticon/ui — Animation Tokens
+ * Duration, easing, transition presets, keyframe animations.
+ * ============================================================================ */
+
+:root {
+  /* --------------------------------------------------------------------------
+   * Duration Tokens
+   * -------------------------------------------------------------------------- */
+
+  --duration-instant: 50ms;
+  --duration-fast:    100ms;
+  --duration-normal:  200ms;
+  --duration-slow:    300ms;
+  --duration-slower:  500ms;
+  --duration-slowest: 800ms;
+
+  /* --------------------------------------------------------------------------
+   * Easing Tokens
+   * -------------------------------------------------------------------------- */
+
+  --ease-default:  cubic-bezier(0.4, 0, 0.2, 1);    /* Material standard */
+  --ease-in:       cubic-bezier(0.4, 0, 1, 1);       /* Accelerate */
+  --ease-out:      cubic-bezier(0, 0, 0.2, 1);       /* Decelerate */
+  --ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1);     /* Standard */
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1); /* Springy overshoot */
+  --ease-bounce:   cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Bounce */
+  --ease-elastic:  cubic-bezier(0.5, 1.25, 0.75, 1.25);  /* Elastic */
+
+  /* --------------------------------------------------------------------------
+   * Standard Transition Presets
+   * -------------------------------------------------------------------------- */
+
+  --transition-colors:    color var(--duration-fast) var(--ease-default),
+                          background-color var(--duration-fast) var(--ease-default),
+                          border-color var(--duration-fast) var(--ease-default),
+                          box-shadow var(--duration-fast) var(--ease-default),
+                          outline-color var(--duration-fast) var(--ease-default);
+
+  --transition-opacity:   opacity var(--duration-normal) var(--ease-default);
+
+  --transition-transform: transform var(--duration-normal) var(--ease-default);
+
+  --transition-all:       all var(--duration-normal) var(--ease-default);
+
+  --transition-shadow:    box-shadow var(--duration-normal) var(--ease-default);
+
+  --transition-size:      width var(--duration-normal) var(--ease-default),
+                          height var(--duration-normal) var(--ease-default);
+}
+
+/* ============================================================================
+ * Reduced Motion Override
+ * Respects user's accessibility preferences by disabling animations.
+ * ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant:  0ms;
+    --duration-fast:     0ms;
+    --duration-normal:   0ms;
+    --duration-slow:     0ms;
+    --duration-slower:   0ms;
+    --duration-slowest:  0ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================================
+ * Keyframe Animations
+ * ============================================================================ */
+
+/* Fade in from transparent */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Fade out to transparent */
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Slide up from below */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide down from above */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide in from left */
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Slide in from right */
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Scale up from center */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Pulse glow — accent-colored breathing effect */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(52, 152, 219, 0.5);
+  }
+}
+
+/* Pulse subtle — opacity pulse for status indicators */
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Continuous spin */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Shimmer — loading skeleton sweep */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Blink — for cursor-like indicators */
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+/* Radar sweep — rotating line for radar-style displays */
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Scan line — horizontal scan effect */
+@keyframes scan-line {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0.5;
+  }
+}

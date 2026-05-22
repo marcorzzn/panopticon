@@ -1,0 +1,99 @@
+/* ============================================================================
+ * @panopticon/ui — Spacing Tokens
+ * 4px base grid, named spacing, border radius, z-index scale.
+ * ============================================================================ */
+
+:root {
+  /* --------------------------------------------------------------------------
+   * Spacing Scale (4px base grid)
+   * --space-{n} = n × 4px
+   * -------------------------------------------------------------------------- */
+
+  --space-0:   0;
+  --space-px:  1px;
+  --space-0_5: 2px;
+  --space-1:   4px;
+  --space-1_5: 6px;
+  --space-2:   8px;
+  --space-2_5: 10px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-7:   28px;
+  --space-8:   32px;
+  --space-9:   36px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-14:  56px;
+  --space-16:  64px;
+  --space-18:  72px;
+  --space-20:  80px;
+  --space-24:  96px;
+  --space-32:  128px;
+
+  /* --------------------------------------------------------------------------
+   * Named Spacing Aliases
+   * -------------------------------------------------------------------------- */
+
+  --space-xs:  var(--space-1);   /* 4px  */
+  --space-sm:  var(--space-2);   /* 8px  */
+  --space-md:  var(--space-4);   /* 16px */
+  --space-lg:  var(--space-6);   /* 24px */
+  --space-xl:  var(--space-8);   /* 32px */
+  --space-2xl: var(--space-12);  /* 48px */
+  --space-3xl: var(--space-16);  /* 64px */
+  --space-4xl: var(--space-20);  /* 80px */
+
+  /* --------------------------------------------------------------------------
+   * Panel / Layout Spacing
+   * -------------------------------------------------------------------------- */
+
+  --panel-padding:    var(--space-md);
+  --panel-padding-sm: var(--space-sm);
+  --panel-padding-lg: var(--space-lg);
+  --panel-gap:        var(--space-sm);
+  --panel-gap-lg:     var(--space-md);
+  --header-height:    48px;
+  --sidebar-width:    240px;
+  --sidebar-collapsed-width: 48px;
+
+  /* --------------------------------------------------------------------------
+   * Border Radius Tokens
+   * -------------------------------------------------------------------------- */
+
+  --radius-none: 0;
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  24px;
+  --radius-full: 9999px;
+
+  /* --------------------------------------------------------------------------
+   * Z-Index Scale
+   * Structured layers to prevent z-index wars.
+   * -------------------------------------------------------------------------- */
+
+  --z-below:    -1;
+  --z-base:      0;
+  --z-above:     1;
+  --z-header:    50;
+  --z-dropdown:  100;
+  --z-sticky:    200;
+  --z-modal:     300;
+  --z-popover:   400;
+  --z-toast:     500;
+  --z-tooltip:   600;
+  --z-max:       9999;
+
+  /* --------------------------------------------------------------------------
+   * Breakpoints (for reference — use in @media queries)
+   * -------------------------------------------------------------------------- */
+
+  --bp-sm:  640px;
+  --bp-md:  768px;
+  --bp-lg:  1024px;
+  --bp-xl:  1280px;
+  --bp-2xl: 1536px;
+}

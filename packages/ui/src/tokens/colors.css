@@ -1,0 +1,265 @@
+/* ============================================================================
+ * @panopticon/ui — Color Tokens
+ * Three-tier architecture: Primitives → Semantic → Component
+ * ============================================================================ */
+
+:root {
+  /* --------------------------------------------------------------------------
+   * TIER 1: Primitive Color Tokens
+   * Raw color values — never reference these directly in components.
+   * -------------------------------------------------------------------------- */
+
+  /* Navy scale */
+  --navy-50:  #e8edf4;
+  --navy-100: #c5d0e0;
+  --navy-200: #9fb3cc;
+  --navy-300: #7896b7;
+  --navy-400: #5b80a7;
+  --navy-500: #3e6b97;
+  --navy-600: #37608a;
+  --navy-700: #2f5078;
+  --navy-800: #274167;
+  --navy-900: #1b2a41;
+  --navy-950: #0b0f1a;
+
+  /* Gray scale (blue-tinted neutrals) */
+  --gray-50:  #f0f2f5;
+  --gray-100: #dce0e6;
+  --gray-200: #c8d3e0;
+  --gray-300: #b0bcc9;
+  --gray-400: #8899aa;
+  --gray-500: #6b7d8f;
+  --gray-600: #556677;
+  --gray-700: #3f4e5e;
+  --gray-800: #2f3e56;
+  --gray-900: #1e3050;
+  --gray-950: #0d1520;
+
+  /* Blue / Accent scale */
+  --blue-50:  #e6f2fb;
+  --blue-100: #b3d7f3;
+  --blue-200: #80bceb;
+  --blue-300: #5aa6e3;
+  --blue-400: #3498db;
+  --blue-500: #2980b9;
+  --blue-600: #1f6da0;
+  --blue-700: #165a87;
+  --blue-800: #0e476e;
+  --blue-900: #063455;
+
+  /* Green scale */
+  --green-50:  #e6f5ec;
+  --green-100: #b3e2c9;
+  --green-200: #80d0a6;
+  --green-300: #4dbd83;
+  --green-400: #27ae60;
+  --green-500: #209e54;
+  --green-600: #1a8e48;
+  --green-700: #147e3c;
+  --green-800: #0e6e31;
+  --green-900: #085e25;
+
+  /* Yellow / Amber scale */
+  --yellow-50:  #fdf6e0;
+  --yellow-100: #f9e6a3;
+  --yellow-200: #f4d566;
+  --yellow-300: #f0c53a;
+  --yellow-400: #e8b00f;
+  --yellow-500: #d09e0d;
+  --yellow-600: #b88c0c;
+  --yellow-700: #a07a0a;
+  --yellow-800: #886809;
+  --yellow-900: #705607;
+
+  /* Red scale */
+  --red-50:  #f5e0e0;
+  --red-100: #e0a3a3;
+  --red-200: #cc6666;
+  --red-300: #c03333;
+  --red-400: #b10000;
+  --red-500: #990000;
+  --red-600: #800000;
+  --red-700: #660000;
+  --red-800: #4d0000;
+  --red-900: #330000;
+
+  /* Orange scale */
+  --orange-50:  #fef0e6;
+  --orange-100: #fcd5b3;
+  --orange-200: #faba80;
+  --orange-300: #f89f4d;
+  --orange-400: #f5841a;
+  --orange-500: #e07316;
+  --orange-600: #c76312;
+  --orange-700: #ae530e;
+  --orange-800: #95430b;
+  --orange-900: #7c3307;
+
+  /* Cyan scale */
+  --cyan-50:  #e0f7fa;
+  --cyan-100: #b2ebf2;
+  --cyan-200: #80deea;
+  --cyan-300: #4dd0e1;
+  --cyan-400: #26c6da;
+  --cyan-500: #00bcd4;
+  --cyan-600: #00acc1;
+  --cyan-700: #0097a7;
+  --cyan-800: #00838f;
+  --cyan-900: #006064;
+
+  /* Purple scale */
+  --purple-50:  #f3e5f5;
+  --purple-100: #e1bee7;
+  --purple-200: #ce93d8;
+  --purple-300: #ba68c8;
+  --purple-400: #ab47bc;
+  --purple-500: #9c27b0;
+  --purple-600: #8e24aa;
+  --purple-700: #7b1fa2;
+  --purple-800: #6a1b9a;
+  --purple-900: #4a148c;
+
+  /* Pure values */
+  --white: #ffffff;
+  --black: #000000;
+  --transparent: transparent;
+
+  /* --------------------------------------------------------------------------
+   * TIER 2: Semantic Color Tokens
+   * Mapped from primitives — use these in all component styles.
+   * -------------------------------------------------------------------------- */
+
+  /* Backgrounds */
+  --color-bg-deepest:    var(--navy-950);     /* #0b0f1a */
+  --color-bg-base:       var(--navy-950);     /* #0b0f1a */
+  --color-bg-surface:    var(--navy-900);     /* #1b2a41 */
+  --color-bg-elevated:   var(--gray-800);     /* #2f3e56 */
+  --color-bg-hover:      #374f6e;
+  --color-bg-active:     #3d577a;
+  --color-bg-selected:   rgba(52, 152, 219, 0.15);
+  --color-bg-disabled:   rgba(27, 42, 65, 0.5);
+  --color-bg-overlay:    rgba(11, 15, 26, 0.85);
+  --color-bg-scrim:      rgba(0, 0, 0, 0.6);
+  --color-bg-inverse:    var(--gray-200);
+
+  /* Text */
+  --color-text-primary:   var(--gray-200);    /* #c8d3e0 */
+  --color-text-secondary: var(--gray-400);    /* #8899aa */
+  --color-text-tertiary:  #6b7d8f;
+  --color-text-disabled:  var(--gray-600);    /* #556677 */
+  --color-text-inverse:   var(--navy-950);
+  --color-text-link:      var(--blue-400);
+  --color-text-link-hover: var(--blue-300);
+  --color-text-on-accent:  var(--white);
+  --color-text-heading:    #dce3ed;
+
+  /* Borders */
+  --color-border-weak:    var(--gray-900);    /* #1e3050 */
+  --color-border-medium:  #2a4060;
+  --color-border-strong:  #3a506f;
+  --color-border-focus:   var(--blue-400);
+  --color-border-error:   var(--red-400);
+  --color-border-success: var(--green-400);
+  --color-border-inverse: rgba(255, 255, 255, 0.2);
+
+  /* Accent / Brand */
+  --color-accent:         var(--blue-400);    /* #3498db */
+  --color-accent-hover:   var(--blue-300);
+  --color-accent-active:  var(--blue-500);
+  --color-accent-subtle:  rgba(52, 152, 219, 0.12);
+  --color-accent-muted:   rgba(52, 152, 219, 0.25);
+
+  /* Accent glow */
+  --color-accent-glow:       rgba(52, 152, 219, 0.4);
+  --color-accent-glow-soft:  rgba(52, 152, 219, 0.2);
+  --color-accent-glow-intense: rgba(52, 152, 219, 0.6);
+
+  /* Status: OK / Success */
+  --color-status-ok:          var(--green-400);   /* #27ae60 */
+  --color-status-ok-text:     #2ecc71;
+  --color-status-ok-bg:       rgba(39, 174, 96, 0.12);
+  --color-status-ok-bg-hover: rgba(39, 174, 96, 0.20);
+  --color-status-ok-border:   rgba(39, 174, 96, 0.30);
+
+  /* Status: Warning */
+  --color-status-warning:          var(--yellow-400);  /* #e8b00f */
+  --color-status-warning-text:     #f1c40f;
+  --color-status-warning-bg:       rgba(232, 176, 15, 0.12);
+  --color-status-warning-bg-hover: rgba(232, 176, 15, 0.20);
+  --color-status-warning-border:   rgba(232, 176, 15, 0.30);
+
+  /* Status: Critical / Error */
+  --color-status-critical:          var(--red-400);   /* #b10000 */
+  --color-status-critical-text:     #e74c3c;
+  --color-status-critical-bg:       rgba(177, 0, 0, 0.12);
+  --color-status-critical-bg-hover: rgba(177, 0, 0, 0.20);
+  --color-status-critical-border:   rgba(177, 0, 0, 0.30);
+
+  /* Status: Info */
+  --color-status-info:          var(--blue-400);   /* #3498db */
+  --color-status-info-text:     #5dade2;
+  --color-status-info-bg:       rgba(52, 152, 219, 0.12);
+  --color-status-info-bg-hover: rgba(52, 152, 219, 0.20);
+  --color-status-info-border:   rgba(52, 152, 219, 0.30);
+
+  /* Status: Unknown / Neutral */
+  --color-status-unknown:        var(--gray-500);
+  --color-status-unknown-text:   var(--gray-400);
+  --color-status-unknown-bg:     rgba(107, 125, 143, 0.12);
+  --color-status-unknown-border: rgba(107, 125, 143, 0.30);
+
+  /* Icons */
+  --color-icon-primary:    var(--gray-300);
+  --color-icon-secondary:  var(--gray-500);
+  --color-icon-disabled:   var(--gray-600);
+  --color-icon-accent:     var(--blue-400);
+  --color-icon-inverse:    var(--navy-950);
+  --color-icon-on-accent:  var(--white);
+
+  /* Interactive / Form */
+  --color-input-bg:        var(--navy-950);
+  --color-input-bg-hover:  rgba(27, 42, 65, 0.8);
+  --color-input-border:    var(--color-border-medium);
+  --color-input-border-focus: var(--blue-400);
+  --color-input-placeholder:  var(--gray-600);
+
+  /* Scrollbar */
+  --color-scrollbar-track: var(--navy-950);
+  --color-scrollbar-thumb: var(--gray-800);
+  --color-scrollbar-thumb-hover: var(--gray-700);
+
+  /* Selection */
+  --color-selection-bg:    rgba(52, 152, 219, 0.35);
+  --color-selection-text:  var(--white);
+
+  /* --------------------------------------------------------------------------
+   * Glassmorphism Tokens
+   * -------------------------------------------------------------------------- */
+
+  --glass-bg:           rgba(255, 255, 255, 0.05);
+  --glass-bg-level-2:   rgba(255, 255, 255, 0.08);
+  --glass-bg-level-3:   rgba(255, 255, 255, 0.12);
+  --glass-border:        rgba(255, 255, 255, 0.08);
+  --glass-border-level-2: rgba(255, 255, 255, 0.12);
+  --glass-border-level-3: rgba(255, 255, 255, 0.16);
+  --glass-blur:          16px;
+  --glass-blur-heavy:    24px;
+  --glass-blur-light:    8px;
+  --glass-shadow:        0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  --glass-shadow-lg:     0 16px 48px 0 rgba(0, 0, 0, 0.5);
+  --glass-shadow-sm:     0 4px 16px 0 rgba(0, 0, 0, 0.3);
+
+  /* --------------------------------------------------------------------------
+   * Shadows & Elevation
+   * -------------------------------------------------------------------------- */
+
+  --shadow-xs:   0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm:   0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md:   0 4px 8px rgba(0, 0, 0, 0.35);
+  --shadow-lg:   0 8px 16px rgba(0, 0, 0, 0.4);
+  --shadow-xl:   0 16px 32px rgba(0, 0, 0, 0.45);
+  --shadow-2xl:  0 24px 48px rgba(0, 0, 0, 0.5);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+  --shadow-glow: 0 0 20px var(--color-accent-glow-soft);
+  --shadow-glow-intense: 0 0 40px var(--color-accent-glow);
+}
