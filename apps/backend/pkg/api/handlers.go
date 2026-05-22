@@ -798,4 +798,95 @@ func GetSatellitesHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, res)
 }
 
+func BulkIngestHandler(w http.ResponseWriter, r *http.Request) {
+	var batch []ingestion.OsintEvent
+	if err := json.NewDecoder(r.Body).Decode(&batch); err != nil {
+		http.Error(w, "Invalid JSON payload: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	type resultItem struct {
+		ID        string `json:"id"`
+		Clustered bool   `json:"clustered"`
+		Error     string `json:"error,omitempty"`
+	}
+	results := make([]resultItem, 0, len(batch))
+
+	for _, item := range batch {
+		resID, clustered, err := ingestion.UpsertOsintEvent(r.Context(), item)
+		var errStr string
+		if err != nil {
+			errStr = err.Error()
+		}
+		results = append(results, resultItem{
+			ID:        resID,
+			Clustered: clustered,
+			Error:     errStr,
+		})
+	}
+
+	writeJSON(w, http.StatusOK, results)
+}
+
+type CorrelationEdge struct {
+	SourceID       string  `json:"source_id"`
+	TargetID       string  `json:"target_id"`
+	Category       string  `json:"category"`
+	DistanceMeters float64 `json:"distance_meters"`
+	TimeDiffSecs   float64 `json:"time_diff_seconds"`
+}
+
+func GetEventCorrelationHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	rows, err := db.Pool.Query(ctx, `
+		SELECT 
+			e1.id AS source_id,
+			e2.id AS target_id,
+			e1.event_category AS category,
+			ST_Distance(e1.geom::geography, e2.geom::geography) AS distance_meters,
+			ABS(EXTRACT(EPOCH FROM (e1.event_time - e2.event_time))) AS time_diff_seconds
+		FROM osint_events e1
+		JOIN osint_events e2 ON e1.id < e2.id
+		WHERE ST_DWithin(e1.geom::geography, e2.geom::geography, 50000)
+		  AND e1.event_time >= e2.event_time - interval '6 hours'
+		  AND e1.event_time <= e2.event_time + interval '6 hours'
+		LIMIT 100;
+	`)
+	if err != nil {
+		// Handled gracefully: if the table was empty, return empty list rather than 500
+		writeJSON(w, http.StatusOK, []CorrelationEdge{})
+		return
+	}
+	defer rows.Close()
+
+	var edges []CorrelationEdge
+	for rows.Next() {
+		var edge CorrelationEdge
+		err := rows.Scan(&edge.SourceID, &edge.TargetID, &edge.Category, &edge.DistanceMeters, &edge.TimeDiffSecs)
+		if err != nil {
+			http.Error(w, "Error scanning correlation row", http.StatusInternalServerError)
+			return
+		}
+		edges = append(edges, edge)
+	}
+
+	writeJSON(w, http.StatusOK, edges)
+}
+
+func WebcamProxyHandler(w http.ResponseWriter, r *http.Request) {
+	ingestion.WebcamProxyHandler(w, r)
+}
+
+func GetLiveTelemetryHandler(w http.ResponseWriter, r *http.Request) {
+	t := r.URL.Query().Get("type")
+	if t == "" {
+		t = "all"
+	}
+	data := ingestion.GetLiveTelemetry(t)
+	writeJSON(w, http.StatusOK, data)
+}
+
+
 

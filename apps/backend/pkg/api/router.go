@@ -28,6 +28,13 @@ func SetupRouter() *chi.Mux {
 		r.Get("/environmental/airquality", GetAirQualityHandler)
 		r.Get("/geopolitical/acled", GetAcledEventsHandler)
 		
+		// New OSINT endpoints
+		r.Post("/ingest/bulk", BulkIngestHandler)
+		r.Get("/events/correlation", GetEventCorrelationHandler)
+		r.Get("/webcams/proxy", WebcamProxyHandler)
+		r.Get("/telemetry/live", GetLiveTelemetryHandler)
+		r.Get("/transit/congestion", GetCongestionGridHandler)
+		
 		// Webcam and Recon network layers
 		r.Get("/webcams", GetWebcamsHandler)
 		r.Get("/recon/trace", GetReconTraceHandler)

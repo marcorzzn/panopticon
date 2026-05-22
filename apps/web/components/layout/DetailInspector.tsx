@@ -74,10 +74,29 @@ const getEntityReconTarget = (entity: { type: string; data: any }) => {
 }
 
 // ── 2. REAL-TIME CANVAS CCTV SIMULATOR COMPONENT ─────────────────────────────
-function CctvLiveFeed({ id, status }: { id: string; name: string; status: string }) {
+function CctvLiveFeed({ id, name, status, coordinates }: { id: string; name: string; status: string; coordinates: [number, number] }) {
+  const [snapshotUrl, setSnapshotUrl] = React.useState<string>('')
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null)
 
+  // Snapshot polling effect for healthy/degraded cameras
   React.useEffect(() => {
+    if (status === 'offline') return
+
+    const updateSnapshot = () => {
+      // Bypass CORS via secure backend snapshot proxy with cache-busting timestamp
+      setSnapshotUrl(`/api/v1/webcams/proxy?id=${encodeURIComponent(id)}&type=snapshot&t=${Date.now()}`)
+    }
+
+    updateSnapshot()
+    const interval = setInterval(updateSnapshot, 3000)
+
+    return () => clearInterval(interval)
+  }, [id, status])
+
+  // Canvas radar sweep effect for offline cameras
+  React.useEffect(() => {
+    if (status !== 'offline') return
+
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
@@ -86,117 +105,130 @@ function CctvLiveFeed({ id, status }: { id: string; name: string; status: string
     let animationFrameId: number
     let frameCount = 0
 
-    // Abstract wireframe shapes for camera simulation
-    const shapes: { x: number; y: number; size: number; dx: number; dy: number; rot: number; rotSpeed: number }[] = []
-    for (let i = 0; i < 4; i++) {
-      shapes.push({
-        x: Math.random() * 320,
-        y: Math.random() * 180,
-        size: 20 + Math.random() * 30,
-        dx: (Math.random() - 0.5) * 0.4,
-        dy: (Math.random() - 0.5) * 0.4,
-        rot: Math.random() * Math.PI,
-        rotSpeed: (Math.random() - 0.5) * 0.008
+    // Random noise elements
+    const blips: { x: number; y: number; size: number; alpha: number; label: string }[] = []
+    
+    // Seed a couple of signal interference blips around the center
+    for (let i = 0; i < 3; i++) {
+      blips.push({
+        x: 160 + (Math.random() - 0.5) * 100,
+        y: 90 + (Math.random() - 0.5) * 60,
+        size: 3 + Math.random() * 4,
+        alpha: 0.1 + Math.random() * 0.4,
+        label: `INTERFERENCE_SEC_${Math.floor(Math.random() * 900 + 100)}`
       })
     }
 
     const render = () => {
       frameCount++
       
-      // 1. Clear background (tactical dark blue-black)
-      ctx.fillStyle = '#060a13'
+      // 1. Dark tactical background (OLED black/deep green)
+      ctx.fillStyle = '#030805'
       ctx.fillRect(0, 0, 320, 180)
 
-      // 2. Draw moving simulated vector shapes (landscape wireframes)
-      ctx.strokeStyle = status === 'degraded' ? 'rgba(232, 176, 15, 0.15)' : 'rgba(255, 251, 0, 0.15)'
+      // 2. Draw Concentric Radar rings
+      ctx.strokeStyle = 'rgba(0, 255, 0, 0.08)'
       ctx.lineWidth = 1
-      shapes.forEach((s) => {
-        s.x += s.dx
-        s.y += s.dy
-        s.rot += s.rotSpeed
-
-        if (s.x < 0 || s.x > 320) s.dx *= -1
-        if (s.y < 0 || s.y > 180) s.dy *= -1
-
-        ctx.save()
-        ctx.translate(s.x, s.y)
-        ctx.rotate(s.rot)
+      for (let r = 20; r <= 140; r += 25) {
         ctx.beginPath()
-        ctx.rect(-s.size / 2, -s.size / 2, s.size, s.size)
-        ctx.moveTo(-s.size / 2, 0)
-        ctx.lineTo(s.size / 2, 0)
+        ctx.arc(160, 90, r, 0, Math.PI * 2)
         ctx.stroke()
-        ctx.restore()
+      }
+
+      // Draw crosshairs
+      ctx.strokeStyle = 'rgba(0, 255, 0, 0.05)'
+      ctx.beginPath()
+      ctx.moveTo(160, 10)
+      ctx.lineTo(160, 170)
+      ctx.moveTo(10, 90)
+      ctx.lineTo(310, 90)
+      ctx.stroke()
+
+      // 3. Draw Radar Sweep (Green rotating line with fading gradient)
+      const sweepAngle = (frameCount * 0.02) % (Math.PI * 2)
+      
+      // Draw tail trail sweeps for maximum visual fidelity
+      for (let i = 0; i < 20; i++) {
+        const angle = sweepAngle - (i * 0.015)
+        const alpha = Math.max(0, 0.3 - (i * 0.015))
+        ctx.strokeStyle = `rgba(0, 255, 0, ${alpha})`
+        ctx.lineWidth = i === 0 ? 2.0 : 1.0
+        ctx.beginPath()
+        ctx.moveTo(160, 90)
+        ctx.lineTo(
+          160 + 140 * Math.cos(angle),
+          90 + 140 * Math.sin(angle)
+        )
+        ctx.stroke()
+      }
+
+      // 4. Draw noise/interference blips
+      blips.forEach((b) => {
+        // Calculate angular distance to sweep line to make them "light up" when radar passes
+        const blipAngle = Math.atan2(b.y - 90, b.x - 160)
+        const diff = Math.abs((sweepAngle - blipAngle + Math.PI * 2) % (Math.PI * 2))
+        
+        let currentAlpha = b.alpha
+        if (diff < 0.15) {
+          currentAlpha = 0.8 // Flash brightly on sweep pass
+        } else {
+          // Slow decay
+          currentAlpha = Math.max(b.alpha, currentAlpha - 0.02)
+        }
+
+        ctx.fillStyle = `rgba(0, 255, 0, ${currentAlpha})`
+        ctx.beginPath()
+        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2)
+        ctx.fill()
+
+        if (diff < 0.15) {
+          ctx.strokeStyle = `rgba(0, 255, 0, ${currentAlpha * 0.5})`
+          ctx.strokeRect(b.x - b.size - 2, b.y - b.size - 2, b.size * 2 + 4, b.size * 2 + 4)
+          ctx.font = '5px monospace'
+          ctx.fillText(b.label, b.x + b.size + 4, b.y + 2)
+        }
       })
 
-      // 3. Draw static scanline overlay
-      ctx.strokeStyle = 'rgba(255, 251, 0, 0.05)'
-      ctx.lineWidth = 1
-      for (let y = 0; y < 180; y += 4) {
-        ctx.beginPath()
-        ctx.moveTo(0, y)
-        ctx.lineTo(320, y)
-        ctx.stroke()
-      }
-
-      // 4. Draw random grain / signal noise (stronger if degraded)
-      const noiseDensity = status === 'degraded' ? 0.06 : 0.02
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.07)'
-      const numPixels = Math.floor(320 * 180 * noiseDensity)
-      for (let i = 0; i < numPixels; i++) {
-        const x = Math.floor(Math.random() * 320)
-        const y = Math.floor(Math.random() * 180)
-        ctx.fillRect(x, y, 1, 1)
-      }
-
-      // 5. Center targeting reticle
-      const cx = 160
-      const cy = 90
-      ctx.strokeStyle = status === 'degraded' ? '#e8b00f' : '#fffb00'
-      ctx.lineWidth = 1
+      // 5. Draw Center Lock Target Box (Simulated Satellite search lock over Cam coordinates)
+      ctx.strokeStyle = '#00ff00'
+      ctx.lineWidth = 1.5
+      ctx.strokeRect(150, 80, 20, 20)
       
+      // Target brackets corner indicators
       ctx.beginPath()
-      ctx.arc(cx, cy, 10, 0, Math.PI * 2)
+      // Top left
+      ctx.moveTo(146, 80); ctx.lineTo(146, 76); ctx.lineTo(150, 76)
+      // Top right
+      ctx.moveTo(174, 80); ctx.lineTo(174, 76); ctx.lineTo(170, 76)
+      // Bottom left
+      ctx.moveTo(146, 100); ctx.lineTo(146, 104); ctx.lineTo(150, 104)
+      // Bottom right
+      ctx.moveTo(174, 100); ctx.lineTo(174, 104); ctx.lineTo(170, 104)
       ctx.stroke()
 
-      ctx.beginPath()
-      ctx.moveTo(cx - 18, cy)
-      ctx.lineTo(cx - 5, cy)
-      ctx.moveTo(cx + 5, cy)
-      ctx.lineTo(cx + 18, cy)
-      ctx.moveTo(cx, cy - 18)
-      ctx.lineTo(cx, cy - 5)
-      ctx.moveTo(cx, cy + 5)
-      ctx.lineTo(cx, cy + 18)
-      ctx.stroke()
-
-      // 6. HUD info overlays
-      ctx.fillStyle = status === 'degraded' ? '#e8b00f' : '#fffb00'
+      // 6. HUD text overlay
+      ctx.fillStyle = '#00ff00'
       ctx.font = '7px monospace'
-      ctx.fillText(`CAM_${id.toUpperCase()}`, 10, 15)
-      ctx.fillText('1080P // TACTICAL_GRID', 10, 25)
+      ctx.fillText(`CAM_ID: ${id.toUpperCase()}`, 10, 15)
+      ctx.fillText('STATUS: DOWNLINK_FAILURE', 10, 25)
+      ctx.fillText('MODE: GEOSPATIAL_RADAR_SWEEP', 10, 35)
 
-      // Blinking REC dot
-      const flash = Math.floor(frameCount / 18) % 2 === 0
-      if (flash) {
+      // Warning text
+      const isFlash = Math.floor(frameCount / 20) % 2 === 0
+      if (isFlash) {
         ctx.fillStyle = '#ff3b30'
-        ctx.beginPath()
-        ctx.arc(320 - 32, 12, 2.5, 0, Math.PI * 2)
-        ctx.fill()
+        ctx.fillText('NO SIGNAL / LOCKING TELEMETRY...', 10, 180 - 15)
+      } else {
+        ctx.fillStyle = '#ffcc00'
+        ctx.fillText('SCANNING COORDINATES SECTOR...', 10, 180 - 15)
       }
-      ctx.fillStyle = status === 'degraded' ? '#e8b00f' : '#fffb00'
-      ctx.fillText('REC', 320 - 24, 15)
 
-      // Signal Bitrate
-      const rate = (Math.sin(frameCount * 0.04) * 120 + 2048).toFixed(0)
-      ctx.fillText(`STREAM: ${rate} KBPS`, 10, 180 - 20)
-      ctx.fillText('CIPHER: SECURE AES-256', 10, 180 - 10)
-
-      // Precise dynamic timestamp
-      const now = new Date()
-      const timeStr = now.toLocaleTimeString()
-      ctx.fillText(timeStr, 320 - 62, 180 - 10)
-      ctx.fillText(`FRM: ${frameCount}`, 320 - 62, 180 - 20)
+      ctx.fillStyle = '#00ff00'
+      ctx.fillText(`LAT: ${coordinates[1].toFixed(5)}`, 320 - 95, 15)
+      ctx.fillText(`LON: ${coordinates[0].toFixed(5)}`, 320 - 95, 25)
+      
+      const sweepPercent = ((sweepAngle / (Math.PI * 2)) * 100).toFixed(0)
+      ctx.fillText(`SWEEP_REFRESH: ${sweepPercent}%`, 320 - 95, 180 - 15)
 
       animationFrameId = requestAnimationFrame(render)
     }
@@ -206,26 +238,68 @@ function CctvLiveFeed({ id, status }: { id: string; name: string; status: string
     return () => {
       cancelAnimationFrame(animationFrameId)
     }
-  }, [id, status])
+  }, [id, status, coordinates])
+
+  if (status === 'offline') {
+    return (
+      <div className="relative border border-red-500/30 rounded overflow-hidden bg-[#030805]">
+        <canvas
+          ref={canvasRef}
+          width={320}
+          height={180}
+          className="w-full h-auto block aspect-video"
+        />
+        <div className="absolute inset-0 flex items-center justify-center bg-red-950/10 pointer-events-none animate-pulse">
+          <span className="px-2 py-0.5 border border-red-500 text-red-500 font-mono text-[9px] font-bold bg-[#0b0f1a]/95 rounded tracking-widest uppercase">
+            FEED OFFLINE
+          </span>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="relative border border-[#fffb00]/30 rounded overflow-hidden bg-deepest">
-      <canvas
-        ref={canvasRef}
-        width={320}
-        height={180}
-        className="w-full h-auto block aspect-video"
+    <div className="relative border border-[#fffb00]/30 rounded overflow-hidden bg-deepest aspect-video flex items-center justify-center">
+      {/* Fallback image with automatic snapshot updates */}
+      <img
+        src={snapshotUrl}
+        alt={name}
+        className="w-full h-full object-cover animate-fade-in"
+        onError={(e) => {
+          // If image load fails due to dev environment/offline state, show a custom tactical placeholder grid
+          e.currentTarget.style.display = 'none'
+          const parent = e.currentTarget.parentElement
+          if (parent) {
+            const existingFallback = parent.querySelector('.proxy-fallback')
+            if (!existingFallback) {
+              const fallbackDiv = document.createElement('div')
+              fallbackDiv.className = 'proxy-fallback w-full h-full flex flex-col items-center justify-center bg-[#0b0f1a] text-secondary font-mono text-[9px] gap-2 border-dashed border border-[#fffb00]/25'
+              fallbackDiv.innerHTML = `
+                <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-ping"></div>
+                <span class="text-yellow-400 font-bold uppercase tracking-wider">CONNECTING PROXY...</span>
+                <span class="opacity-70 text-[8px]">SNAPSHOT ACQUISITION IN PROGRESS</span>
+              `
+              parent.appendChild(fallbackDiv)
+            }
+          }
+        }}
       />
       {status === 'degraded' && (
         <div className="absolute inset-0 flex items-center justify-center bg-yellow-950/15 pointer-events-none animate-pulse">
-          <span className="px-2 py-0.5 border border-[#e8b00f] text-[#e8b00f] font-mono text-[9px] font-bold bg-[#0b0f1a]/90 rounded tracking-widest uppercase">
+          <span className="px-2 py-0.5 border border-[#e8b00f] text-[#e8b00f] font-mono text-[9px] font-bold bg-[#0b0f1a]/95 rounded tracking-widest uppercase">
             SIGNAL DEGRADED
           </span>
         </div>
       )}
+      <div className="absolute top-2 left-2 flex items-center gap-1 font-mono text-[8px] bg-black/60 text-primary px-1.5 py-0.5 border border-[#1e3050] rounded select-none">
+        <div className={`w-1.5 h-1.5 rounded-full ${status === 'healthy' ? 'bg-green-400 animate-pulse' : 'bg-yellow-400 animate-pulse'}`} />
+        <span className="uppercase text-secondary">PROXY DISPATCH [CAM_${id.toUpperCase()}]</span>
+      </div>
     </div>
   )
 }
+
+
 
 // ── 3. OSINT CYBER RECON CONSOLE PANEL COMPONENT ─────────────────────────────
 function EntityReconPanel({ entity }: { entity: { type: string; data: any } }) {
@@ -762,7 +836,7 @@ export default function DetailInspector() {
               </div>
 
               {/* Simulated Live Feed Canvas */}
-              <CctvLiveFeed id={cam.id} name={cam.label} status={cam.status} />
+              <CctvLiveFeed id={cam.id} name={cam.label} status={cam.status} coordinates={cam.coordinates} />
 
               {/* Status and details grid */}
               <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2.5">

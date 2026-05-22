@@ -5,3 +5,5 @@
 
 export { default as MapView } from './2d/MapView'
 export { getTerminatorPolygon } from './layers/terminator-layer'
+export { LayerFactory, LayerManager } from './layers/LayerFactory'
+export type { LayerConfig } from './layers/LayerFactory'

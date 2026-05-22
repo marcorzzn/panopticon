@@ -1,0 +1,190 @@
+[
+  {
+    "id": "aviation-layer",
+    "name": "Real-Time Aviation (ADS-B)",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 6,
+      "circle-color": "#e74c3c",
+      "circle-stroke-width": 1.5,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "visible"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.95,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Active Flight Vector",
+      "color": "#e74c3c"
+    }
+  },
+  {
+    "id": "maritime-layer",
+    "name": "Maritime Tracking (AIS)",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": "#2ecc71",
+      "circle-stroke-width": 1.5,
+      "circle-stroke-color": "#000000"
+    },
+    "layout": {
+      "visibility": "visible"
+    },
+    "minZoom": 2,
+    "maxZoom": 20,
+    "opacity": 0.9,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Cargo/Vessel Vector",
+      "color": "#2ecc71"
+    }
+  },
+  {
+    "id": "congestion-heatmap",
+    "name": "Global Ground Congestion Grid",
+    "source_type": "heatmap",
+    "paint": {
+      "heatmap-weight": [
+        "interpolate",
+        ["linear"],
+        ["get", "score"],
+        0, 0,
+        4, 1
+      ],
+      "heatmap-intensity": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        0, 1,
+        9, 3
+      ],
+      "heatmap-color": [
+        "interpolate",
+        ["linear"],
+        ["heatmap-density"],
+        0, "rgba(33,102,172,0)",
+        0.2, "rgb(103,169,207)",
+        0.4, "rgb(209,229,240)",
+        0.6, "rgb(253,219,199)",
+        0.8, "rgb(239,138,98)",
+        1.0, "rgb(178,24,43)"
+      ],
+      "heatmap-radius": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        0, 2,
+        9, 20
+      ]
+    },
+    "layout": {
+      "visibility": "visible"
+    },
+    "minZoom": 3,
+    "maxZoom": 18,
+    "opacity": 0.75,
+    "tier": 1,
+    "legend": {
+      "type": "gradient",
+      "label": "Transit Delay Congestion Density",
+      "color": "linear-gradient(to right, rgb(103,169,207), rgb(239,138,98), rgb(178,24,43))"
+    }
+  },
+  {
+    "id": "conflict-zones",
+    "name": "Conflict Frontline Boundaries",
+    "source_type": "GeoJSON",
+    "paint": {
+      "fill-color": "#f1c40f",
+      "fill-opacity": 0.25,
+      "fill-outline-color": "#d35400"
+    },
+    "layout": {
+      "visibility": "visible"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.6,
+    "tier": -1,
+    "legend": {
+      "type": "polygon",
+      "label": "Active Combat Zone / FRONT",
+      "color": "#f1c40f"
+    }
+  },
+  {
+    "id": "disaster-footprints",
+    "name": "NASA Wildfire Boundaries",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 7,
+      "circle-color": "#e67e22",
+      "circle-stroke-width": 2,
+      "circle-stroke-color": "#f39c12"
+    },
+    "layout": {
+      "visibility": "visible"
+    },
+    "minZoom": 2,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "Thermal Wildfire Anomaly",
+      "color": "#e67e22"
+    }
+  },
+  {
+    "id": "sensor-networks",
+    "name": "Crowd-Sourced PurpAir Nodes",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 4,
+      "circle-color": "#9b59b6",
+      "circle-stroke-width": 1,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "visible"
+    },
+    "minZoom": 4,
+    "maxZoom": 20,
+    "opacity": 0.7,
+    "tier": -1,
+    "legend": {
+      "type": "circle",
+      "label": "IoT Environmental Station",
+      "color": "#9b59b6"
+    }
+  },
+  {
+    "id": "news-pins",
+    "name": "Deduplicated News Geolocation",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 8,
+      "circle-color": "#3498db",
+      "circle-stroke-width": 2,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "visible"
+    },
+    "minZoom": 1,
+    "maxZoom": 20,
+    "opacity": 0.9,
+    "tier": -2,
+    "legend": {
+      "type": "circle",
+      "label": "C2 Verified News Event",
+      "color": "#3498db"
+    }
+  }
+]

@@ -3,8 +3,9 @@
 import * as React from 'react'
 import { Map, Source, Layer, NavigationControl, ScaleControl } from 'react-map-gl/maplibre'
 import type { MapRef } from 'react-map-gl/maplibre'
-import { useMapStore } from '@panopticon/core/stores'
+import { useMapStore, useOsintStore } from '@panopticon/core/stores'
 import { getTerminatorPolygon } from '../layers/terminator-layer'
+import { LayerManager } from '../layers/LayerFactory'
 import type { EarthquakeEntity, GdeltEvent, WeatherPoint, AircraftEntity, WildfireEntity, AirQualityEntity, AcledEventEntity, WebcamEntity, SatelliteEntity, Coordinate } from '@panopticon/core/types'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
@@ -18,6 +19,15 @@ interface MapViewProps {
   acledEvents?: AcledEventEntity[]
   webcams?: WebcamEntity[]
   satellites?: SatelliteEntity[]
+}
+
+const transformRequest = (url: string, resourceType?: string) => {
+  if (resourceType === 'glyphs') {
+    return {
+      url: url.replace('https://tiles.openfreemap.org/fonts', 'https://fonts.openmaptiles.org')
+    }
+  }
+  return { url }
 }
 
 export default function MapView({
@@ -70,22 +80,13 @@ export default function MapView({
     }
   }, [flyToTarget, clearFlyTo])
 
-  // 3. Sync viewport bounds on load and move
+  const { activeLayerIds } = useOsintStore()
+  const layerManagerRef = React.useRef<LayerManager | null>(null)
+
+  // 3. Sync viewport bounds on move
   const syncBounds = React.useCallback(() => {
     if (mapRef.current) {
       const map = mapRef.current.getMap()
-      
-      // Silence missing sprite images from public styles
-      map.on('styleimagemissing', (e) => {
-        const id = e.id
-        if (!map.hasImage(id)) {
-          const width = 1
-          const height = 1
-          const data = new Uint8Array(4) // Transparent 1x1 pixel
-          map.addImage(id, { width, height, data })
-        }
-      })
-
       const mapBounds = map.getBounds()
       if (mapBounds) {
         setBounds([
@@ -97,6 +98,45 @@ export default function MapView({
       }
     }
   }, [setBounds])
+
+  // 3b. Handle initial map load
+  const onMapLoad = React.useCallback(() => {
+    if (mapRef.current) {
+      const map = mapRef.current.getMap()
+      
+      // Instantiate LayerManager
+      layerManagerRef.current = new LayerManager(map)
+
+      // Silence missing sprite images from public styles once
+      map.on('styleimagemissing', (e) => {
+        const id = e.id
+        if (!map.hasImage(id)) {
+          const width = 1
+          const height = 1
+          const data = new Uint8Array(4) // Transparent 1x1 pixel
+          map.addImage(id, { width, height, data })
+        }
+      })
+
+      // Sync initial bounds
+      const mapBounds = map.getBounds()
+      if (mapBounds) {
+        setBounds([
+          mapBounds.getWest(),
+          mapBounds.getSouth(),
+          mapBounds.getEast(),
+          mapBounds.getNorth(),
+        ])
+      }
+    }
+  }, [setBounds])
+
+  // 3c. Cull off-screen and zoom-out-of-bound layers dynamically to save GPU cycles and memory
+  React.useEffect(() => {
+    if (layerManagerRef.current) {
+      layerManagerRef.current.reconcileViewport(viewState.zoom, activeLayerIds)
+    }
+  }, [viewState.zoom, activeLayerIds])
 
   // 4. Transform Earthquakes to GeoJSON
   const earthquakesGeoJson = React.useMemo(() => {
@@ -510,8 +550,9 @@ export default function MapView({
         {...viewState}
         ref={mapRef}
         onMove={(evt) => setViewState(evt.viewState)}
-        onLoad={syncBounds}
+        onLoad={onMapLoad}
         onMoveEnd={syncBounds}
+        transformRequest={transformRequest}
         onClick={onMapClick}
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}

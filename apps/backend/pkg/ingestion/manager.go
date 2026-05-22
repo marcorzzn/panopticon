@@ -43,6 +43,8 @@ func (m *Manager) Start() {
 	go m.runAcledPoller()
 	go m.runWebcamPoller()
 	go m.runSpacePoller()
+	go m.runNewsWirePoller()
+	go m.runTelemetryIngestion()
 
 	// 3. Start stale telemetry pruning daemon
 	go m.runPruningDaemon()
@@ -65,6 +67,7 @@ func (m *Manager) initializeSourceMetadata() {
 		"acled-conflicts":   "ACLED Global Geopolitical Conflicts Registry",
 		"webcams":           "Global CCTV / Webcams Network Feed",
 		"space-satellites":  "NOAA SWPC Space & Orbital Satellites Grid",
+		"ap-news-wire":      "OSINT AP/Reuters/AFP News Wire Service",
 	}
 
 	for id, name := range sources {

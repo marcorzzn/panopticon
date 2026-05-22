@@ -217,6 +217,29 @@ func RunMigrations(pool *pgxpool.Pool) error {
 		return err
 	}
 
+	// 12. OSINT Events Deduplicated Table
+	_, err = pool.Exec(ctx, `
+		CREATE TABLE IF NOT EXISTS osint_events (
+			id VARCHAR(100) PRIMARY KEY,
+			headline TEXT NOT NULL,
+			event_category VARCHAR(100) NOT NULL,
+			severity VARCHAR(20) NOT NULL,
+			geom GEOMETRY(Point, 4326) NOT NULL,
+			event_time TIMESTAMPTZ NOT NULL,
+			associated_sources JSONB DEFAULT '[]'::jsonb,
+			redundancy_count INT DEFAULT 0,
+			integrity_score NUMERIC(5,2) DEFAULT 0.0,
+			source_tier INT DEFAULT 0,
+			audit_log JSONB DEFAULT '{}'::jsonb,
+			created_at TIMESTAMPTZ DEFAULT NOW()
+		);
+		CREATE INDEX IF NOT EXISTS idx_osint_geom ON osint_events USING GIST(geom);
+		CREATE INDEX IF NOT EXISTS idx_osint_time_cat ON osint_events(event_time DESC, event_category);
+	`)
+	if err != nil {
+		return err
+	}
+
 	log.Println("Database migrations executed successfully")
 	return nil
 }

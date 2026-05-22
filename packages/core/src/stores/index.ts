@@ -6,3 +6,6 @@ export type { PanelStore } from './panel-store'
 
 export { useAppStore } from './app-store'
 export type { AppStore } from './app-store'
+
+export { useOsintStore } from './osint-store'
+export type { OsintStore, OsintEvent, TelemetryPoint, AssociatedSource, CorrelationEdge } from './osint-store'
