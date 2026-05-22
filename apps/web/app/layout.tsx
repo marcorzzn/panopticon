@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono, Outfit } from 'next/font/google'
 import { Suspense } from 'react'
 import '@panopticon/ui/styles'
+import './globals.css'
 import ErrorBoundary from '@/components/ErrorBoundary'
 
 const sansFont = Inter({
