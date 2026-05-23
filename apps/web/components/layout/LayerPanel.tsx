@@ -17,6 +17,7 @@ import {
   ChevronDown,
   ChevronRight,
   Sun,
+  Rss,
 } from 'lucide-react'
 import { useMapStore } from '@panopticon/core/stores'
 import layersConfig from '@panopticon/core/src/config/layers.json'
@@ -42,6 +43,7 @@ function LayerRow({ id, label, icon, description }: LayerRowProps) {
   return (
     <div
       onClick={() => toggleLayer(id)}
+      title={description}
       className={`group p-3 border-b border-weak hover:bg-hover hover:bg-opacity-30 transition-all cursor-pointer select-none ${
         isVisible ? 'bg-accent bg-opacity-[0.02]' : 'opacity-65'
       }`}
@@ -59,7 +61,10 @@ function LayerRow({ id, label, icon, description }: LayerRowProps) {
             <span className="text-xs font-semibold tracking-wide text-primary uppercase">
               {label}
             </span>
-            <span className="text-[10px] text-secondary leading-tight mt-0.5 max-w-[150px] truncate">
+            <span 
+              title={description}
+              className="text-[10px] text-secondary leading-tight mt-0.5 max-w-[150px] truncate block"
+            >
               {description}
             </span>
           </div>
@@ -155,9 +160,12 @@ export default function LayerPanel() {
           <Layers className="w-4 h-4 text-accent" />
           <span>Operational Domains</span>
         </div>
-        <span className="text-[8px] font-mono font-semibold uppercase px-1.5 py-0.5 rounded border border-accent border-opacity-35 text-accent bg-accent bg-opacity-[0.03] animate-pulse shadow-[0_0_8px_rgba(0,240,255,0.3)]">
-          PHASE 5 ACTIVE
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
+          <span className="text-[8px] font-mono font-semibold uppercase px-1.5 py-0.5 rounded border border-accent border-opacity-35 text-accent bg-accent bg-opacity-[0.03] shadow-[0_0_8px_rgba(0,240,255,0.3)]">
+            STATUS: NOMINAL
+          </span>
+        </div>
       </div>
 
       {/* Layer Groups Container */}
@@ -226,6 +234,13 @@ export default function LayerPanel() {
             label="ACLED Conflicts"
             icon={<ShieldAlert className="w-3.5 h-3.5" />}
             description="Geopolitical armed conflict and protest dispatches"
+          />
+
+          <LayerRow
+            id="news-events"
+            label="News Events"
+            icon={<Rss className="w-3.5 h-3.5" />}
+            description="Geolocated real-time media and threat wire events"
           />
         </div>
 

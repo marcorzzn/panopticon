@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import dynamic from 'next/dynamic'
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 import {
   fetchEarthquakes,
   fetchGlobalWeatherGrid,
@@ -56,6 +56,41 @@ export default function Home() {
   const presetIndexRef = React.useRef(0)
 
   const globalRefreshPaused = useAppStore((s) => s.globalRefreshPaused)
+  const [secondsSinceUpdate, setSecondsSinceUpdate] = React.useState(0)
+  const { mutate } = useSWRConfig()
+
+  // High-frequency client-side polling timer
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setSecondsSinceUpdate((prev) => prev + 1)
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  // Auto-mutate all feeds on high-frequency interval if not paused
+  React.useEffect(() => {
+    if (globalRefreshPaused) return
+
+    const keys = [
+      'usgs-earthquakes-core',
+      'opensky-aircraft-core',
+      'nasa-wildfires-core',
+      'openaq-airquality-core',
+      'acled-conflicts-core',
+      'webcams-core',
+      'space-satellites-core'
+    ]
+
+    const pollingInterval = setInterval(async () => {
+      await Promise.all([
+        ...keys.map(k => mutate(k)),
+        mutate(['gdelt-events-core', 'protest'])
+      ])
+      setSecondsSinceUpdate(0)
+    }, 15000) // 15s high-frequency polling sweep
+
+    return () => clearInterval(pollingInterval)
+  }, [globalRefreshPaused, mutate])
 
   // ── 1. BACKGROUND SWR POLLING PIPELINE ────────────────────────────────────
 
@@ -312,6 +347,21 @@ export default function Home() {
 
   return (
     <>
+      {/* Global Pipeline Sync HUD Indicator */}
+      <div className="absolute left-16 top-16 z-20 flex flex-col font-mono text-[9px] px-2.5 py-1.5 rounded border border-weak bg-[#0b0f1a]/85 backdrop-blur-sm pointer-events-none select-none text-secondary">
+        <div className="flex items-center gap-1.5 font-bold">
+          <span className={`w-1.5 h-1.5 rounded-full ${globalRefreshPaused ? 'bg-status-critical-text animate-pulse' : 'bg-accent animate-ping'}`} />
+          <span className="uppercase text-primary font-semibold">PIPELINE SYNC</span>
+          <span className="text-secondary">•</span>
+          <span className={`uppercase font-bold ${globalRefreshPaused ? 'text-status-critical-text' : 'text-[#34c759]'}`}>
+            {globalRefreshPaused ? 'PAUSED' : 'ACTIVE'}
+          </span>
+        </div>
+        <span className="mt-1 text-[8px] text-secondary">
+          LAST SWEEP: {secondsSinceUpdate === 0 ? 'JUST NOW' : `${secondsSinceUpdate}s AGO`}
+        </span>
+      </div>
+
       <DashboardLayout
         earthquakePanel={<EarthquakePanel />}
         spaceWeatherPanel={<SpaceWeatherPanel />}

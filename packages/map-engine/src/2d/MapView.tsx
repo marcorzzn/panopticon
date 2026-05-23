@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { Map, Source, Layer, NavigationControl, ScaleControl } from 'react-map-gl/maplibre'
 import type { MapRef } from 'react-map-gl/maplibre'
-import { useMapStore, useAppStore } from '@panopticon/core/stores'
+import { useMapStore, useAppStore, useNewsStore } from '@panopticon/core/stores'
 import layersConfig from '@panopticon/core/src/config/layers.json'
 
 // ── DETERMINISTIC SEED-HASHED RANDOM GENERATOR ────────────────────────────────
@@ -71,6 +71,7 @@ export default function MapView({
   } = useMapStore()
 
   const { theme } = useAppStore()
+  const { newsEvents } = useNewsStore()
 
   // 1. Calculate Day/Night Terminator Polygon
   const [terminatorGeoJson, setTerminatorGeoJson] = React.useState<any>(null)
@@ -415,6 +416,33 @@ export default function MapView({
       })),
     }
   }, [satellites])
+
+  const newsEventsGeoJson = React.useMemo(() => {
+    return {
+      type: 'FeatureCollection',
+      features: newsEvents
+        .filter((ev) => ev.coordinates)
+        .map((ev, idx) => ({
+          type: 'Feature',
+          id: ev.id || `news-event-${idx}`,
+          geometry: {
+            type: 'Point',
+            coordinates: ev.coordinates!,
+          },
+          properties: {
+            id: ev.id || `news-event-${idx}`,
+            category: ev.category,
+            title: ev.title,
+            label: ev.title,
+            source: ev.source,
+            severity: ev.severity,
+            summary: ev.summary,
+            timestamp: ev.timestamp,
+            url: ev.url,
+          },
+        })),
+    }
+  }, [newsEvents])
   // 13. Deterministic Procedural Custom Layers GeoJSON Generator
   const activeCustomLayersData = React.useMemo(() => {
     const data: Record<string, any> = {}
@@ -473,6 +501,7 @@ export default function MapView({
       'webcams-layer',
       'recon-hops-layer',
       'satellites-layer',
+      'news-events-layer',
       ...activeCustomLayerIds
     ]
   }, [activeCustomLayerIds])
@@ -1091,6 +1120,71 @@ export default function MapView({
             }}
             paint={{
               'text-color': '#fffb00',
+              'text-halo-color': '#0b0f1a',
+              'text-halo-width': 1.2,
+            }}
+          />
+        </Source>
+
+        {/* ── 9b. NEWS EVENTS GEOLOCATED LAYER ───────────────────────── */}
+        <Source id="news-events-source" type="geojson" data={newsEventsGeoJson as any}>
+          {/* Soft neon outer glow based on severity */}
+          <Layer
+            id="news-events-glow-layer"
+            type="circle"
+            layout={{ visibility: isLayerVisible('news-events') }}
+            paint={{
+              'circle-radius': 14,
+              'circle-color': [
+                'match',
+                ['get', 'category'],
+                'geopolitical', '#ff3b30',
+                'cyber', '#00f0ff',
+                'maritime', '#007aff',
+                'hazard', '#ff9500',
+                'markets', '#34c759',
+                '#ffffff'
+              ],
+              'circle-opacity': 0.15,
+              'circle-blur': 0.85,
+            }}
+          />
+          {/* Solid color core dot based on category */}
+          <Layer
+            id="news-events-layer"
+            type="circle"
+            layout={{ visibility: isLayerVisible('news-events') }}
+            paint={{
+              'circle-radius': 5.5,
+              'circle-color': [
+                'match',
+                ['get', 'category'],
+                'geopolitical', '#ff3b30',
+                'cyber', '#00f0ff',
+                'maritime', '#007aff',
+                'hazard', '#ff9500',
+                'markets', '#34c759',
+                '#ffffff'
+              ],
+              'circle-stroke-width': 1.2,
+              'circle-stroke-color': '#ffffff',
+              'circle-opacity': 0.9,
+            }}
+          />
+          {/* News Ticker Label symbol */}
+          <Layer
+            id="news-events-label-layer"
+            type="symbol"
+            layout={{
+              visibility: isLayerVisible('news-events'),
+              'text-field': '📰',
+              'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+              'text-size': 9,
+              'text-offset': [0, -1.2],
+              'text-allow-overlap': false,
+            }}
+            paint={{
+              'text-color': '#00f0ff',
               'text-halo-color': '#0b0f1a',
               'text-halo-width': 1.2,
             }}

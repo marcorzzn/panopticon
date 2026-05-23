@@ -25,7 +25,22 @@ export default function StatusBar() {
 
   // Count active layers
   const activeLayersCount = React.useMemo(() => {
-    return Object.values(layerStates).filter((layer) => layer.visible !== false).length
+    const defaultLayerIds = ['earthquakes', 'weather', 'wildfires', 'airquality', 'terminator', 'gdelt', 'acled', 'aircraft', 'webcams', 'recon', 'space', 'news-events']
+    let activeCount = 0
+    
+    // Check default layers (active by default unless explicitly disabled)
+    defaultLayerIds.forEach(id => {
+      if (layerStates[id]?.visible !== false) activeCount++
+    })
+    
+    // Check custom add-on layers (active only if explicitly enabled)
+    Object.keys(layerStates).forEach(id => {
+      if (id.includes('-add-') && layerStates[id]?.visible === true) {
+        activeCount++
+      }
+    })
+    
+    return activeCount
   }, [layerStates])
 
   // Format cursor coordinates
@@ -90,9 +105,13 @@ export default function StatusBar() {
 
         {/* Active Layers */}
         <div className="flex items-center gap-1.5">
-          <Eye className="w-3.5 h-3.5 text-accent" />
+          <Eye className={`w-3.5 h-3.5 ${activeLayersCount > 0 ? 'text-[#34c759]' : 'text-accent'}`} />
           <span className="text-secondary uppercase">LAYERS:</span>
-          <span className="px-1 rounded bg-accent bg-opacity-15 border border-accent border-opacity-30 text-accent font-bold tabular-nums">
+          <span className={`px-1 rounded font-bold tabular-nums border ${
+            activeLayersCount > 0 
+              ? 'bg-[#34c759]/10 border-[#34c759]/30 text-[#34c759]' 
+              : 'bg-accent bg-opacity-15 border-accent border-opacity-30 text-accent'
+          }`}>
             {activeLayersCount}
           </span>
         </div>

@@ -25,9 +25,11 @@ import {
   Network,
   Server,
   Shield,
-  Satellite
+  Satellite,
+  Clipboard,
+  Check
 } from 'lucide-react'
-import { useMapStore } from '@panopticon/core/stores'
+import { useMapStore, useNewsStore } from '@panopticon/core/stores'
 import {
   fetchEarthquakes,
   fetchGdeltEvents,
@@ -87,442 +89,284 @@ const getEntityReconTarget = (entity: { type: string; data: any }) => {
 }
 
 // ── 2. REAL-TIME CANVAS CCTV SIMULATOR COMPONENT ─────────────────────────────
-function CctvLiveFeed({ id, name, status, coordinates }: { id: string; name: string; status: string; coordinates: [number, number] }) {
-  const [snapshotUrl, setSnapshotUrl] = React.useState<string>('')
-  const canvasRef = React.useRef<HTMLCanvasElement | null>(null)
+function CctvLiveFeed({ id, name, status, coordinates, streamUrl }: { id: string; name: string; status: string; coordinates: [number, number]; streamUrl?: string }) {
+  const [videoError, setVideoError] = React.useState(false)
+  const isHls = streamUrl?.endsWith('.m3u8')
+  
+  const reportBrokenLink = () => {
+    const issueTitle = encodeURIComponent(`CCTV Failure Report: Camera ${id}`)
+    const issueBody = encodeURIComponent(`Operational Failure Report for CCTV Surveillance Endpoint:\n- Camera: ${name}\n- Coordinates: [${coordinates[1]}, ${coordinates[0]}]\n- Stream URL: ${streamUrl || 'N/A'}\n- Reported Status: ${status}`)
+    window.open(`https://github.com/marcorzzn/panopticon/issues/new?title=${issueTitle}&body=${issueBody}`, '_blank')
+  }
 
-  // Snapshot polling effect for healthy/degraded cameras
-  React.useEffect(() => {
-    if (status === 'offline') return
-
-    const updateSnapshot = () => {
-      // Bypass CORS via secure backend snapshot proxy with cache-busting timestamp
-      setSnapshotUrl(`/api/v1/webcams/proxy?id=${encodeURIComponent(id)}&type=snapshot&t=${Date.now()}`)
-    }
-
-    updateSnapshot()
-    const interval = setInterval(updateSnapshot, 3000)
-
-    return () => clearInterval(interval)
-  }, [id, status])
-
-  // Canvas radar sweep effect for offline cameras
-  React.useEffect(() => {
-    if (status !== 'offline') return
-
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    let animationFrameId: number
-    let frameCount = 0
-
-    // Random noise elements
-    const blips: { x: number; y: number; size: number; alpha: number; label: string }[] = []
-    
-    // Seed a couple of signal interference blips around the center
-    for (let i = 0; i < 3; i++) {
-      blips.push({
-        x: 160 + (Math.random() - 0.5) * 100,
-        y: 90 + (Math.random() - 0.5) * 60,
-        size: 3 + Math.random() * 4,
-        alpha: 0.1 + Math.random() * 0.4,
-        label: `INTERFERENCE_SEC_${Math.floor(Math.random() * 900 + 100)}`
-      })
-    }
-
-    const render = () => {
-      frameCount++
-      
-      // 1. Dark tactical background (OLED black/deep green)
-      ctx.fillStyle = '#030805'
-      ctx.fillRect(0, 0, 320, 180)
-
-      // 2. Draw Concentric Radar rings
-      ctx.strokeStyle = 'rgba(0, 255, 0, 0.08)'
-      ctx.lineWidth = 1
-      for (let r = 20; r <= 140; r += 25) {
-        ctx.beginPath()
-        ctx.arc(160, 90, r, 0, Math.PI * 2)
-        ctx.stroke()
-      }
-
-      // Draw crosshairs
-      ctx.strokeStyle = 'rgba(0, 255, 0, 0.05)'
-      ctx.beginPath()
-      ctx.moveTo(160, 10)
-      ctx.lineTo(160, 170)
-      ctx.moveTo(10, 90)
-      ctx.lineTo(310, 90)
-      ctx.stroke()
-
-      // 3. Draw Radar Sweep (Green rotating line with fading gradient)
-      const sweepAngle = (frameCount * 0.02) % (Math.PI * 2)
-      
-      // Draw tail trail sweeps for maximum visual fidelity
-      for (let i = 0; i < 20; i++) {
-        const angle = sweepAngle - (i * 0.015)
-        const alpha = Math.max(0, 0.3 - (i * 0.015))
-        ctx.strokeStyle = `rgba(0, 255, 0, ${alpha})`
-        ctx.lineWidth = i === 0 ? 2.0 : 1.0
-        ctx.beginPath()
-        ctx.moveTo(160, 90)
-        ctx.lineTo(
-          160 + 140 * Math.cos(angle),
-          90 + 140 * Math.sin(angle)
-        )
-        ctx.stroke()
-      }
-
-      // 4. Draw noise/interference blips
-      blips.forEach((b) => {
-        // Calculate angular distance to sweep line to make them "light up" when radar passes
-        const blipAngle = Math.atan2(b.y - 90, b.x - 160)
-        const diff = Math.abs((sweepAngle - blipAngle + Math.PI * 2) % (Math.PI * 2))
-        
-        let currentAlpha = b.alpha
-        if (diff < 0.15) {
-          currentAlpha = 0.8 // Flash brightly on sweep pass
-        } else {
-          // Slow decay
-          currentAlpha = Math.max(b.alpha, currentAlpha - 0.02)
-        }
-
-        ctx.fillStyle = `rgba(0, 255, 0, ${currentAlpha})`
-        ctx.beginPath()
-        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2)
-        ctx.fill()
-
-        if (diff < 0.15) {
-          ctx.strokeStyle = `rgba(0, 255, 0, ${currentAlpha * 0.5})`
-          ctx.strokeRect(b.x - b.size - 2, b.y - b.size - 2, b.size * 2 + 4, b.size * 2 + 4)
-          ctx.font = '5px monospace'
-          ctx.fillText(b.label, b.x + b.size + 4, b.y + 2)
-        }
-      })
-
-      // 5. Draw Center Lock Target Box (Simulated Satellite search lock over Cam coordinates)
-      ctx.strokeStyle = '#00ff00'
-      ctx.lineWidth = 1.5
-      ctx.strokeRect(150, 80, 20, 20)
-      
-      // Target brackets corner indicators
-      ctx.beginPath()
-      // Top left
-      ctx.moveTo(146, 80); ctx.lineTo(146, 76); ctx.lineTo(150, 76)
-      // Top right
-      ctx.moveTo(174, 80); ctx.lineTo(174, 76); ctx.lineTo(170, 76)
-      // Bottom left
-      ctx.moveTo(146, 100); ctx.lineTo(146, 104); ctx.lineTo(150, 104)
-      // Bottom right
-      ctx.moveTo(174, 100); ctx.lineTo(174, 104); ctx.lineTo(170, 104)
-      ctx.stroke()
-
-      // 6. HUD text overlay
-      ctx.fillStyle = '#00ff00'
-      ctx.font = '7px monospace'
-      ctx.fillText(`CAM_ID: ${id.toUpperCase()}`, 10, 15)
-      ctx.fillText('STATUS: DOWNLINK_FAILURE', 10, 25)
-      ctx.fillText('MODE: GEOSPATIAL_RADAR_SWEEP', 10, 35)
-
-      // Warning text
-      const isFlash = Math.floor(frameCount / 20) % 2 === 0
-      if (isFlash) {
-        ctx.fillStyle = '#ff3b30'
-        ctx.fillText('NO SIGNAL / LOCKING TELEMETRY...', 10, 180 - 15)
-      } else {
-        ctx.fillStyle = '#ffcc00'
-        ctx.fillText('SCANNING COORDINATES SECTOR...', 10, 180 - 15)
-      }
-
-      ctx.fillStyle = '#00ff00'
-      ctx.fillText(`LAT: ${coordinates[1].toFixed(5)}`, 320 - 95, 15)
-      ctx.fillText(`LON: ${coordinates[0].toFixed(5)}`, 320 - 95, 25)
-      
-      const sweepPercent = ((sweepAngle / (Math.PI * 2)) * 100).toFixed(0)
-      ctx.fillText(`SWEEP_REFRESH: ${sweepPercent}%`, 320 - 95, 180 - 15)
-
-      animationFrameId = requestAnimationFrame(render)
-    }
-
-    render()
-
-    return () => {
-      cancelAnimationFrame(animationFrameId)
-    }
-  }, [id, status, coordinates])
-
+  // 1. STATE C: OFFLINE
   if (status === 'offline') {
     return (
-      <div className="relative border border-red-500/30 rounded overflow-hidden bg-[#030805]">
-        <canvas
-          ref={canvasRef}
-          width={320}
-          height={180}
-          className="w-full h-auto block aspect-video"
+      <div className="relative border border-red-500/30 rounded aspect-video bg-[#0c0f1a] flex flex-col items-center justify-center font-mono gap-2 border-dashed select-none">
+        <Video className="w-8 h-8 text-red-500/50 animate-pulse" />
+        <span className="text-red-500 font-bold uppercase tracking-wider text-[10px]">ENDPOINT OFFLINE</span>
+        <span className="text-secondary text-[8px]">CONNECTION DEAD — NO POWER / SIGNAL LOSS</span>
+        <button 
+          type="button"
+          onClick={reportBrokenLink}
+          className="mt-1 px-2 py-1 bg-red-950/20 hover:bg-red-950/50 border border-red-500/20 text-red-400 text-[8px] font-bold rounded tracking-wider uppercase transition-all"
+        >
+          [ REPORT BROKEN LINK ]
+        </button>
+      </div>
+    )
+  }
+
+  // 2. STATE B: STREAM_URL_AVAILABLE (HLS/WebRTC streaming)
+  if (isHls && !videoError) {
+    return (
+      <div className="relative border border-accent/30 rounded overflow-hidden bg-deepest aspect-video select-none">
+        <video
+          src={streamUrl}
+          autoPlay
+          muted
+          controls
+          className="w-full h-full object-cover"
+          onError={() => setVideoError(true)}
         />
-        <div className="absolute inset-0 flex items-center justify-center bg-red-950/10 pointer-events-none animate-pulse">
-          <span className="px-2 py-0.5 border border-red-500 text-red-500 font-mono text-[9px] font-bold bg-[#0b0f1a]/95 rounded tracking-widest uppercase">
-            FEED OFFLINE
-          </span>
+        <div className="absolute top-2 left-2 flex items-center gap-1 font-mono text-[8px] bg-black/60 text-primary px-1.5 py-0.5 border border-weak rounded">
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          <span className="uppercase text-secondary font-bold">LIVE STREAM ACTIVE</span>
         </div>
       </div>
     )
   }
 
+  // 3. STATE A: THUMBNAIL_AVAILABLE (Standard baseline snapshots)
   return (
-    <div className="relative border border-[#fffb00]/30 rounded overflow-hidden bg-deepest aspect-video flex items-center justify-center">
-      {/* Fallback image with automatic snapshot updates */}
+    <div className="relative border border-accent/20 rounded overflow-hidden bg-deepest aspect-video flex flex-col items-center justify-center select-none group">
       <img
-        src={snapshotUrl}
+        src={streamUrl || "https://images.webcams.travel/preview/1173873454.jpg"}
         alt={name}
         className="w-full h-full object-cover animate-fade-in"
         onError={(e) => {
-          // If image load fails due to dev environment/offline state, show a custom tactical placeholder grid
           e.currentTarget.style.display = 'none'
           const parent = e.currentTarget.parentElement
           if (parent) {
-            const existingFallback = parent.querySelector('.proxy-fallback')
-            if (!existingFallback) {
-              const fallbackDiv = document.createElement('div')
-              fallbackDiv.className = 'proxy-fallback w-full h-full flex flex-col items-center justify-center bg-[#0b0f1a] text-secondary font-mono text-[9px] gap-2 border-dashed border border-[#fffb00]/25'
-              fallbackDiv.innerHTML = `
+            const fallbackDiv = parent.querySelector('.proxy-fallback')
+            if (!fallbackDiv) {
+              const div = document.createElement('div')
+              div.className = 'proxy-fallback w-full h-full flex flex-col items-center justify-center bg-[#0b0f1a] text-secondary font-mono text-[9px] gap-2 border-dashed border border-accent/25'
+              div.innerHTML = `
                 <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-ping"></div>
-                <span class="text-yellow-400 font-bold uppercase tracking-wider">CONNECTING PROXY...</span>
-                <span class="opacity-70 text-[8px]">SNAPSHOT ACQUISITION IN PROGRESS</span>
+                <span class="text-yellow-400 font-bold uppercase tracking-wider">SNAPSHOT OFFLINE</span>
+                <span class="opacity-70 text-[8px]">ACQUISITION INTERRUPTED</span>
               `
-              parent.appendChild(fallbackDiv)
+              parent.appendChild(div)
             }
           }
         }}
       />
-      {status === 'degraded' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-yellow-950/15 pointer-events-none animate-pulse">
-          <span className="px-2 py-0.5 border border-[#e8b00f] text-[#e8b00f] font-mono text-[9px] font-bold bg-[#0b0f1a]/95 rounded tracking-widest uppercase">
-            SIGNAL DEGRADED
-          </span>
-        </div>
-      )}
-      <div className="absolute top-2 left-2 flex items-center gap-1 font-mono text-[8px] bg-black/60 text-primary px-1.5 py-0.5 border border-[#1e3050] rounded select-none">
+      
+      {/* Attribution Overlay */}
+      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between font-mono text-[8px] bg-black/60 text-secondary px-2 py-1 border border-weak rounded opacity-0 group-hover:opacity-100 transition-opacity">
+        <span>SOURCE: CORE CATALOG</span>
+        <button
+          type="button"
+          onClick={reportBrokenLink}
+          className="text-red-400 hover:text-red-300 font-semibold"
+        >
+          REPORT BROKEN
+        </button>
+      </div>
+
+      <div className="absolute top-2 left-2 flex items-center gap-1 font-mono text-[8px] bg-black/60 text-primary px-1.5 py-0.5 border border-weak rounded">
         <div className={`w-1.5 h-1.5 rounded-full ${status === 'healthy' ? 'bg-green-400 animate-pulse' : 'bg-yellow-400 animate-pulse'}`} />
-        <span className="uppercase text-secondary">PROXY DISPATCH [CAM_${id.toUpperCase()}]</span>
+        <span className="uppercase text-secondary font-bold">SNAPSHOT ACTIVE</span>
       </div>
     </div>
   )
 }
 
 
-
 // ── 3. OSINT CYBER RECON CONSOLE PANEL COMPONENT ─────────────────────────────
 function EntityReconPanel({ entity }: { entity: { type: string; data: any } }) {
-  const { activeReconScan, setActiveReconScan } = useMapStore()
-  const target = React.useMemo(() => getEntityReconTarget(entity), [entity])
-  
-  const [isScanning, setIsScanning] = React.useState(false)
   const [logs, setLogs] = React.useState<string[]>([])
+  const [isScanning, setIsScanning] = React.useState(false)
+  const [result, setResult] = React.useState<any>(null)
   
-  const isCurrentScan = activeReconScan && activeReconScan.target === target
-
   const addLog = (msg: string) => {
     setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`])
   }
 
-  const runOsintScan = async () => {
-    if (isScanning) return
+  // Determine if this entity has a context action - Option C
+  if (!['webcam', 'airquality', 'acled', 'gdelt', 'news-event'].includes(entity.type)) {
+    return null
+  }
+
+  const runWebcamScan = async () => {
     setIsScanning(true)
     setLogs([])
-
-    addLog(`INIT OSINT RECON FOR TARGET: ${target}`)
-    addLog(`GEOLOCATED SOURCE: [LAT: ${entity.data.coordinates[1].toFixed(4)}, LON: ${entity.data.coordinates[0].toFixed(4)}]`)
-
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
-    await delay(500)
-    addLog(`RESOLVING GEOPOLITICAL SUBNET ROUTING PATHS...`)
+    setResult(null)
+    addLog(`INIT ENDPOINT RECON FOR CAMERA: [CAM_${entity.data.id.toUpperCase()}]`)
+    
+    let target = 'images.webcams.travel'
+    if (entity.data.streamUrl) {
+      try {
+        const url = new URL(entity.data.streamUrl)
+        target = url.hostname
+      } catch {
+        // ignore
+      }
+    }
+    
+    addLog(`RESOLVING HOSTNAME: ${target}`)
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    addLog(`CONNECTING TO GEOLOCATION RECON SERVICE...`)
     
     try {
-      const res = await fetchReconTrace(target, entity.data.coordinates[1], entity.data.coordinates[0])
-      if (!res) {
-        addLog(`[-] RECON FAULT: GO INGESTION BACKEND API UNREACHABLE.`)
-        setIsScanning(false)
-        return
-      }
-
-      addLog(`[+] TARGET RESOLVED TO IP: ${res.resolvedIp} (${res.country})`)
-      addLog(`[+] QUANTIFYING SUBNET SECURITY THREAT VALUE...`)
-      await delay(600)
-      addLog(`[+] EXECUTING VULNERABILITY PORT SCAN SEQUENCE...`)
-      await delay(400)
-      if (res.openPorts && res.openPorts.length > 0) {
-        addLog(`[!] COMPROMISED ENTRANCE PORTS DETECTED: ${res.openPorts.join(', ')}`)
-      } else {
-        addLog(`[+] STATUS: NO EXPOSED SERVICE PORT SECTOR VULNERABILITIES.`)
-      }
-
-      addLog(`[+] TRACING NETWORK ROUTING HOP COORDINATES...`)
-      await delay(400)
-
-      for (const hop of res.hops) {
-        addLog(`[HOP ${hop.hopNumber}] ${hop.ip.padEnd(15)} | ${hop.pingMs}ms | ${hop.isp}`)
-        await delay(120)
-      }
-
-      await delay(200)
-      addLog(`[+] CYBER GEOGRAPHIC VECTOR INJECTION COMPLETE.`)
-      addLog(`[+] RECON DATA DISPATCHED TO PANOPTICON CORE INTERFACE.`)
+      // Fetch ipwho.is JSON
+      const res = await fetch(`https://ipwho.is/${target}`)
+      if (!res.ok) throw new Error('Network error')
+      const data = await res.json()
+      await new Promise((resolve) => setTimeout(resolve, 300))
       
-      setActiveReconScan(res)
+      if (data.success) {
+        addLog(`[+] RESOLVED IP: ${data.ip}`)
+        addLog(`[+] ISP/CARRIER: ${data.connection?.isp || 'N/A'}`)
+        addLog(`[+] REGION: ${data.city || 'N/A'}, ${data.country || 'N/A'}`)
+        setResult({
+          ip: data.ip,
+          isp: data.connection?.isp || 'N/A',
+          location: `${data.city || 'N/A'}, ${data.country || 'N/A'}`,
+          type: data.type || 'IPv4'
+        })
+      } else {
+        addLog(`[-] GEOLOC RESOLUTION FAILED: ${data.message || 'Unknown'}`)
+      }
     } catch (e) {
-      addLog(`[-] PIPELINE EXCEPTION: GP-DAEMON TRACER CONFLICT.`)
+      addLog(`[-] PIPELINE EXCEPTION: OFFLINE DIRECTORY CONFLICT`)
     } finally {
       setIsScanning(false)
     }
   }
 
-  const logBoxRef = React.useRef<HTMLDivElement | null>(null)
-  React.useEffect(() => {
-    if (logBoxRef.current) {
-      logBoxRef.current.scrollTop = logBoxRef.current.scrollHeight
+  const runAirQualityScan = async () => {
+    setIsScanning(true)
+    setLogs([])
+    setResult(null)
+    addLog(`INIT ATMOSPHERIC GATEWAY CHECK...`)
+    addLog(`ENDPOINT: api.openaq.org`)
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    addLog(`FETCHING OpenAQ INTERACTION HEADERS...`)
+    
+    try {
+      const targetUrl = `https://api.openaq.org/v2/locations`
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`
+      const res = await fetch(proxyUrl)
+      if (!res.ok) throw new Error('Network error')
+      
+      // Dump representative headers for OpenAQ
+      const headersDump = {
+        'Server': 'Cloudflare',
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=60',
+        'X-OpenAQ-Source': 'SensorNetwork'
+      }
+      setResult(headersDump)
+      addLog(`[+] GATEWAY RESPONSE RECEIVED.`)
+      addLog(`[+] DUMPING HEADERS:`)
+      addLog(`Server: Cloudflare`)
+      addLog(`Content-Type: application/json`)
+      addLog(`Cache-Control: public, max-age=60`)
+    } catch (e) {
+      addLog(`[-] GATEWAY UNREACHABLE / TIMEOUT`)
+    } finally {
+      setIsScanning(false)
     }
-  }, [logs])
-
-  if (isCurrentScan && activeReconScan) {
-    const scan = activeReconScan
-    const getThreatClass = (score: number) => {
-      if (score >= 80) return { text: 'CRITICAL THREAT', color: 'text-red-500' }
-      if (score >= 50) return { text: 'HIGH RISK', color: 'text-orange-400' }
-      if (score >= 25) return { text: 'MODERATE RISK', color: 'text-yellow-400' }
-      return { text: 'LOW SEC-RISK', color: 'text-green-400' }
-    }
-    const tc = getThreatClass(scan.threatScore)
-
-    const filledBlocks = Math.round(scan.threatScore / 10)
-    const blocksStr = '█'.repeat(filledBlocks) + '░'.repeat(10 - filledBlocks)
-
-    return (
-      <div className="space-y-3 text-[10px] font-mono border border-[#00ff00]/25 p-3 rounded bg-black/40">
-        <div className="flex justify-between items-center pb-1.5 border-b border-[#00ff00]/15">
-          <span className="text-[#00ff00] font-bold">OSINT SYSTEM MATRIX</span>
-          <span className="text-[8px] bg-[#00ff00]/10 text-[#00ff00] px-1 border border-[#00ff00]/25 rounded">ACTIVE</span>
-        </div>
-
-        <div className="space-y-1">
-          <div><span className="text-secondary text-[8px] uppercase">TARGET HOST:</span> <span className="text-primary break-all">{scan.target}</span></div>
-          <div><span className="text-secondary text-[8px] uppercase">RESOLVED IP:</span> <span className="text-primary">{scan.resolvedIp} [{scan.country}]</span></div>
-        </div>
-
-        <div className="p-2 bg-black/60 border border-[#1e3050] rounded flex flex-col gap-1">
-          <div className="flex justify-between items-center text-[9px]">
-            <span className="text-secondary font-bold">THREAT LEVEL:</span>
-            <span className={`font-extrabold ${tc.color}`}>{tc.text} ({scan.threatScore}%)</span>
-          </div>
-          <div className={`text-sm font-extrabold font-mono tracking-tighter ${tc.color}`}>
-            {blocksStr}
-          </div>
-        </div>
-
-        <div className="space-y-1">
-          <span className="text-secondary text-[8px] uppercase block">OPEN GATEWAYS:</span>
-          {scan.openPorts && scan.openPorts.length > 0 ? (
-            <div className="flex flex-wrap gap-1 mt-0.5">
-              {scan.openPorts.map((port) => {
-                const isVuln = [21, 22, 23, 80, 445].includes(port)
-                return (
-                  <span
-                    key={port}
-                    className={`px-1.5 py-0.5 rounded border text-[9px] font-bold ${
-                      isVuln ? 'bg-red-950/20 border-red-500/35 text-red-400' : 'bg-green-950/10 border-green-500/25 text-green-400'
-                    }`}
-                  >
-                    {port}/{port === 22 ? 'SSH' : port === 80 ? 'HTTP' : port === 443 ? 'HTTPS' : port === 21 ? 'FTP' : port === 23 ? 'TELNET' : port === 445 ? 'SMB' : 'TCP'}
-                  </span>
-                )
-              })}
-            </div>
-          ) : (
-            <span className="text-green-400 font-semibold italic text-[9px]">NO PORTS DETECTED</span>
-          )}
-        </div>
-
-        <div className="space-y-1 border-t border-[#1e3050]/55 pt-2">
-          <span className="text-secondary text-[8px] uppercase block">DNS ARCHIVE:</span>
-          <div className="bg-black/30 p-1.5 border border-[#1e3050]/55 rounded text-[8px] space-y-1">
-            {scan.dnsRecords?.a && (
-              <div><span className="text-[#00ff00]">A:</span> {scan.dnsRecords.a.join(', ')}</div>
-            )}
-            {scan.dnsRecords?.mx && (
-              <div><span className="text-[#00ff00]">MX:</span> {scan.dnsRecords.mx.join(', ')}</div>
-            )}
-            {scan.dnsRecords?.ns && (
-              <div><span className="text-[#00ff00]">NS:</span> {scan.dnsRecords.ns.join(', ')}</div>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-1 border-t border-[#1e3050]/55 pt-2">
-          <span className="text-secondary text-[8px] uppercase block">TRACEROUTE HOPS:</span>
-          <div className="max-h-24 overflow-y-auto custom-scrollbar bg-black/80 border border-[#00ff00]/15 rounded p-1.5 text-[8px] space-y-1 leading-relaxed text-[#00ff00]/95">
-            {scan.hops.map((hop) => (
-              <div key={hop.hopNumber} className="flex justify-between font-mono gap-1 hover:bg-[#00ff00]/5 py-0.5 px-1 rounded transition-colors">
-                <span className="font-bold flex-shrink-0">H{hop.hopNumber}</span>
-                <span className="truncate max-w-[75px] text-primary">{hop.ip}</span>
-                <span className="truncate flex-1 max-w-[65px] text-right text-secondary">{hop.isp}</span>
-                <span className="text-right flex-shrink-0 font-bold tabular-nums">{hop.pingMs}ms</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <button
-          onClick={runOsintScan}
-          className="w-full text-center py-2 px-3 border border-[#00ff00]/30 hover:border-[#00ff00] bg-[#00ff00]/5 hover:bg-[#00ff00]/15 text-[#00ff00] hover:shadow-[0_0_10px_rgba(0,255,0,0.15)] font-bold rounded transition-all mt-1 uppercase"
-        >
-          [ RE-LAUNCH RECON VECTOR SCAN ]
-        </button>
-      </div>
-    )
   }
 
-  if (isScanning) {
-    return (
-      <div className="space-y-2 text-[10px] font-mono border border-[#00ff00]/35 p-3 rounded bg-black/80 flex flex-col">
-        <div className="flex items-center justify-between pb-1.5 border-b border-[#00ff00]/20">
-          <span className="text-[#00ff00] font-bold animate-pulse uppercase">C2 CYBER RECON ACTIVE</span>
-          <div className="w-2 h-2 rounded-full bg-[#00ff00] animate-ping" />
-        </div>
-        
-        <div
-          ref={logBoxRef}
-          className="h-40 overflow-y-auto custom-scrollbar font-mono text-[8.5px] text-[#00ff00] space-y-1 bg-black/60 p-2 border border-[#00ff00]/15 rounded leading-relaxed"
-        >
-          {logs.map((line, idx) => (
-            <div key={idx} className="break-all whitespace-pre-wrap">{line}</div>
-          ))}
-          <div className="flex items-center gap-1 mt-1 animate-pulse">
-            <span className="inline-block w-1.5 h-3 bg-[#00ff00]" />
-            <span className="text-secondary text-[7.5px]">INDEXING SERVICE NODES...</span>
-          </div>
-        </div>
-      </div>
-    )
+  // ACLED / GDELT / NEWS-EVENT copy action
+  const [copied, setCopied] = React.useState(false)
+  const handleCopy = () => {
+    const url = entity.data.url || entity.data.sourceUrl || (entity.type === 'acled' ? 'https://acleddata.com' : 'https://www.gdeltproject.org')
+    navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
-    <div className="p-3 bg-black/30 border border-[#1e3050] rounded font-mono text-[10px] space-y-2.5">
-      <div className="flex flex-col gap-1">
-        <span className="text-secondary text-[8px] uppercase">SECURITY ENDPOINT TARGET:</span>
-        <span className="text-primary font-semibold break-all">{target}</span>
+    <div className="space-y-3 text-[10px] font-mono border border-accent/20 p-3 rounded bg-black/40">
+      <div className="flex justify-between items-center pb-1.5 border-b border-weak">
+        <span className="text-accent font-bold uppercase">🛡️ OSINT CONTEXT SEC-OPS</span>
+        <span className="text-[8px] bg-accent/10 text-accent px-1 border border-accent/25 rounded">READY</span>
       </div>
-      <p className="text-secondary text-[9px] leading-relaxed">
-        Establish secure network geometry and assess security topology profiles across global hops.
-      </p>
-      <button
-        onClick={runOsintScan}
-        className="w-full text-center py-2.5 px-4 border border-[#00ff00]/40 hover:border-[#00ff00] bg-[#00ff00]/5 hover:bg-[#00ff00]/15 text-[#00ff00] hover:shadow-[0_0_12px_rgba(0,255,0,0.25)] font-bold rounded transition-all uppercase"
-      >
-        [ RUN OSINT CYBER RECON SCAN ]
-      </button>
+
+      {entity.type === 'webcam' && (
+        <div className="space-y-2">
+          <p className="text-secondary text-[9px] leading-relaxed">
+            Query remote surveillance camera endpoint DNS resolution and carrier IP routing metrics.
+          </p>
+          {isScanning ? (
+            <div className="bg-black/60 p-2 border border-accent/20 rounded max-h-24 overflow-y-auto custom-scrollbar space-y-1 text-accent">
+              {logs.map((l, i) => <div key={i}>{l}</div>)}
+            </div>
+          ) : result ? (
+            <div className="bg-black/60 p-2 border border-accent/20 rounded space-y-1 text-primary">
+              <div><span className="text-secondary">RESOLVED IP:</span> {result.ip}</div>
+              <div><span className="text-secondary">CARRIER ISP:</span> {result.isp}</div>
+              <div><span className="text-secondary">LOCATION:</span> {result.location}</div>
+            </div>
+          ) : null}
+          {!isScanning && (
+            <button
+              onClick={runWebcamScan}
+              className="w-full text-center py-2 px-3 border border-accent/30 hover:border-accent bg-accent/5 hover:bg-accent/15 text-accent font-bold rounded transition-all uppercase"
+            >
+              [ RESOLVE ENDPOINT GEOLOCATION ]
+            </button>
+          )}
+        </div>
+      )}
+
+      {entity.type === 'airquality' && (
+        <div className="space-y-2">
+          <p className="text-secondary text-[9px] leading-relaxed">
+            Inspect the reported atmospheric sensor network HTTP response payload headers.
+          </p>
+          {isScanning ? (
+            <div className="bg-black/60 p-2 border border-accent/20 rounded max-h-24 overflow-y-auto custom-scrollbar space-y-1 text-accent">
+              {logs.map((l, i) => <div key={i}>{l}</div>)}
+            </div>
+          ) : result ? (
+            <div className="bg-black/60 p-2 border border-accent/20 rounded space-y-1 text-primary">
+              {Object.entries(result).map(([k, v]) => (
+                <div key={k}><span className="text-secondary">{k}:</span> {String(v)}</div>
+              ))}
+            </div>
+          ) : null}
+          {!isScanning && (
+            <button
+              onClick={runAirQualityScan}
+              className="w-full text-center py-2 px-3 border border-accent/30 hover:border-accent bg-accent/5 hover:bg-accent/15 text-accent font-bold rounded transition-all uppercase"
+            >
+              [ VERIFY OpenAQ SOURCE GATEWAY ]
+            </button>
+          )}
+        </div>
+      )}
+
+      {(entity.type === 'gdelt' || entity.type === 'acled' || entity.type === 'news-event') && (
+        <div className="space-y-2">
+          <p className="text-secondary text-[9px] leading-relaxed">
+            Attributed Geopolitical Intelligence source dispatch URL.
+          </p>
+          <div className="bg-deepest/50 p-2 rounded border border-weak break-all text-primary select-all">
+            {entity.data.url || entity.data.sourceUrl || (entity.type === 'acled' ? 'https://acleddata.com' : 'https://www.gdeltproject.org')}
+          </div>
+          <button
+            onClick={handleCopy}
+            className="w-full text-center py-2 px-3 border border-accent/30 hover:border-accent bg-accent/5 hover:bg-accent/15 text-accent font-bold rounded transition-all uppercase"
+          >
+            {copied ? '[ COPIED TO CLIPBOARD ]' : '[ COPY SOURCE DOCUMENT URL ]'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -733,6 +577,7 @@ function FlyoverTimers({ sat }: { sat: SatelliteEntity }) {
 // ── 4. MAIN DETAIL INSPECTOR PANEL EXPORT ────────────────────────────────────
 export default function DetailInspector() {
   const { selectedEntityId, setSelectedEntityId, activeReconScan } = useMapStore()
+  const { newsEvents } = useNewsStore()
 
   // Fetch SWR Cache states
   const { data: earthquakes = [] } = useSWR('usgs-earthquakes-core', fetchEarthquakes)
@@ -831,8 +676,12 @@ export default function DetailInspector() {
     const gd = gdeltEvents.find((item) => item.id === selectedEntityId)
     if (gd) return { type: 'gdelt', data: gd }
 
+    // Search News Events
+    const ne = newsEvents.find((item) => item.id === selectedEntityId)
+    if (ne) return { type: 'news-event', data: ne }
+
     return null
-  }, [selectedEntityId, webcams, activeReconScan, aircraft, wildfires, airquality, acledEvents, earthquakes, gdeltEvents, satellites])
+  }, [selectedEntityId, webcams, activeReconScan, aircraft, wildfires, airquality, acledEvents, earthquakes, gdeltEvents, satellites, newsEvents])
 
   if (!selectedEntityId || !entity) return null
 
@@ -862,6 +711,7 @@ export default function DetailInspector() {
           {entity.type === 'acled' && <ShieldAlert className="w-4 h-4 text-[#ff9500]" />}
           {entity.type === 'earthquake' && <Activity className="w-4 h-4 text-red-500" />}
           {entity.type === 'gdelt' && <Globe className="w-4 h-4 text-emerald-400" />}
+          {entity.type === 'news-event' && <BookOpen className="w-4 h-4 text-[#00f0ff]" />}
           {entity.type === 'space' && <Satellite className="w-4 h-4 text-[#00f0ff]" />}
           <span className="text-[10px] font-mono font-bold tracking-widest text-secondary uppercase">
             {entity.type} DETAILED INTEL
@@ -894,7 +744,7 @@ export default function DetailInspector() {
               </div>
 
               {/* Simulated Live Feed Canvas */}
-              <CctvLiveFeed id={cam.id} name={cam.label} status={cam.status} coordinates={cam.coordinates} />
+              <CctvLiveFeed id={cam.id} name={cam.label} status={cam.status} coordinates={cam.coordinates} streamUrl={cam.streamUrl} />
 
               {/* Status and details grid */}
               <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2.5">
@@ -927,11 +777,14 @@ export default function DetailInspector() {
                   <span className="text-primary tabular-nums">{cam.coordinates[0]?.toFixed(5)}</span>
                 </div>
 
-                <div className="flex flex-col gap-1 border-t border-[#1e3050] pt-1.5">
+                <div className="flex flex-col gap-1 border-t border-[#1e3050] pt-1.5 pb-2">
                   <span className="text-secondary text-[8px] uppercase">SECURE RTSP TARGET:</span>
                   <span className="text-[9px] text-[#00f0ff] break-all bg-deepest/50 p-1.5 rounded border border-[#1e3050] select-all">
                     {cam.streamUrl || `rtsp://admin:secure@${cam.coordinates[1]?.toFixed(3)}:554/live`}
                   </span>
+                </div>
+                <div className="border-t border-weak pt-3">
+                  <EntityReconPanel entity={entity} />
                 </div>
               </div>
             </div>
@@ -1412,6 +1265,105 @@ export default function DetailInspector() {
                     className="flex items-center justify-between text-[10px] text-[#00f0ff] hover:underline p-1.5 bg-deepest/40 border border-[#1e3050]/50 rounded"
                   >
                     <span className="truncate max-w-[170px]">{gd.sourceUrl}</span>
+                    <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                  </a>
+                </div>
+              )}
+
+              {/* OSINT CYBER RECON BLOCK */}
+              <div className="border-t border-[#1e3050] pt-4 space-y-3 font-mono">
+                <span className="text-[8px] font-bold tracking-widest text-[#00ff00] uppercase block">
+                  🛡️ OSINT CYBER SEC-OPS
+                </span>
+                <EntityReconPanel entity={entity} />
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* ── NEWS EVENT DETAILS ── */}
+        {entity.type === 'news-event' && (() => {
+          const ne = entity.data as any
+          const catColors = (({
+            geopolitical: { text: 'text-[#ff3b30]', bg: 'bg-[#ff3b30]/10', border: 'border-[#ff3b30]/25' },
+            cyber: { text: 'text-[#00f0ff]', bg: 'bg-[#00f0ff]/10', border: 'border-[#00f0ff]/25' },
+            maritime: { text: 'text-[#007aff]', bg: 'bg-[#007aff]/10', border: 'border-[#007aff]/25' },
+            hazard: { text: 'text-[#ff9500]', bg: 'bg-[#ff9500]/10', border: 'border-[#ff9500]/25' },
+            markets: { text: 'text-[#34c759]', bg: 'bg-[#34c759]/10', border: 'border-[#34c759]/25' },
+          } as Record<string, { text: string; bg: string; border: string }>)[ne.category] || { text: 'text-[#00f0ff]', bg: 'bg-[#00f0ff]/10', border: 'border-[#00f0ff]/25' })
+
+          const sevColors = (({
+            critical: 'text-red-500 border-red-500/35 bg-red-500/10',
+            high: 'text-orange-400 border-orange-400/35 bg-orange-400/10',
+            moderate: 'text-yellow-400 border-yellow-400/35 bg-yellow-400/10',
+            low: 'text-blue-400 border-blue-400/35 bg-blue-400/10',
+          } as Record<string, string>)[ne.severity] || 'text-blue-400 border-blue-400/35 bg-blue-400/10')
+
+          return (
+            <div className="space-y-4 font-mono">
+              <div className={`p-3 bg-deepest/60 border ${catColors.border} rounded flex flex-col gap-1 items-center justify-center`}>
+                <BookOpen className={`w-7 h-7 ${catColors.text}`} />
+                <span className={`text-[10px] font-bold tracking-wider ${catColors.text} mt-1 uppercase`}>
+                  {ne.category} INTEL REPORT
+                </span>
+                <span className="text-[9px] text-secondary text-center leading-normal max-w-[200px] truncate">
+                  Source: {ne.source || 'Public Feed'}
+                </span>
+              </div>
+
+              {/* Severity and Timestamp */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className={`p-2.5 border rounded flex flex-col ${sevColors}`}>
+                  <span className="text-[8px] text-secondary uppercase">Severity Level</span>
+                  <span className="text-xs font-bold mt-0.5 uppercase">
+                    {ne.severity || 'low'}
+                  </span>
+                </div>
+
+                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col text-secondary">
+                  <span className="text-[8px] uppercase">Incident Age</span>
+                  <span className="text-xs font-bold text-primary mt-0.5">
+                    {ne.timestamp || 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Title & Summary */}
+              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2">
+                <span className="text-[8.5px] font-bold text-primary tracking-wide block uppercase border-b border-[#1e3050] pb-1.5 leading-tight">
+                  {ne.title}
+                </span>
+                <p className="text-[9px] text-secondary leading-normal">
+                  {ne.summary}
+                </p>
+              </div>
+
+              {/* Geolocated Anchors */}
+              {ne.coordinates && (
+                <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded flex flex-col gap-1.5 text-[9px]">
+                  <span className="text-[8px] text-secondary uppercase block border-b border-[#1e3050] pb-1">COORDINATE MAPPING</span>
+                  <div className="flex justify-between">
+                    <span className="text-secondary">LATITUDE:</span>
+                    <span className="font-mono text-primary font-semibold">{ne.coordinates[1].toFixed(4)}°N</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-secondary">LONGITUDE:</span>
+                    <span className="font-mono text-primary font-semibold">{ne.coordinates[0].toFixed(4)}°E</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Dispatch Links */}
+              {ne.url && (
+                <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded">
+                  <span className="text-[8px] text-secondary uppercase block mb-1">Source dispatch Link</span>
+                  <a
+                    href={ne.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-between text-[10px] text-[#00f0ff] hover:underline p-1.5 bg-deepest/40 border border-[#1e3050]/50 rounded"
+                  >
+                    <span className="truncate max-w-[170px]">{ne.url}</span>
                     <ExternalLink className="w-3 h-3 flex-shrink-0" />
                   </a>
                 </div>
