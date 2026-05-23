@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware'
 // Types
 // ---------------------------------------------------------------------------
 
-type Theme = 'midnight' | 'amoled' | 'light' | 'high-contrast'
+type Theme = 'dark' | 'light'
 type ClockFormat = '24h' | '12h'
 
 export interface AppStore {
@@ -69,7 +69,7 @@ export const useAppStore = create<AppStore>()(
   persist(
     (set) => ({
       // ── Theme ────────────────────────────────────────────────────────────
-      theme: 'midnight' as Theme,
+      theme: 'dark' as Theme,
       setTheme: (theme) => set({ theme }),
 
       // ── Clock ────────────────────────────────────────────────────────────

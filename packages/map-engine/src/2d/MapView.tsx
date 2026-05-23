@@ -624,6 +624,7 @@ export default function MapView({
   return (
     <div className="w-full h-full relative" style={{ minHeight: '300px' }}>
       <Map
+        key={theme}
         {...viewState}
         ref={mapRef}
         onMove={(evt: any) => setViewState(evt.viewState)}
@@ -1086,7 +1087,7 @@ export default function MapView({
         </Source>
 
         {/* ── 9. GLOBAL CCTV WEBCAMS LAYER ───────────────────────── */}
-        <Source id="webcams-source" type="geojson" data={webcamsGeoJson as any} cluster={true} clusterMaxZoom={14} clusterRadius={40}>
+        <Source id="webcams-source" type="geojson" data={webcamsGeoJson as any} cluster={true} clusterMaxZoom={14} clusterRadius={50}>
           {/* Cluster circle */}
           <Layer
             id="webcams-cluster-circle"

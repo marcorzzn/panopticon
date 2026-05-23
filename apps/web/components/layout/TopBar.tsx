@@ -13,7 +13,6 @@ import {
   Cpu,
   Tv,
   SunMoon,
-  Settings,
   Terminal,
   RefreshCw,
 } from 'lucide-react'
@@ -99,7 +98,6 @@ export default function TopBar() {
     toggleIntelPanel,
     toggleBottomPanel,
     toggleMapFullscreen,
-    toggleSettingsDrawer,
     reconToolkitOpen,
     toggleReconToolkit,
     aiBriefOpen,
@@ -123,10 +121,7 @@ export default function TopBar() {
   }
 
   const cycleTheme = () => {
-    if (theme === 'midnight') setTheme('amoled')
-    else if (theme === 'amoled') setTheme('light')
-    else if (theme === 'light') setTheme('high-contrast')
-    else setTheme('midnight')
+    setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
   // Update theme data-attribute on document element
@@ -224,16 +219,7 @@ export default function TopBar() {
           </button>
         </Tooltip>
 
-        {/* Operational Settings Drawer */}
-        <Tooltip content="Open telemetry credentials & webcam settings panel">
-          <button
-            onClick={toggleSettingsDrawer}
-            aria-label="Open telemetry credentials and settings panel"
-            className="p-1.5 rounded border border-[var(--pan-border-default)] hover:border-[var(--pan-border-strong)] text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] bg-[var(--pan-btn-secondary-bg)] hover:bg-[var(--pan-btn-secondary-hover)] transition-all animate-none"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
-        </Tooltip>
+
 
         {/* AI Brief Drawer */}
         <Tooltip content="Toggle daily AI strategic brief overlay [A]">

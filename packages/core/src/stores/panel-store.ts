@@ -12,7 +12,6 @@ export interface PanelStore {
   layerPanelOpen: boolean
   intelPanelOpen: boolean
   bottomPanelOpen: boolean
-  settingsDrawerOpen: boolean
   reconToolkitOpen: boolean
   aiBriefOpen: boolean
 
@@ -34,7 +33,6 @@ export interface PanelStore {
   toggleLayerPanel: () => void
   toggleIntelPanel: () => void
   toggleBottomPanel: () => void
-  toggleSettingsDrawer: () => void
   toggleReconToolkit: () => void
   toggleAiBrief: () => void
   toggleMapFullscreen: () => void
@@ -58,7 +56,6 @@ const DEFAULTS = {
   layerPanelOpen: true,
   intelPanelOpen: false,
   bottomPanelOpen: false,
-  settingsDrawerOpen: false,
   reconToolkitOpen: false,
   aiBriefOpen: false,
   layerPanelSize: 18,
@@ -89,9 +86,6 @@ export const usePanelStore = create<PanelStore>()(
       toggleBottomPanel: () =>
         set((s) => ({ bottomPanelOpen: !s.bottomPanelOpen })),
 
-      toggleSettingsDrawer: () =>
-        set((s) => ({ settingsDrawerOpen: !s.settingsDrawerOpen })),
-
       toggleReconToolkit: () =>
         set((s) => ({ reconToolkitOpen: !s.reconToolkitOpen })),
 
@@ -108,7 +102,6 @@ export const usePanelStore = create<PanelStore>()(
                 layerPanelOpen: false,
                 intelPanelOpen: false,
                 bottomPanelOpen: false,
-                settingsDrawerOpen: false,
                 reconToolkitOpen: false,
                 aiBriefOpen: false,
               }),
@@ -134,7 +127,6 @@ export const usePanelStore = create<PanelStore>()(
           layerPanelOpen: false,
           intelPanelOpen: false,
           bottomPanelOpen: false,
-          settingsDrawerOpen: false,
           reconToolkitOpen: false,
           aiBriefOpen: false,
         }),
@@ -148,7 +140,6 @@ export const usePanelStore = create<PanelStore>()(
         layerPanelOpen: state.layerPanelOpen,
         intelPanelOpen: state.intelPanelOpen,
         bottomPanelOpen: state.bottomPanelOpen,
-        settingsDrawerOpen: state.settingsDrawerOpen,
         reconToolkitOpen: state.reconToolkitOpen,
         aiBriefOpen: state.aiBriefOpen,
         layerPanelSize: state.layerPanelSize,

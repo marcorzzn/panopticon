@@ -1,0 +1,73 @@
+/* ============================================================================
+ * @panopticon/ui — Dark Theme (Default)
+ * True dark/slate optimized for SOC (Security Operations Center) environments.
+ * Applied via [data-theme='dark'] or as :root default.
+ * ============================================================================ */
+
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Theme metadata */
+  --theme-name: 'dark';
+
+  /* Background layers */
+  --color-bg-deepest:  #03060d;
+  --color-bg-base:     #03060d;
+  --color-bg-surface:  #0b132b;
+  --color-bg-elevated: #1c2541;
+  --color-bg-hover:    #24305e;
+  --color-bg-active:   #34495e;
+
+  /* Text hierarchy */
+  --color-text-primary:   #d5e0f2;
+  --color-text-secondary: #a5b4fc;
+  --color-text-tertiary:  #708090;
+  --color-text-disabled:  #475569;
+  --color-text-heading:   #e0f2fe;
+
+  /* Borders */
+  --color-border-weak:   #1c2541;
+  --color-border-medium: #3b82f6;
+  --color-border-strong: #00f0ff;
+
+  /* Accent */
+  --color-accent:        #00f0ff;
+  --color-accent-hover:  #33f3ff;
+  --color-accent-active: #00c0cc;
+
+  /* Glassmorphism */
+  --glass-bg:       rgba(11, 19, 43, 0.65);
+  --glass-border:   rgba(0, 240, 255, 0.1);
+  --glass-blur:     16px;
+  --glass-shadow:   0 8px 32px 0 rgba(0, 0, 0, 0.65);
+}
+
+:root[data-theme='dark'],
+:root:not([data-theme]) {
+  background-color: #03060d;
+  background-image:
+    /* Vertical grid lines */
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 79px,
+      rgba(0, 240, 255, 0.02) 79px,
+      rgba(0, 240, 255, 0.02) 80px
+    ),
+    /* Horizontal grid lines */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 79px,
+      rgba(0, 240, 255, 0.02) 79px,
+      rgba(0, 240, 255, 0.02) 80px
+    ),
+    /* Faint radial vignette — darker edges, lighter center */
+    radial-gradient(
+      ellipse at 50% 50%,
+      rgba(0, 240, 255, 0.015) 0%,
+      transparent 75%
+    );
+  background-attachment: fixed;
+}

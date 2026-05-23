@@ -17,6 +17,7 @@ export async function fetchWebcams(): Promise<WebcamEntity[]> {
       streamUrl: cam.streamUrl,
       status: cam.status as 'healthy' | 'degraded' | 'offline',
       type: cam.type as 'iframe_embed' | 'static_snapshot',
+      provider: 'EarthCam',
     })
   })
 
@@ -31,6 +32,7 @@ export async function fetchWebcams(): Promise<WebcamEntity[]> {
       streamUrl: cam.streamUrl,
       status: cam.status as 'healthy' | 'degraded' | 'offline',
       type: cam.type as 'iframe_embed' | 'static_snapshot',
+      provider: 'AMOS',
     })
   })
 

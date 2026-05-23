@@ -217,6 +217,7 @@ export interface WebcamEntity extends GeoEntity {
   streamUrl: string
   status: 'healthy' | 'degraded' | 'offline'
   type?: 'iframe_embed' | 'static_snapshot'
+  provider?: 'EarthCam' | 'AMOS' | 'Windy'
 }
 
 /** ReconScan hop details */

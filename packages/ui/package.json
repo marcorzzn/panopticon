@@ -7,10 +7,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./styles": "./src/index.css",
-    "./themes/midnight": "./src/themes/midnight.css",
-    "./themes/amoled": "./src/themes/amoled.css",
-    "./themes/light": "./src/themes/light.css",
-    "./themes/high-contrast": "./src/themes/high-contrast.css"
+    "./themes/dark": "./src/themes/dark.css",
+    "./themes/light": "./src/themes/light.css"
   },
   "devDependencies": {
     "typescript": "^5.5.0"

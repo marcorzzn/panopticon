@@ -8,7 +8,6 @@ import StatusBar from './StatusBar'
 import LayerPanel from './LayerPanel'
 import IntelPanel from './IntelPanel'
 import DetailInspector from './DetailInspector'
-import SettingsDrawer from './SettingsDrawer'
 import ReconToolkit from './ReconToolkit'
 import AiBriefConsole from './AiBriefConsole'
 
@@ -213,9 +212,6 @@ export default function DashboardLayout({
 
       {/* 3. Global Status Bar (Footer) */}
       <StatusBar />
-
-      {/* Settings Drawer */}
-      <SettingsDrawer />
 
       {/* Recon Toolkit Drawer */}
       <ReconToolkit />

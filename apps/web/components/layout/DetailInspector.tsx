@@ -97,6 +97,7 @@ function CctvLiveFeed({
   coordinates,
   streamUrl,
   type = 'static_snapshot',
+  provider = 'AMOS',
 }: {
   id: string
   name: string
@@ -104,89 +105,170 @@ function CctvLiveFeed({
   coordinates: [number, number]
   streamUrl?: string
   type?: 'iframe_embed' | 'static_snapshot'
+  provider?: string
 }) {
-  const [snapshotError, setSnapshotError] = React.useState(false)
+  // Highly resilient 3-State player state: 1 = Live / Iframe, 2 = Polling Snapshot, 3 = Offline Link Redirection
+  const [playerState, setPlayerState] = React.useState<'state1' | 'state2' | 'state3'>(
+    status === 'offline'
+      ? 'state3'
+      : type === 'static_snapshot'
+      ? 'state2'
+      : 'state1'
+  )
+  const [timestamp, setTimestamp] = React.useState(Date.now())
   const [secondsSinceLoad, setSecondsSinceLoad] = React.useState(0)
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
 
+  // 1. Seconds counter for active preview overlay
   React.useEffect(() => {
-    setSnapshotError(false)
     setSecondsSinceLoad(0)
     const interval = setInterval(() => {
       setSecondsSinceLoad((prev) => prev + 1)
     }, 1000)
     return () => clearInterval(interval)
-  }, [id])
+  }, [id, playerState])
+
+  // 2. State 1 loading timeout: if iframe/live stream doesn't mount in 5s, cascade to State 2
+  React.useEffect(() => {
+    if (playerState === 'state1') {
+      timeoutRef.current = setTimeout(() => {
+        console.warn(`[CCTV TIMEOUT] Feed ${id} load timeout in State 1. Cascading to State 2 snapshot fallback.`)
+        setPlayerState('state2')
+      }, 5000)
+    }
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [id, playerState])
+
+  // 3. State 2 15-second cache-busting refresh interval loop
+  React.useEffect(() => {
+    if (playerState !== 'state2') return
+    const interval = setInterval(() => {
+      setTimestamp(Date.now())
+      setSecondsSinceLoad(0)
+    }, 15000) // strict 15s refresh interval
+    return () => clearInterval(interval)
+  }, [playerState])
 
   const reportBrokenLink = () => {
     const issueTitle = encodeURIComponent(`CCTV Failure Report: Camera ${id}`)
-    const issueBody = encodeURIComponent(`Operational Failure Report for CCTV Surveillance Endpoint:\n- Camera: ${name}\n- Coordinates: [${coordinates[1]}, ${coordinates[0]}]\n- Stream URL: ${streamUrl || 'N/A'}\n- Reported Status: ${status}`)
+    const issueBody = encodeURIComponent(`Operational Failure Report for CCTV Surveillance Endpoint:\n- Camera: ${name}\n- Provider: ${provider}\n- Coordinates: [${coordinates[1]}, ${coordinates[0]}]\n- Stream URL: ${streamUrl || 'N/A'}\n- Reported Status: ${status}`)
     window.open(`https://github.com/marcorzzn/panopticon/issues/new?title=${issueTitle}&body=${issueBody}`, '_blank')
   }
 
-  // 1. STATE C: OFFLINE (Explicitly marked offline or image load failed)
-  if (status === 'offline' || snapshotError) {
-    return (
-      <div className="relative border border-red-500/30 rounded aspect-video bg-[#0c0f1a] flex flex-col items-center justify-center font-mono gap-2 border-dashed select-none">
-        <Video className="w-8 h-8 text-red-500/50 animate-pulse" />
-        <span className="text-red-500 font-bold uppercase tracking-wider text-[10px]">CONNECTION OFFLINE</span>
-        <span className="text-secondary text-[8px]">FEED TIMEOUT / SIGNAL ACQUISITION FAILED</span>
-        <button 
-          type="button"
-          onClick={reportBrokenLink}
-          className="mt-1 px-2 py-1 bg-red-950/20 hover:bg-red-950/50 border border-red-500/20 text-red-400 text-[8px] font-bold rounded tracking-wider uppercase transition-all"
-        >
-          [ REPORT BROKEN LINK ]
-        </button>
-      </div>
-    )
+  const openSourceNode = () => {
+    if (streamUrl) {
+      window.open(streamUrl, '_blank', 'noopener,noreferrer')
+    }
   }
 
-  // 2. STATE B: IFRAME_EMBED
-  if (type === 'iframe_embed' && streamUrl) {
+  // STATE 3: SIGNAL LOST / REDIRECT PANEL
+  if (playerState === 'state3' || !streamUrl) {
     return (
-      <div className="relative border border-accent/30 rounded overflow-hidden bg-deepest aspect-video select-none">
-        <iframe
-          src={streamUrl}
-          title={name}
-          className="w-full h-full border-0 object-cover"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-        <div className="absolute top-2 left-2 flex items-center gap-1 font-mono text-[8px] bg-black/60 text-primary px-1.5 py-0.5 border border-weak rounded">
-          <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          <span className="uppercase text-secondary font-bold">LIVE EMBED ACTIVE</span>
+      <div className="relative border border-red-500/40 rounded aspect-video bg-[#03060d] flex flex-col items-center justify-center font-mono gap-2 border-dashed select-none p-4">
+        <div className="w-8 h-8 rounded-full border border-red-500/40 bg-red-950/20 flex items-center justify-center text-red-500 animate-pulse">
+          <ShieldAlert className="w-4 h-4" />
+        </div>
+        <span className="text-red-500 font-bold uppercase tracking-widest text-[9px] text-center">SIGNAL LOST IN-APP / SECURITY ACCESS EXCLUDED</span>
+        <span className="text-secondary text-[8px] max-w-xs text-center leading-normal">
+          Direct client-side streaming blocked by CORS or frame-origin policies. Bypass restriction via air-gapped node.
+        </span>
+        <div className="flex gap-2 mt-2 w-full">
+          <button
+            type="button"
+            onClick={openSourceNode}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-red-950/40 hover:bg-red-900/40 border border-red-500/40 text-red-400 hover:text-red-300 text-[8px] font-bold rounded tracking-wider uppercase transition-all"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>[ OPEN ORIGINAL OPEN-SOURCE INTELLIGENCE NODE ]</span>
+          </button>
+          <button
+            type="button"
+            onClick={reportBrokenLink}
+            className="px-3 py-1.5 bg-red-950/20 hover:bg-red-950/50 border border-red-500/20 text-red-500/70 hover:text-red-500 text-[8px] font-bold rounded tracking-wider uppercase transition-all"
+          >
+            REPORT
+          </button>
         </div>
       </div>
     )
   }
 
-  // 3. STATE A: STATIC_SNAPSHOT
+  // STATE 1: TRUE LIVE EMBED / IFRAME PLAYER
+  if (playerState === 'state1') {
+    return (
+      <div className="relative border border-accent/30 rounded overflow-hidden bg-deepest aspect-video select-none">
+        <iframe
+          src={streamUrl}
+          title={name}
+          onLoad={() => {
+            // Clear state 1 timeout if it loads successfully before 5s
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current)
+              timeoutRef.current = null
+            }
+          }}
+          className="w-full h-full border-0 object-cover"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+        <div className="absolute top-2 left-2 flex items-center gap-1.5 font-mono text-[8px] bg-black/60 text-primary px-2 py-0.5 border border-weak rounded">
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          <span className="uppercase text-secondary font-bold">LIVE EMBED ACTIVE</span>
+          <span className="text-secondary opacity-60">|</span>
+          <span className="text-[#00f0ff] uppercase">{provider}</span>
+        </div>
+      </div>
+    )
+  }
+
+  // STATE 2: DYNAMIC POLLING SNAPSHOT FALLBACK
+  const separator = streamUrl.includes('?') ? '&' : '?'
+  const imgSrc = `${streamUrl}${separator}t=${timestamp}`
+
   return (
     <div className="relative border border-accent/20 rounded overflow-hidden bg-deepest aspect-video flex flex-col items-center justify-center select-none group">
       <img
-        src={streamUrl || "https://images.webcams.travel/preview/1173873454.jpg"}
+        src={imgSrc}
         alt={name}
         className="w-full h-full object-cover animate-fade-in"
-        onError={() => setSnapshotError(true)}
+        onError={() => {
+          console.error(`[CCTV ERROR] Snapshot load failed for ${id}. Cascading to State 3 link redirection.`)
+          setPlayerState('state3')
+        }}
       />
-      
+
       {/* Attribution Overlay */}
       <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between font-mono text-[8px] bg-black/60 text-secondary px-2 py-1 border border-weak rounded opacity-0 group-hover:opacity-100 transition-opacity">
-        <span>SOURCE: AMOS NETWORK</span>
-        <button
-          type="button"
-          onClick={reportBrokenLink}
-          className="text-red-400 hover:text-red-300 font-semibold"
-        >
-          REPORT BROKEN
-        </button>
+        <span>SOURCE: {provider} NETWORK</span>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={openSourceNode}
+            className="text-[#00f0ff] hover:underline flex items-center gap-0.5"
+          >
+            <span>SOURCE</span>
+            <ExternalLink className="w-2.5 h-2.5" />
+          </button>
+          <span className="text-secondary opacity-40">|</span>
+          <button
+            type="button"
+            onClick={reportBrokenLink}
+            className="text-red-400 hover:text-red-300 font-semibold"
+          >
+            REPORT BROKEN
+          </button>
+        </div>
       </div>
 
       <div className="absolute top-2 left-2 flex items-center gap-1.5 font-mono text-[8px] bg-black/60 text-primary px-1.5 py-0.5 border border-weak rounded">
         <div className={`w-1.5 h-1.5 rounded-full ${status === 'healthy' ? 'bg-green-400 animate-pulse' : 'bg-yellow-400 animate-pulse'}`} />
         <span className="uppercase text-secondary font-bold">SNAPSHOT ACTIVE</span>
         <span className="text-secondary opacity-60">|</span>
-        <span className="text-[7px] text-[#00f0ff] uppercase tracking-wide">loaded {secondsSinceLoad}s ago</span>
+        <span className="text-[#00f0ff] uppercase">{provider}</span>
+        <span className="text-secondary opacity-60">|</span>
+        <span className="text-[7px] text-[#00f0ff] uppercase tracking-wide">refreshed {secondsSinceLoad}s ago</span>
       </div>
     </div>
   )
@@ -766,7 +848,7 @@ export default function DetailInspector() {
               </div>
 
               {/* Simulated Live Feed Canvas */}
-              <CctvLiveFeed id={cam.id} name={cam.label} status={cam.status} coordinates={cam.coordinates} streamUrl={cam.streamUrl} type={cam.type} />
+              <CctvLiveFeed id={cam.id} name={cam.label} status={cam.status} coordinates={cam.coordinates} streamUrl={cam.streamUrl} type={cam.type} provider={cam.provider} />
 
               {/* Status and details grid */}
               <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2.5">

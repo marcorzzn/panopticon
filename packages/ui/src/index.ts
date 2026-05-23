@@ -4,13 +4,13 @@
  * ============================================================================ */
 
 /** Available theme identifiers */
-export type Theme = 'midnight' | 'amoled' | 'high-contrast'
+export type Theme = 'dark' | 'light'
 
 /** Ordered list of all available themes */
-export const THEMES: Theme[] = ['midnight', 'amoled', 'high-contrast']
+export const THEMES: Theme[] = ['dark', 'light']
 
 /** Default theme applied when no explicit theme is set */
-export const DEFAULT_THEME: Theme = 'midnight'
+export const DEFAULT_THEME: Theme = 'dark'
 
 /** Data attribute name used on the root element to set the active theme */
 export const THEME_ATTRIBUTE = 'data-theme'
