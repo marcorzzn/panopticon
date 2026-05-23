@@ -216,6 +216,7 @@ export interface AcledEventEntity extends GeoEntity {
 export interface WebcamEntity extends GeoEntity {
   streamUrl: string
   status: 'healthy' | 'degraded' | 'offline'
+  type?: 'iframe_embed' | 'static_snapshot'
 }
 
 /** ReconScan hop details */

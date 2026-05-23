@@ -56,32 +56,7 @@ export async function fetchEarthquakes(): Promise<EarthquakeEntity[]> {
       }
     })
   } catch (err) {
-    console.warn("USGS Earthquakes feed unreachable. Engaging client-side simulation fallback:", err)
-    
-    const mockEarthquakes = [
-      { id: "eq-mock-1", mag: 6.2, place: "Off the coast of Honshu, Japan", lat: 38.3224, lon: 142.3693, depth: 24.5, tsunami: 1 },
-      { id: "eq-mock-2", mag: 4.8, place: "Southern California, USA", lat: 34.0522, lon: -118.2437, depth: 8.2, tsunami: 0 },
-      { id: "eq-mock-3", mag: 7.1, place: "Near the coast of Central Chile", lat: -33.4489, lon: -70.6693, depth: 35.0, tsunami: 1 },
-      { id: "eq-mock-4", mag: 3.5, place: "Central Italy", lat: 42.8582, lon: 13.1492, depth: 10.0, tsunami: 0 },
-      { id: "eq-mock-5", mag: 5.4, place: "Reykjanes Ridge, Iceland", lat: 64.1466, lon: -21.9426, depth: 2.0, tsunami: 0 },
-    ]
-
-    return mockEarthquakes.map((eq, index) => {
-      const timestamp = Date.now() - index * 300000
-      return {
-        id: eq.id,
-        coordinates: [eq.lon, eq.lat],
-        domain: IntelligenceDomain.CLIMATE,
-        timestamp,
-        label: `M ${eq.mag.toFixed(1)} - ${eq.place}`,
-        severity: getSeverity(eq.mag),
-        magnitude: eq.mag,
-        depth: eq.depth,
-        place: eq.place,
-        tsunamiAlert: eq.tsunami === 1,
-        felt: eq.mag >= 4.5 ? Math.floor(Math.random() * 200) + 10 : null,
-        url: "https://earthquake.usgs.gov",
-      }
-    })
+    console.warn("USGS Earthquakes feed unreachable. Returning empty data:", err)
+    return []
   }
 }

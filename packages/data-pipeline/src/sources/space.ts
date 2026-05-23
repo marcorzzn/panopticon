@@ -1,91 +1,50 @@
 import type { SatelliteEntity } from '@panopticon/core/types'
 import { IntelligenceDomain } from '@panopticon/core/types'
 
-function shouldBypassFetch(): boolean {
-	if (typeof window === 'undefined') return false
-	const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-	const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL
-	
-	// If we are on a remote deployment (e.g. GitHub Pages) and don't have a secure production backend configured,
-	// we bypass fetch and immediately trigger the client-side simulation.
-	if (!isLocal) {
-		if (!backendUrl || !backendUrl.startsWith('https://')) {
-			return true
-		}
-	}
-	return false
-}
-
 export async function fetchSatellites(): Promise<SatelliteEntity[]> {
-	if (shouldBypassFetch()) {
-		return getMockSatellites()
-	}
-
-	const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080/api/v1'
+	// Propagate 11 NORAD satellites based on authentic TLE lines and Keplerian models
+	const propagatedSats = getPropagatedSatellites()
 	
 	try {
-		const response = await fetch(`${backendUrl}/space/satellites`)
+		// Fetch real-time ISS coordinates from Where The ISS At API
+		const response = await fetch('https://api.wheretheiss.at/v1/satellites/25544')
 		if (!response.ok) {
-			throw new Error(`Go Backend API returned status ${response.status}`)
+			throw new Error(`Where The ISS At API returned status ${response.status}`)
 		}
 		
-		const res = await response.json()
-		if (!res || !Array.isArray(res.data)) {
-			return []
-		}
+		const issData = await response.json()
+		const issLon = parseFloat(issData.longitude)
+		const issLat = parseFloat(issData.latitude)
 		
-		const fields = res.fields || []
-		const idxId = fields.indexOf("id")
-		const idxName = fields.indexOf("name")
-		const idxNoradId = fields.indexOf("noradId")
-		const idxSatelliteType = fields.indexOf("satelliteType")
-		const idxLat = fields.indexOf("lat")
-		const idxLon = fields.indexOf("lon")
-		const idxAltitudeKm = fields.indexOf("altitudeKm")
-		const idxInclination = fields.indexOf("inclination")
-		const idxVelocityKms = fields.indexOf("velocityKms")
-		const idxTleLine1 = fields.indexOf("tleLine1")
-		const idxTleLine2 = fields.indexOf("tleLine2")
-		
-		return res.data.map((row: any[], index: number) => {
-			const id = row[idxId] || `sat-${index}`
-			const name = row[idxName] || 'Active Satellite Tracker'
-			const noradId = row[idxNoradId] ?? 0
-			const satelliteType = row[idxSatelliteType] || 'telecom'
-			const lat = row[idxLat] ?? 0
-			const lon = row[idxLon] ?? 0
-			const altitudeKm = row[idxAltitudeKm] ?? 0
-			const inclination = row[idxInclination] ?? 0
-			const velocityKms = row[idxVelocityKms] ?? 0
-			const tleLine1 = row[idxTleLine1] || ''
-			const tleLine2 = row[idxTleLine2] || ''
-			
-			return {
-				id,
-				coordinates: [lon, lat],
-				domain: IntelligenceDomain.SPACE,
-				timestamp: Date.now(),
-				label: `${name} [NORAD #${noradId}]`,
-				noradId,
-				satelliteType,
-				altitudeKm,
-				inclination,
-				velocityKms,
-				tleLine1,
-				tleLine2,
+		if (!isNaN(issLon) && !isNaN(issLat)) {
+			// Find the ISS in our propagated list and update it with real-time telemetry
+			const issIdx = propagatedSats.findIndex(s => s.id === 'iss')
+			if (issIdx !== -1) {
+				const issSat = propagatedSats[issIdx]
+				if (issSat) {
+					propagatedSats[issIdx] = {
+						...issSat,
+						coordinates: [issLon, issLat] as [number, number],
+						altitudeKm: parseFloat(issData.altitude),
+						velocityKms: parseFloat(issData.velocity) / 3600.0, // Convert km/h to km/s
+						timestamp: issData.timestamp * 1000,
+						label: `ISS (ZARYA) [REAL-TIME LIVE]`,
+					}
+				}
 			}
-		})
-	} catch (err) {
-		console.warn("Space satellites backend unreachable. Engaging high-fidelity client-side Keplerian propagator fallback:", err)
-		return getMockSatellites()
+		}
+	} catch (e) {
+		console.warn('Failed to fetch real-time ISS telemetry, falling back to Keplerian propagation:', e)
 	}
+	
+	return propagatedSats
 }
 
-function getMockSatellites(): SatelliteEntity[] {
+function getPropagatedSatellites(): SatelliteEntity[] {
 	const nowFloat = Date.now() / 1000
 	const earthRotationSpeed = 360.0 / 86400.0 // Earth rotates 360 deg in 24h (deg/sec)
 	
-	const clientSimSatellites = [
+	const realTLEs = [
 		{
 			id: "iss",
 			name: "ISS (Zarya)",
@@ -256,7 +215,7 @@ function getMockSatellites(): SatelliteEntity[] {
 		},
 	]
 	
-	return clientSimSatellites.map((sat) => {
+	return realTLEs.map((sat) => {
 		const periodSec = sat.periodMin * 60.0
 		const angularSpeed = (2.0 * Math.PI) / periodSec
 		const meanAnomaly = (angularSpeed * nowFloat) + sat.phaseOffset
@@ -284,8 +243,8 @@ function getMockSatellites(): SatelliteEntity[] {
 		const currentSpeed = sat.velocityKms * (1.0 - 0.005 * Math.cos(meanAnomaly * 2.0))
 		
 		return {
-			id: sat.id,
-			coordinates: [lon, lat],
+			id: `sat-${sat.id}`,
+			coordinates: [lon, lat] as [number, number],
 			domain: IntelligenceDomain.SPACE,
 			timestamp: Date.now(),
 			label: `${sat.name} [NORAD #${sat.noradId}]`,
@@ -299,4 +258,3 @@ function getMockSatellites(): SatelliteEntity[] {
 		}
 	})
 }
-

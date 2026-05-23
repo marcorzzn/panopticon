@@ -1,0 +1,272 @@
+[
+  {
+    "id": "earthcam-0",
+    "name": "New York - Times Square Crossroads",
+    "lat": 40.7580,
+    "lon": -73.9855,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/1-iS7LArMPA",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-1",
+    "name": "Tokyo - Shibuya Crossing Live",
+    "lat": 35.6596,
+    "lon": 139.7018,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/4_Gde11C9U0",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-2",
+    "name": "Venice - Rialto Bridge Panorama",
+    "lat": 45.4380,
+    "lon": 12.3359,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/HpZGWd287xg",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-3",
+    "name": "London - Abbey Road Crossing",
+    "lat": 51.5320,
+    "lon": -0.1773,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/e13RJb0S3f8",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-4",
+    "name": "Paris - Eiffel Tower View",
+    "lat": 48.8584,
+    "lon": 2.2945,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/W-e35L6u9Lg",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-5",
+    "name": "Las Vegas - Strip Live Cam",
+    "lat": 36.1147,
+    "lon": -115.1728,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/n4fCq77y4yE",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-6",
+    "name": "Sydney - Harbour Bridge Panorama",
+    "lat": -33.8523,
+    "lon": 151.2108,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/b-T1ZmgG67E",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-7",
+    "name": "Rio de Janeiro - Copacabana Promenade",
+    "lat": -22.9714,
+    "lon": -43.1824,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/g2J03fK4sjg",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-8",
+    "name": "Prague - Old Town Square Clock",
+    "lat": 50.0875,
+    "lon": 14.4212,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/Rk5S4_1Y_o8",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-9",
+    "name": "Berlin - Brandenburg Gate Esplanade",
+    "lat": 52.5163,
+    "lon": 13.3777,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/2_H_P8v7Qeg",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-10",
+    "name": "Rome - Trevi Fountain Basin",
+    "lat": 41.9009,
+    "lon": 12.4833,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/Xg4wY6Y_1Qg",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-11",
+    "name": "Dublin - Temple Bar Street View",
+    "lat": 53.3454,
+    "lon": -6.2644,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/x17Q2Wf7Zjg",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-12",
+    "name": "Seattle - Space Needle Skyline",
+    "lat": 47.6205,
+    "lon": -122.3493,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/o7Y7oBv7_Qk",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-13",
+    "name": "San Francisco - Golden Gate Bridge South",
+    "lat": 37.8199,
+    "lon": -122.4783,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/1_iS7LArMPA",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-14",
+    "name": "Miami - South Beach Ocean Drive",
+    "lat": 25.7781,
+    "lon": -80.1313,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/p1_e_4sB3jg",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-15",
+    "name": "Amsterdam - Dam Square Center",
+    "lat": 52.3731,
+    "lon": 4.8926,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/gP_24-8fSjg",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-16",
+    "name": "Hong Kong - Victoria Harbour View",
+    "lat": 22.2855,
+    "lon": 114.1577,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/1-iS7LArMPA",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-17",
+    "name": "Singapore - Marina Bay Sands Bayfront",
+    "lat": 1.2863,
+    "lon": 103.8598,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/1_iS7LArMPA",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-18",
+    "name": "Bangkok - Siam Square Central",
+    "lat": 13.7456,
+    "lon": 100.5342,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/1-iS7LArMPA",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-19",
+    "name": "Seoul - Myeongdong Shopping Alley",
+    "lat": 37.5635,
+    "lon": 126.9845,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/1-iS7LArMPA",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-20",
+    "name": "Niagara Falls - Horseshoe Falls view",
+    "lat": 43.0896,
+    "lon": -79.0849,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/Rk5S4_1Y_o8",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-21",
+    "name": "Key West - Mallory Square Harbour",
+    "lat": 24.5592,
+    "lon": -81.8073,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/x17Q2Wf7Zjg",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-22",
+    "name": "Honolulu - Waikiki Beach Surf Monitor",
+    "lat": 21.2765,
+    "lon": -157.8271,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/o7Y7oBv7_Qk",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-23",
+    "name": "Venice - St. Mark's Square Esplanade",
+    "lat": 45.4344,
+    "lon": 12.3380,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/Xg4wY6Y_1Qg",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-24",
+    "name": "Washington D.C. - National Mall Monument",
+    "lat": 38.8895,
+    "lon": -77.0353,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/n4fCq77y4yE",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-25",
+    "name": "Chicago - Michigan Avenue Bridge View",
+    "lat": 41.8895,
+    "lon": -87.6244,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/o7Y7oBv7_Qk",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-26",
+    "name": "New Orleans - Bourbon Street Crossroads",
+    "lat": 29.9584,
+    "lon": -90.0651,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/n4fCq77y4yE",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-27",
+    "name": "Jerusalem - Western Wall Plaza",
+    "lat": 31.7767,
+    "lon": 35.2345,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/x17Q2Wf7Zjg",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-28",
+    "name": "Mecca - Grand Mosque Live",
+    "lat": 21.4225,
+    "lon": 39.8262,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/Xg4wY6Y_1Qg",
+    "type": "iframe_embed"
+  },
+  {
+    "id": "earthcam-29",
+    "name": "Reykjavik - Iceland City Center",
+    "lat": 64.1466,
+    "lon": -21.9426,
+    "status": "healthy",
+    "streamUrl": "https://www.youtube.com/embed/2_H_P8v7Qeg",
+    "type": "iframe_embed"
+  }
+]

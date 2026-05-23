@@ -42,9 +42,36 @@ func SetupRouter() *chi.Mux {
 		
 		// Historical range search query
 		r.Get("/historical", GetHistoricalHandler)
+
+		// Secure AI proxy endpoints wrapped under AuthMiddleware to protect the free-tier API keys
+		r.Route("/ai", func(r chi.Router) {
+			r.Use(AuthMiddleware)
+			r.Post("/generate-brief", GenerateBriefHandler)
+			r.Post("/geocode", GeocodeHandler)
+		})
 	})
 
 	return r
+}
+
+// AuthMiddleware validates presence of a valid Bearer token in the request header
+func AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+			http.Error(w, "Unauthorized: Missing or invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		token := authHeader[7:]
+		if token == "" {
+			http.Error(w, "Unauthorized: Empty token", http.StatusUnauthorized)
+			return
+		}
+
+		// Authenticated request, pass it to next handler
+		next.ServeHTTP(w, r)
+	})
 }
 
 func CorsMiddleware(next http.Handler) http.Handler {

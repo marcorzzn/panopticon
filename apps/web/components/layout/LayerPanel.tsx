@@ -18,18 +18,25 @@ import {
   ChevronRight,
   Sun,
   Rss,
+  Shield,
+  Lock,
+  MapPin,
+  Network,
+  Cpu,
+  Database,
+  LockKeyhole
 } from 'lucide-react'
 import { useMapStore } from '@panopticon/core/stores'
-import layersConfig from '@panopticon/core/src/config/layers.json'
 
 interface LayerRowProps {
   id: string
   label: string
   icon: React.ReactNode
   description: string
+  locked?: boolean
 }
 
-function LayerRow({ id, label, icon, description }: LayerRowProps) {
+function LayerRow({ id, label, icon, description, locked }: LayerRowProps) {
   const { layerStates, toggleLayer } = useMapStore()
   
   // Layer is active by default if not explicitly turned off (except for custom add-ons)
@@ -40,30 +47,44 @@ function LayerRow({ id, label, icon, description }: LayerRowProps) {
   const entityCount = layerStates[id]?.entityCount ?? 0
   const error = layerStates[id]?.error
 
+  const handleClick = () => {
+    if (locked) return
+    toggleLayer(id)
+  }
+
   return (
     <div
-      onClick={() => toggleLayer(id)}
+      onClick={handleClick}
       title={description}
-      className={`group p-3 border-b border-weak hover:bg-hover hover:bg-opacity-30 transition-all cursor-pointer select-none ${
-        isVisible ? 'bg-accent bg-opacity-[0.02]' : 'opacity-65'
+      className={`group p-3 border-b border-[var(--pan-border-default)] hover:bg-[var(--pan-bg-interactive)] transition-all select-none border-l-2 ${
+        locked
+          ? 'opacity-40 cursor-not-allowed border-l-transparent bg-transparent'
+          : isVisible
+            ? 'bg-[var(--pan-btn-active-bg)] border-l-[var(--pan-btn-active-border)] cursor-pointer'
+            : 'border-l-transparent bg-transparent opacity-70 hover:opacity-100 cursor-pointer'
       }`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div
             className={`p-1.5 rounded transition-all ${
-              isVisible ? 'bg-accent bg-opacity-15 text-accent border border-accent border-opacity-20' : 'bg-deepest text-secondary border border-weak'
+              locked
+                ? 'bg-[var(--pan-bg-raised)] text-[var(--pan-text-secondary)] border border-[var(--pan-border-default)]'
+                : isVisible
+                  ? 'bg-[var(--pan-btn-active-bg)] text-[var(--pan-btn-active-text)] border border-[var(--pan-btn-active-border)]'
+                  : 'bg-[var(--pan-bg-raised)] text-[var(--pan-text-secondary)] border border-[var(--pan-border-default)]'
             }`}
           >
             {icon}
           </div>
           <div className="flex flex-col">
-            <span className="text-xs font-semibold tracking-wide text-primary uppercase">
+            <span className="text-xs font-semibold tracking-wide text-[var(--pan-text-primary)] uppercase flex items-center gap-1.5">
               {label}
+              {locked && <span className="text-[7px] px-1 rounded bg-[var(--pan-sev-critical-bg)] text-[var(--pan-sev-critical-text)] border border-[var(--pan-sev-critical-border)] scale-90">LOCKED</span>}
             </span>
             <span 
               title={description}
-              className="text-[10px] text-secondary leading-tight mt-0.5 max-w-[150px] truncate block"
+              className="text-[10px] text-[var(--pan-text-secondary)] leading-tight mt-0.5 max-w-[140px] truncate block"
             >
               {description}
             </span>
@@ -74,25 +95,29 @@ function LayerRow({ id, label, icon, description }: LayerRowProps) {
         <div className="flex items-center gap-2">
           {error ? (
             <span title={error}>
-              <AlertTriangle className="w-3.5 h-3.5 text-status-critical-text" />
+              <AlertTriangle className="w-3.5 h-3.5 text-[var(--pan-text-danger)]" />
             </span>
-          ) : isVisible && entityCount > 0 ? (
-            <span className="text-[9px] font-mono font-semibold px-1 rounded bg-deepest border border-weak text-accent tabular-nums">
+          ) : isVisible && entityCount > 0 && !locked ? (
+            <span className="text-[9px] font-mono font-semibold px-1 rounded bg-[var(--pan-bg-base)] border border-[var(--pan-border-default)] text-[var(--pan-text-accent)] tabular-nums">
               {entityCount}
             </span>
           ) : null}
           
-          <div
-            className={`w-6 h-3.5 rounded-full p-0.5 transition-colors relative ${
-              isVisible ? 'bg-accent' : 'bg-deepest border border-weak'
-            }`}
-          >
+          {locked ? (
+            <Lock className="w-3 h-3 text-[var(--pan-text-secondary)]" />
+          ) : (
             <div
-              className={`w-2.5 h-2.5 rounded-full bg-white transition-transform ${
-                isVisible ? 'translate-x-2.5' : 'translate-x-0'
+              className={`w-6 h-3.5 rounded-full p-0.5 transition-colors relative ${
+                isVisible ? 'bg-[var(--pan-text-accent)]' : 'bg-[var(--pan-bg-base)] border border-[var(--pan-border-default)]'
               }`}
-            />
-          </div>
+            >
+              <div
+                className={`w-2.5 h-2.5 rounded-full bg-white transition-transform ${
+                  isVisible ? 'translate-x-2.5' : 'translate-x-0'
+                }`}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -100,256 +125,415 @@ function LayerRow({ id, label, icon, description }: LayerRowProps) {
 }
 
 export default function LayerPanel() {
-  const [mainOpen, setMainOpen] = React.useState(false)
-  const [climateOpen, setClimateOpen] = React.useState(false)
-  const [geopolOpen, setGeopolOpen] = React.useState(false)
-  const [cyberOpen, setCyberOpen] = React.useState(false)
+  const { setLayerVisible } = useMapStore()
+  
+  const [conflictOpen, setConflictOpen] = React.useState(true)
+  const [humanOpen, setHumanOpen] = React.useState(true)
+  const [hazardOpen, setHazardOpen] = React.useState(true)
+  const [maritimeOpen, setMaritimeOpen] = React.useState(true)
+  const [aviationOpen, setAviationOpen] = React.useState(true)
+  const [osintOpen, setOsintOpen] = React.useState(true)
+  const [spaceOpen, setSpaceOpen] = React.useState(true)
   const [infraOpen, setInfraOpen] = React.useState(false)
 
-  const customLayers = React.useMemo(() => {
-    return (layersConfig as any[]).filter((l) => l.id.includes('-add-'))
-  }, [])
-  
-  const climateLayers = React.useMemo(() => customLayers.filter(l => l.id.startsWith('climate-add-')), [customLayers])
-  const geopolLayers = React.useMemo(() => customLayers.filter(l => l.id.startsWith('geopol-add-')), [customLayers])
-  const cyberLayers = React.useMemo(() => customLayers.filter(l => l.id.startsWith('cyber-add-')), [customLayers])
-  const infraLayers = React.useMemo(() => customLayers.filter(l => l.id.startsWith('infra-add-')), [customLayers])
+  const activeLayerIds = [
+    'earthquakes',
+    'weather',
+    'wildfires',
+    'airquality',
+    'terminator',
+    'gdelt',
+    'acled',
+    'news-events',
+    'aircraft',
+    'webcams',
+    'recon',
+    'space',
+    'iss-position',
+    'space-weather',
+    'active-conflicts',
+    'protest-unrest',
+    'organized-crime',
+    'drug-corridors',
+    'terrorism',
+    'humanitarian-crises',
+    'refugee-movements',
+    'ais-vessels',
+    'maritime-incidents',
+    'undersea-cables',
+    'aviation-incidents',
+    'no-fly-zones'
+  ]
 
-  const renderSubAccordion = (
-    title: string,
-    isOpen: boolean,
-    setIsOpen: (val: boolean) => void,
-    layers: any[],
-    icon: React.ReactNode
-  ) => {
-    return (
-      <div className="flex flex-col border-b border-weak border-opacity-60">
-        <div
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center justify-between px-4 py-2 hover:bg-hover hover:bg-opacity-20 cursor-pointer select-none bg-deepest bg-opacity-30 transition-all"
-        >
-          <div className="flex items-center gap-2 font-mono text-[9px] font-bold text-secondary uppercase tracking-wider">
-            {icon}
-            <span>{title} ({layers.length})</span>
-          </div>
-          {isOpen ? <ChevronDown className="w-3.5 h-3.5 text-secondary" /> : <ChevronRight className="w-3.5 h-3.5 text-secondary" />}
-        </div>
-        
-        {isOpen && (
-          <div className="flex flex-col bg-deepest bg-opacity-10 pl-2 max-h-72 overflow-y-auto custom-scrollbar">
-            {layers.map((layer) => (
-              <LayerRow
-                key={layer.id}
-                id={layer.id}
-                label={layer.name}
-                icon={icon}
-                description={layer.legend.label}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    )
+  const handleActivateAll = () => {
+    activeLayerIds.forEach(id => {
+      setLayerVisible(id, true)
+    })
+  }
+
+  const handleDeactivateAll = () => {
+    activeLayerIds.forEach(id => {
+      setLayerVisible(id, false)
+    })
   }
 
   return (
     <div className="flex flex-col h-full overflow-hidden select-none">
+      
       {/* Drawer Title Header */}
-      <div className="p-4 border-b border-weak flex items-center justify-between bg-deepest bg-opacity-30">
-        <div className="flex items-center gap-2 text-primary font-display text-xs font-bold uppercase tracking-wider">
-          <Layers className="w-4 h-4 text-accent" />
+      <div className="p-4 border-b border-[var(--pan-border-default)] flex items-center justify-between bg-[var(--pan-bg-surface)]">
+        <div className="flex items-center gap-2 text-[var(--pan-text-primary)] font-display text-xs font-bold uppercase tracking-wider">
+          <Layers className="w-4 h-4 text-[var(--pan-text-accent)]" />
           <span>Operational Domains</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
-          <span className="text-[8px] font-mono font-semibold uppercase px-1.5 py-0.5 rounded border border-accent border-opacity-35 text-accent bg-accent bg-opacity-[0.03] shadow-[0_0_8px_rgba(0,240,255,0.3)]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--pan-text-accent)] animate-ping" />
+          <span className="text-[8px] font-mono font-semibold uppercase px-1.5 py-0.5 rounded border border-[var(--pan-text-accent)] border-opacity-35 text-[var(--pan-text-accent)] bg-[var(--pan-text-accent)] bg-opacity-[0.03] shadow-[0_0_8px_rgba(0,200,140,0.3)]">
             STATUS: NOMINAL
           </span>
         </div>
       </div>
 
+      {/* Batch Control Action Buttons */}
+      <div className="p-2 border-b border-[var(--pan-border-default)] bg-[var(--pan-bg-surface)] flex gap-2 shrink-0">
+        <button
+          onClick={handleActivateAll}
+          className="flex-1 py-1 rounded bg-[var(--pan-btn-secondary-bg)] border border-[var(--pan-border-default)] hover:border-[var(--pan-border-strong)] text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] hover:bg-[var(--pan-btn-secondary-hover)] font-mono text-[8px] font-bold uppercase tracking-widest transition-all"
+        >
+          ▶ ALL LAYERS
+        </button>
+        <button
+          onClick={handleDeactivateAll}
+          className="flex-1 py-1 rounded bg-[var(--pan-btn-secondary-bg)] border border-[var(--pan-border-default)] hover:border-[var(--pan-border-strong)] text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] hover:bg-[var(--pan-btn-secondary-hover)] font-mono text-[8px] font-bold uppercase tracking-widest transition-all"
+        >
+          ■ CLEAR ALL
+        </button>
+      </div>
+
       {/* Layer Groups Container */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        {/* DOMAIN 1: CLIMATE & ENVIRONMENTAL RECON */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar bg-[var(--pan-bg-base)]">
+        
+        {/* GROUP 1: CONFLICT & SECURITY */}
         <div className="flex flex-col">
-          <div className="px-4 py-2 bg-deepest bg-opacity-50 border-b border-weak">
-            <span className="label-caps font-semibold text-[9px] tracking-widest text-secondary block">
-              CLIMATE & ENVIRONMENTAL RECON
-            </span>
-          </div>
-
-          <LayerRow
-            id="earthquakes"
-            label="USGS Earthquakes"
-            icon={<Activity className="w-3.5 h-3.5" />}
-            description="Real-time seismic activity monitor"
-          />
-
-          <LayerRow
-            id="weather"
-            label="Open-Meteo Climate"
-            icon={<Thermometer className="w-3.5 h-3.5" />}
-            description="Global atmospheric temperature cells"
-          />
-
-          <LayerRow
-            id="wildfires"
-            label="NASA FIRMS Wildfires"
-            icon={<Flame className="w-3.5 h-3.5" />}
-            description="Thermal hotspot anomalies detector"
-          />
-
-          <LayerRow
-            id="airquality"
-            label="OpenAQ Air Quality"
-            icon={<Wind className="w-3.5 h-3.5" />}
-            description="Real-time particulate matter index"
-          />
-
-          <LayerRow
-            id="terminator"
-            label="Solar Terminator"
-            icon={<Sun className="w-3.5 h-3.5" />}
-            description="Dynamic day/night shadows overlay"
-          />
-        </div>
-
-        {/* DOMAIN 2: GEOPOLITICAL & MEDIA RECON */}
-        <div className="flex flex-col">
-          <div className="px-4 py-2 bg-deepest bg-opacity-50 border-b border-weak">
-            <span className="label-caps font-semibold text-[9px] tracking-widest text-secondary block">
-              GEOPOLITICAL & MEDIA RECON
-            </span>
-          </div>
-
-          <LayerRow
-            id="gdelt"
-            label="GDELT Events Monitor"
-            icon={<Globe className="w-3.5 h-3.5" />}
-            description="Geocoded real-time conflict/cooperation feeds"
-          />
-
-          <LayerRow
-            id="acled"
-            label="ACLED Conflicts"
-            icon={<ShieldAlert className="w-3.5 h-3.5" />}
-            description="Geopolitical armed conflict and protest dispatches"
-          />
-
-          <LayerRow
-            id="news-events"
-            label="News Events"
-            icon={<Rss className="w-3.5 h-3.5" />}
-            description="Geolocated real-time media and threat wire events"
-          />
-        </div>
-
-        {/* DOMAIN 3: AIRSPACE & AVIATION INTELLIGENCE */}
-        <div className="flex flex-col">
-          <div className="px-4 py-2 bg-deepest bg-opacity-50 border-b border-weak">
-            <span className="label-caps font-semibold text-[9px] tracking-widest text-secondary block">
-              AIRSPACE & AVIATION INTELLIGENCE
-            </span>
-          </div>
-
-          <LayerRow
-            id="aircraft"
-            label="OpenSky ADS-B Feeds"
-            icon={<Plane className="w-3.5 h-3.5" />}
-            description="Real-time active flight tracking radar"
-          />
-        </div>
-
-        {/* DOMAIN 4: OSINT & CYBER INTELLIGENCE */}
-        <div className="flex flex-col">
-          <div className="px-4 py-2 bg-deepest bg-opacity-50 border-b border-weak">
-            <span className="label-caps font-semibold text-[9px] tracking-widest text-secondary block">
-              OSINT & CYBER INTELLIGENCE
-            </span>
-          </div>
-
-          <LayerRow
-            id="webcams"
-            label="Global CCTV Network"
-            icon={<Eye className="w-3.5 h-3.5" />}
-            description="Live tactical camera feeds and surveillance endpoints"
-          />
-
-          <LayerRow
-            id="recon"
-            label="OSINT Cyber Recon"
-            icon={<Radio className="w-3.5 h-3.5" />}
-            description="Simulated geolocated port traceroute scans"
-          />
-        </div>
-
-        {/* DOMAIN 5: SPACE & ORBITAL INTELLIGENCE */}
-        <div className="flex flex-col">
-          <div className="px-4 py-2 bg-deepest bg-opacity-50 border-b border-weak">
-            <span className="label-caps font-semibold text-[9px] tracking-widest text-secondary block">
-              SPACE & ORBITAL INTELLIGENCE
-            </span>
-          </div>
-
-          <LayerRow
-            id="space"
-            label="Satellite Tracking Network"
-            icon={<Satellite className="w-3.5 h-3.5" />}
-            description="Real-time orbital propagation and sweep sensor swathes"
-          />
-        </div>
-
-        {/* ── SECTION: DYNAMIC THREAT CHANNELS (120+ ADD-ON LAYERS) ── */}
-        <div className="flex flex-col border-t border-weak">
           <div
-            onClick={() => setMainOpen(!mainOpen)}
-            className="flex items-center justify-between px-4 py-3 bg-deepest bg-opacity-80 hover:bg-hover hover:bg-opacity-30 cursor-pointer select-none border-b border-weak transition-all"
+            onClick={() => setConflictOpen(!conflictOpen)}
+            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
           >
-            <div className="flex items-center gap-2 text-primary font-display text-xs font-bold uppercase tracking-wider">
-              <Layers className="w-4 h-4 text-accent" />
-              <span>Dynamic Threat Channels</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[8px] font-mono font-semibold uppercase px-1 py-0.5 rounded border border-weak text-secondary bg-deepest">
-                120 LAYERS
-              </span>
-              {mainOpen ? <ChevronDown className="w-4 h-4 text-secondary" /> : <ChevronRight className="w-4 h-4 text-secondary" />}
-            </div>
+            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
+              Conflict & Security
+            </span>
+            {conflictOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
           </div>
 
-          {mainOpen && (
+          {conflictOpen && (
             <div className="flex flex-col">
-              {renderSubAccordion(
-                "Climate & Atmosphere",
-                climateOpen,
-                setClimateOpen,
-                climateLayers,
-                <Thermometer className="w-3.5 h-3.5" />
-              )}
-              {renderSubAccordion(
-                "Geopolitical & Threat",
-                geopolOpen,
-                setGeopolOpen,
-                geopolLayers,
-                <ShieldAlert className="w-3.5 h-3.5" />
-              )}
-              {renderSubAccordion(
-                "OSINT & Cyber Recon",
-                cyberOpen,
-                setCyberOpen,
-                cyberLayers,
-                <Radio className="w-3.5 h-3.5" />
-              )}
-              {renderSubAccordion(
-                "Logistics & Infrastructure",
-                infraOpen,
-                setInfraOpen,
-                infraLayers,
-                <Layers className="w-3.5 h-3.5" />
-              )}
+              <LayerRow
+                id="active-conflicts"
+                label="Active Conflicts"
+                icon={<Shield className="w-3.5 h-3.5" />}
+                description="Semi-permanent active wars and strategic occupation maps"
+              />
+              <LayerRow
+                id="gdelt"
+                label="GDELT Geopol Events"
+                icon={<Globe className="w-3.5 h-3.5" />}
+                description="Real-time geo-located conflict and cooperative dispatches"
+              />
+              <LayerRow
+                id="acled"
+                label="ACLED Conflict Reports"
+                icon={<ShieldAlert className="w-3.5 h-3.5" />}
+                description="Tactical armed engagement and violent confrontation telemetry"
+              />
+              <LayerRow
+                id="protest-unrest"
+                label="Protest & Civil Unrest"
+                icon={<AlertTriangle className="w-3.5 h-3.5" />}
+                description="Geocoded rallies, strikes, and regional riots"
+              />
+              <LayerRow
+                id="organized-crime"
+                label="Organized Crime Zones"
+                icon={<ShieldAlert className="w-3.5 h-3.5" />}
+                description="Major transnational organized crime syndicates"
+              />
+              <LayerRow
+                id="drug-corridors"
+                label="Drug Corridors"
+                icon={<Network className="w-3.5 h-3.5" />}
+                description="Documented drug trafficking channels and territories"
+              />
+              <LayerRow
+                id="terrorism"
+                label="Terrorism Incidents"
+                icon={<Shield className="w-3.5 h-3.5" />}
+                description="Active attacks and designated extremist cell dispatches"
+              />
             </div>
           )}
         </div>
+
+        {/* GROUP 2: HUMANITARIAN & CRISIS */}
+        <div className="flex flex-col border-t border-[var(--pan-border-default)]">
+          <div
+            onClick={() => setHumanOpen(!humanOpen)}
+            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
+          >
+            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
+              Humanitarian & Crisis
+            </span>
+            {humanOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
+          </div>
+
+          {humanOpen && (
+            <div className="flex flex-col">
+              <LayerRow
+                id="humanitarian-crises"
+                label="Humanitarian Crises"
+                icon={<AlertTriangle className="w-3.5 h-3.5" />}
+                description="UN OCHA verified relief dispatches and persistent emergency alerts"
+              />
+              <LayerRow
+                id="refugee-movements"
+                label="Refugee Movements"
+                icon={<MapPin className="w-3.5 h-3.5" />}
+                description="Authoritative UNHCR geolocated displacement points"
+              />
+              <LayerRow
+                id="news-events"
+                label="Geocoded News Wire"
+                icon={<Rss className="w-3.5 h-3.5" />}
+                description="Geolocated real-time media and threat wire events"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* GROUP 3: NATURAL HAZARDS */}
+        <div className="flex flex-col border-t border-[var(--pan-border-default)]">
+          <div
+            onClick={() => setHazardOpen(!hazardOpen)}
+            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
+          >
+            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
+              Natural Hazards
+            </span>
+            {hazardOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
+          </div>
+
+          {hazardOpen && (
+            <div className="flex flex-col">
+              <LayerRow
+                id="earthquakes"
+                label="USGS Earthquakes"
+                icon={<Activity className="w-3.5 h-3.5" />}
+                description="Real-time global seismic epicenters"
+              />
+              <LayerRow
+                id="wildfires"
+                label="NASA FIRMS Wildfires"
+                icon={<Flame className="w-3.5 h-3.5" />}
+                description="Active thermal hotspot anomaly vectors"
+              />
+              <LayerRow
+                id="weather"
+                label="Extreme Weather"
+                icon={<Thermometer className="w-3.5 h-3.5" />}
+                description="NOAA and global storm tracking alerts"
+              />
+              <LayerRow
+                id="airquality"
+                label="OpenAQ Air Quality"
+                icon={<Wind className="w-3.5 h-3.5" />}
+                description="Real-time global particulate matter readings"
+              />
+              <LayerRow
+                id="terminator"
+                label="Solar Terminator"
+                icon={<Sun className="w-3.5 h-3.5" />}
+                description="Visual daylight boundary shadows"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* GROUP 4: MARITIME & LOGISTICS */}
+        <div className="flex flex-col border-t border-[var(--pan-border-default)]">
+          <div
+            onClick={() => setMaritimeOpen(!maritimeOpen)}
+            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
+          >
+            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
+              Maritime & Logistics
+            </span>
+            {maritimeOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
+          </div>
+
+          {maritimeOpen && (
+            <div className="flex flex-col">
+              <LayerRow
+                id="ais-vessels"
+                label="AIS Vessel Tracking"
+                icon={<Shield className="w-3.5 h-3.5" />}
+                description="Real-time commercial and military vessel positions via AISHub"
+              />
+              <LayerRow
+                id="maritime-incidents"
+                label="Maritime Incidents"
+                icon={<AlertTriangle className="w-3.5 h-3.5" />}
+                description="Hostile vessels, piracy, and sea lane blockages"
+              />
+              <LayerRow
+                id="undersea-cables"
+                label="Undersea Fiber Cables"
+                icon={<Network className="w-3.5 h-3.5" />}
+                description="Global subsea communication fiber networks"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* GROUP 5: AIRSPACE & AVIATION */}
+        <div className="flex flex-col border-t border-[var(--pan-border-default)]">
+          <div
+            onClick={() => setAviationOpen(!aviationOpen)}
+            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
+          >
+            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
+              Airspace & Aviation
+            </span>
+            {aviationOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
+          </div>
+
+          {aviationOpen && (
+            <div className="flex flex-col">
+              <LayerRow
+                id="aircraft"
+                label="OpenSky ADS-B Feeds"
+                icon={<Plane className="w-3.5 h-3.5" />}
+                description="Real-time aircraft tracking transponder beacons"
+              />
+              <LayerRow
+                id="aviation-incidents"
+                label="Aviation Incidents"
+                icon={<AlertTriangle className="w-3.5 h-3.5" />}
+                description="Grounding orders, flight anomalies, and military intercepts"
+              />
+              <LayerRow
+                id="no-fly-zones"
+                label="No-Fly Zones"
+                icon={<Lock className="w-3.5 h-3.5" />}
+                description="Tactical military and civil airspace restrictions"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* GROUP 6: SURVEILLANCE & OSINT */}
+        <div className="flex flex-col border-t border-[var(--pan-border-default)]">
+          <div
+            onClick={() => setOsintOpen(!osintOpen)}
+            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
+          >
+            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
+              Surveillance & OSINT
+            </span>
+            {osintOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
+          </div>
+
+          {osintOpen && (
+            <div className="flex flex-col">
+              <LayerRow
+                id="webcams"
+                label="Global CCTV Network"
+                icon={<Eye className="w-3.5 h-3.5" />}
+                description="AMOS webcams and verified public EarthCam live feeds"
+              />
+              <LayerRow
+                id="recon"
+                label="OSINT Cyber Recon"
+                icon={<Radio className="w-3.5 h-3.5" />}
+                description="Tactical network hops and port traceback scanners"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* GROUP 7: SPACE & ORBITAL */}
+        <div className="flex flex-col border-t border-[var(--pan-border-default)]">
+          <div
+            onClick={() => setSpaceOpen(!spaceOpen)}
+            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
+          >
+            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
+              Space & Orbital
+            </span>
+            {spaceOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
+          </div>
+
+          {spaceOpen && (
+            <div className="flex flex-col">
+              <LayerRow
+                id="space"
+                label="Satellite Tracking"
+                icon={<Satellite className="w-3.5 h-3.5" />}
+                description="Active NORAD satellite sweeps and ground propagations"
+              />
+              <LayerRow
+                id="iss-position"
+                label="ISS Real-time Position"
+                icon={<Cpu className="w-3.5 h-3.5" />}
+                description="Precise geocoded flight path coordinates of the Space Station"
+              />
+              <LayerRow
+                id="space-weather"
+                label="Space Weather"
+                icon={<Sun className="w-3.5 h-3.5" />}
+                description="Planetary K-index, Bz IMF, and solar wind velocities"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* GROUP 8: INFRASTRUCTURE (COMING SOON / LOCKED) */}
+        <div className="flex flex-col border-t border-[var(--pan-border-default)] border-b border-[var(--pan-border-default)]">
+          <div
+            onClick={() => setInfraOpen(!infraOpen)}
+            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
+          >
+            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-secondary)] block uppercase font-mono">
+              Infrastructure [LOCKED]
+            </span>
+            {infraOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
+          </div>
+
+          {infraOpen && (
+            <div className="flex flex-col">
+              <LayerRow
+                id="power-grid"
+                label="Power Grid Status"
+                icon={<Database className="w-3.5 h-3.5" />}
+                description="National electrical infrastructure maps [Free Real-Time Feeds Pending]"
+                locked={true}
+              />
+              <LayerRow
+                id="nuclear-facilities"
+                label="Nuclear Facilities"
+                icon={<LockKeyhole className="w-3.5 h-3.5" />}
+                description="IAEA geocoded nuclear power reactor maps [Undergoing Review]"
+                locked={true}
+              />
+              <LayerRow
+                id="pipeline-networks"
+                label="Pipeline Networks"
+                icon={<Network className="w-3.5 h-3.5" />}
+                description="Transnational oil and gas pipeline routes [Cites Required]"
+                locked={true}
+              />
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   )

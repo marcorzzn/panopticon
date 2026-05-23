@@ -1,116 +1,55 @@
 import type { AircraftEntity } from '@panopticon/core/types'
 import { IntelligenceDomain } from '@panopticon/core/types'
 
-function shouldBypassFetch(): boolean {
-	if (typeof window === 'undefined') return false
-	const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-	const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL
-	
-	// If we are on a remote deployment (e.g. GitHub Pages) and don't have a secure production backend configured,
-	// we bypass fetch and immediately trigger the client-side simulation.
-	if (!isLocal) {
-		if (!backendUrl || !backendUrl.startsWith('https://')) {
-			return true
-		}
-	}
-	return false
-}
-
 export async function fetchAircraft(): Promise<AircraftEntity[]> {
-	if (shouldBypassFetch()) {
-		return getMockAircraft()
-	}
-
-	const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080/api/v1'
+	const rawTargetUrl = 'https://opensky-network.org/api/states/all'
+	const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawTargetUrl)}`
 	
 	try {
-		const response = await fetch(`${backendUrl}/aviation/states`)
+		const response = await fetch(url)
 		if (!response.ok) {
-			throw new Error(`Go Backend API returned status ${response.status}`)
+			throw new Error(`OpenSky API proxy returned status ${response.status}`)
 		}
 		
-		const res = await response.json()
-		if (!res || !Array.isArray(res.data)) {
+		const data = await response.json()
+		if (!data || !Array.isArray(data.states)) {
 			return []
 		}
 		
-		const fields = res.fields || []
-		const idxIcao = fields.indexOf("icao24")
-		const idxCallsign = fields.indexOf("callsign")
-		const idxLat = fields.indexOf("lat")
-		const idxLon = fields.indexOf("lon")
-		const idxHeading = fields.indexOf("heading")
-		const idxAlt = fields.indexOf("altitude")
-		const idxVel = fields.indexOf("velocity")
-		
-		return res.data.map((row: any[], index: number) => {
-			const icao24 = row[idxIcao] || `sim-ac-${index}`
-			const callsign = row[idxCallsign] || 'UNKNOWN'
-			const lat = row[idxLat] ?? 0
-			const lon = row[idxLon] ?? 0
-			const heading = row[idxHeading] ?? 0
-			const altitude = row[idxAlt] ?? 0
-			const velocity = row[idxVel] ?? 0
+		// Map top 300 active flights to maintain high map telemetry performance
+		return data.states.slice(0, 300).map((row: any[], index: number) => {
+			const icao24 = row[0] ? String(row[0]).trim() : `ac-${index}`
+			const callsign = row[1] ? String(row[1]).trim() : 'UNKNOWN'
+			const originCountry = row[2] ? String(row[2]).trim() : 'International'
+			
+			const lon = row[5]
+			const lat = row[6]
+			if (lon === null || lat === null || isNaN(lon) || isNaN(lat)) {
+				return null
+			}
+			
+			const altitude = row[7] !== null ? parseFloat(row[7]) : 0
+			const velocity = row[9] !== null ? parseFloat(row[9]) : 0
+			const heading = row[10] !== null ? parseFloat(row[10]) : 0
+			const verticalRate = row[11] !== null ? parseFloat(row[11]) : 0
 			
 			return {
-				id: icao24,
-				coordinates: [lon, lat],
+				id: `opensky-${icao24}`,
+				coordinates: [lon, lat] as [number, number],
 				domain: IntelligenceDomain.AVIATION,
-				timestamp: res.timestamp * 1000,
+				timestamp: Date.now(),
 				label: `${callsign} [${icao24.toUpperCase()}]`,
 				callsign,
-				originCountry: 'International',
+				originCountry,
 				baroAltitude: altitude,
 				velocity,
 				trueTrack: heading,
-				verticalRate: 0,
+				verticalRate,
 			}
-		})
+		}).filter((f: any): f is AircraftEntity => f !== null)
+		
 	} catch (err) {
-		console.warn("Aviation telemetry backend unreachable. Engaging client-side simulation fallback:", err)
-		return getMockAircraft()
+		console.warn("OpenSky aviation feed unreachable. Returning empty data:", err)
+		return []
 	}
 }
-
-function getMockAircraft(): AircraftEntity[] {
-	const baseFlights = [
-		{ icao24: "a80001", callsign: "UAL241", lat: 37.7749, lon: -122.4194, heading: 270, velocity: 245, altitude: 10600 }, // Pacific outbound
-		{ icao24: "a80002", callsign: "DLH430", lat: 48.1351, lon: 11.5820, heading: 90, velocity: 230, altitude: 11300 }, // Europe continental
-		{ icao24: "a80003", callsign: "BAW117", lat: 51.5074, lon: -0.1278, heading: 290, velocity: 250, altitude: 9800 }, // Transatlantic west
-		{ icao24: "a80004", callsign: "JAL006", lat: 35.6762, lon: 139.6503, heading: 45, velocity: 260, altitude: 12100 }, // Transpacific east
-		{ icao24: "a80005", callsign: "QFA012", lat: -33.8688, lon: 151.2093, heading: 180, velocity: 240, altitude: 10900 }, // Southern Ocean
-		{ icao24: "a80006", callsign: "UAE201", lat: 25.2048, lon: 55.2708, heading: 320, velocity: 235, altitude: 11600 }, // Middle East inbound
-	]
-	
-	const timeSec = Date.now() / 1000
-	
-	return baseFlights.map((f) => {
-		// Offset coordinates slowly over time to simulate active movement
-		const movementSpeed = 0.0001 * f.velocity // arbitrary scaling
-		const rad = (f.heading * Math.PI) / 180.0
-		const deltaLat = Math.sin(rad) * movementSpeed * (timeSec % 3600)
-		const deltaLon = Math.cos(rad) * movementSpeed * (timeSec % 3600)
-		
-		let lat = f.lat + deltaLat
-		let lon = f.lon + deltaLon
-		
-		// Simple wrapping
-		lat = ((lat + 90) % 180) - 90
-		lon = ((lon + 180) % 360) - 180
-		
-		return {
-			id: f.icao24,
-			coordinates: [lon, lat],
-			domain: IntelligenceDomain.AVIATION,
-			timestamp: Date.now(),
-			label: `${f.callsign} [${f.icao24.toUpperCase()}]`,
-			callsign: f.callsign,
-			originCountry: 'International',
-			baroAltitude: f.altitude,
-			velocity: f.velocity,
-			trueTrack: f.heading,
-			verticalRate: 0,
-		}
-	})
-}
-

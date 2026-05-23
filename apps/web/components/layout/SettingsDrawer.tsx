@@ -6,8 +6,8 @@ import { usePanelStore } from '@panopticon/core/stores'
 
 export default function SettingsDrawer() {
   const { settingsDrawerOpen, toggleSettingsDrawer } = usePanelStore()
-  const [anthropicKey, setAnthropicKey] = React.useState('')
   const [abuseIpdbKey, setAbuseIpdbKey] = React.useState('')
+  const [windyKey, setWindyKey] = React.useState('')
   const [saved, setSaved] = React.useState(false)
 
   // NOTE 2 — localStorage XSS Risk:
@@ -21,8 +21,8 @@ export default function SettingsDrawer() {
         const persisted = localStorage.getItem('panopticon-custom-keys')
         if (persisted) {
           const parsed = JSON.parse(persisted)
-          if (parsed.anthropicKey) setAnthropicKey(parsed.anthropicKey)
           if (parsed.abuseIpdbKey) setAbuseIpdbKey(parsed.abuseIpdbKey)
+          if (parsed.windyKey) setWindyKey(parsed.windyKey)
         }
       } catch (e) {}
     }
@@ -34,7 +34,7 @@ export default function SettingsDrawer() {
       try {
         localStorage.setItem(
           'panopticon-custom-keys',
-          JSON.stringify({ anthropicKey, abuseIpdbKey })
+          JSON.stringify({ abuseIpdbKey, windyKey })
         )
         // Dispatches standard storage event to trigger instant reactive state updates on other panels
         window.dispatchEvent(new Event('storage'))
@@ -93,25 +93,6 @@ export default function SettingsDrawer() {
           </div>
 
           <div className="flex flex-col gap-4 flex-1">
-            {/* Input 1: Anthropic API Key */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-mono font-bold uppercase tracking-wider text-secondary">
-                Anthropic API Key (Claude)
-              </label>
-              <div className="relative">
-                <input
-                  type="password"
-                  value={anthropicKey}
-                  onChange={(e) => setAnthropicKey(e.target.value)}
-                  placeholder="sk-ant-api03-..."
-                  className="w-full bg-deepest border border-weak focus:border-accent text-xs font-mono px-3 py-2 rounded text-primary outline-none transition-all placeholder:opacity-30"
-                />
-              </div>
-              <p className="text-[9px] text-secondary leading-tight">
-                Required to generate real-time AI Intelligence briefs on current hotspots.
-              </p>
-            </div>
-
             {/* Input 2: AbuseIPDB API Key */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[9px] font-mono font-bold uppercase tracking-wider text-secondary">
@@ -131,27 +112,28 @@ export default function SettingsDrawer() {
               </p>
             </div>
 
-            {/* Input 3: Windy API Key (Coming Soon) */}
+            {/* Input 4: Windy API Key */}
             <div className="flex flex-col gap-1.5 opacity-65">
               <label className="text-[9px] font-mono font-bold uppercase tracking-wider text-status-warning-text flex items-center gap-1.5">
-                Windy API Key <span className="text-[8px] bg-yellow-400/10 px-1 border border-yellow-400/20 text-yellow-400 rounded">COMING SOON</span>
+                Windy API Key (Webcams)
               </label>
               <div className="relative">
                 <input
-                  type="text"
-                  disabled
-                  placeholder="[REQUIRES BACKEND PROXY GATEWAY]"
-                  className="w-full bg-deepest/50 border border-weak text-xs font-mono px-3 py-2 rounded text-secondary outline-none cursor-not-allowed select-none placeholder:opacity-40"
+                  type="password"
+                  value={windyKey}
+                  onChange={(e) => setWindyKey(e.target.value)}
+                  placeholder="windy_webcam_v3_api_key"
+                  className="w-full bg-deepest border border-weak focus:border-accent text-xs font-mono px-3 py-2 rounded text-primary outline-none transition-all placeholder:opacity-30"
                 />
               </div>
               <p className="text-[8px] text-secondary leading-tight">
-                Windy Webcam v3 integration requires custom server-side CORS proxy tunnels to prevent key leakages and header drop failures. Operating in catalog mode only.
+                Optional key to fetch Windy webcams dynamically as a query param `?key=KEY`. If missing, falls back to the static global catalog.
               </p>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="border-t border-weak pt-4 flex gap-2">
+          <div className="border-t border-weak pt-4 flex gap-2 shrink-0">
             <button
               type="button"
               onClick={toggleSettingsDrawer}

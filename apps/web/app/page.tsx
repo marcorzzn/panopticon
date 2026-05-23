@@ -15,6 +15,7 @@ import {
   fetchSatellites,
 } from '@panopticon/data-pipeline'
 import { useMapStore, usePanelStore, useAppStore } from '@panopticon/core/stores'
+import persistentConflicts from '../../../packages/core/src/config/persistent-conflicts.json'
 import { X, HelpCircle } from 'lucide-react'
 
 // Layout & Panel Imports
@@ -220,6 +221,10 @@ export default function Home() {
   React.useEffect(() => {
     setLayerEntityCount('space', satellites.length)
   }, [satellites, setLayerEntityCount])
+
+  React.useEffect(() => {
+    setLayerEntityCount('active-conflicts', persistentConflicts.length)
+  }, [setLayerEntityCount])
 
   // ── 2. GEOPOLITICAL C2 KEYBOARD SHORTCUTS SYSTEM ─────────────────────────
 

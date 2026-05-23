@@ -17,16 +17,87 @@
   --color-bg-elevated: var(--color-bg-elevated);
   --color-bg-hover: var(--color-bg-hover);
   --color-bg-active: var(--color-bg-active);
+
+  /* v3.0 colors */
+  --color-pan-base: var(--pan-bg-base);
+  --color-pan-surface: var(--pan-bg-surface);
+  --color-pan-raised: var(--pan-bg-raised);
+  --color-pan-overlay: var(--pan-bg-overlay);
+  --color-pan-interactive: var(--pan-bg-interactive);
+  
+  --color-pan-text-primary: var(--pan-text-primary);
+  --color-pan-text-secondary: var(--pan-text-secondary);
+  --color-pan-text-muted: var(--pan-text-muted);
+  --color-pan-text-accent: var(--pan-text-accent);
+  --color-pan-text-warning: var(--pan-text-warning);
+  --color-pan-text-danger: var(--pan-text-danger);
 }
 
 :root {
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
+
+  /* Background layers */
+  --pan-bg-base:        #06080b;   /* Map canvas background */
+  --pan-bg-surface:     #0d1117;   /* Sidebars, sliding drawers */
+  --pan-bg-raised:      #161b22;   /* Cards, selectors, interactive layers */
+  --pan-bg-overlay:     #1f242c;   /* Tooltips, context modals */
+  --pan-bg-interactive: #212830;   /* Active row hover, list clicks */
+
+  /* Border styling */
+  --pan-border-subtle:  rgba(255, 255, 255, 0.05);
+  --pan-border-default: rgba(255, 255, 255, 0.12);
+  --pan-border-strong:  rgba(255, 255, 255, 0.25);
+  --pan-border-accent:  rgba(0, 200, 140, 0.35);
+
+  /* Typography color hierarchy */
+  --pan-text-primary:   #f0f3f6;   /* Active headlines, tabular values */
+  --pan-text-secondary: #8b949e;   /* General description, metadata labels */
+  --pan-text-muted:     #58a6ff;   /* Secondary tags, informational labels */
+  --pan-text-accent:    #00c88c;   /* Verified active green status */
+  --pan-text-warning:   #f0a000;   /* Degraded status alerts */
+  --pan-text-danger:    #ff4f4f;   /* Critical telemetry alerts */
+
+  /* Cyberpunk Interactive Buttons */
+  --pan-btn-primary-bg:    #163e75;
+  --pan-btn-primary-text:  #f0f3f6;
+  --pan-btn-primary-hover: #1f5aa0;
+  --pan-btn-secondary-bg:  #161b22;
+  --pan-btn-secondary-text:#8b949e;
+  --pan-btn-secondary-hover:#21262d;
+  --pan-btn-active-bg:     #0c2d1c;
+  --pan-btn-active-text:   #00c88c;
+  --pan-btn-active-border: #00c88c;
+
+  /* Severity mapping system */
+  --pan-sev-critical-bg:   #2d1212;
+  --pan-sev-critical-text: #ff6e6e;
+  --pan-sev-critical-border:#b82a2a;
+  --pan-sev-high-bg:       #2b1b04;
+  --pan-sev-high-text:     #ffb454;
+  --pan-sev-high-border:   #b87304;
+  --pan-sev-moderate-bg:   #12270b;
+  --pan-sev-moderate-text: #8be060;
+  --pan-sev-moderate-border:#4d9429;
+  --pan-sev-low-bg:        #081b29;
+  --pan-sev-low-text:      #5ab2ff;
+  --pan-sev-low-border:    #1b68a8;
+
+  /* Tactical Layer Marker Colors */
+  --pan-marker-geopol:    #ff4444;   /* Geopolitical red */
+  --pan-marker-cyber:     #b044ff;   /* Cyber purple */
+  --pan-marker-maritime:  #0088ff;   /* Maritime blue */
+  --pan-marker-hazard:    #ff8800;   /* Natural hazards orange */
+  --pan-marker-markets:   #00c88c;   /* Financial teal */
+  --pan-marker-aviation:  #00f0ff;   /* Flights cyan */
+  --pan-marker-space:     #cca3ff;   /* Space lavender */
+  --pan-marker-cctv:      #ffd700;   /* Surveillance amber */
+  --pan-marker-conflict:  #ff1a1a;   /* Long-term wars */
 }
 
 body {
-  background-color: var(--color-bg-deepest, #0b0f1a);
-  color: var(--color-text-primary, #c8d3e0);
+  background-color: var(--pan-bg-base, #06080b);
+  color: var(--pan-text-primary, #f0f3f6);
   font-family: var(--font-sans), system-ui, sans-serif;
   overflow: hidden;
 }

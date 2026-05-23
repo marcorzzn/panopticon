@@ -29,7 +29,7 @@ import {
   Clipboard,
   Check
 } from 'lucide-react'
-import { useMapStore, useNewsStore } from '@panopticon/core/stores'
+import { useMapStore, useNewsStore, getMapMarkers } from '@panopticon/core/stores'
 import {
   fetchEarthquakes,
   fetchGdeltEvents,
@@ -42,7 +42,8 @@ import {
   fetchSatellites
 } from '@panopticon/data-pipeline'
 import type { WebcamEntity, SatelliteEntity } from '@panopticon/core/types'
-import layersConfig from '@panopticon/core/src/config/layers.json'
+import layersConfig from '../../../../packages/core/src/config/layers.json'
+import persistentConflicts from '../../../../packages/core/src/config/persistent-conflicts.json'
 
 // ── DETERMINISTIC SEED-HASHED RANDOM GENERATOR ────────────────────────────────
 function seedRandom(seedStr: string) {
@@ -89,23 +90,46 @@ const getEntityReconTarget = (entity: { type: string; data: any }) => {
 }
 
 // ── 2. REAL-TIME CANVAS CCTV SIMULATOR COMPONENT ─────────────────────────────
-function CctvLiveFeed({ id, name, status, coordinates, streamUrl }: { id: string; name: string; status: string; coordinates: [number, number]; streamUrl?: string }) {
-  const [videoError, setVideoError] = React.useState(false)
-  const isHls = streamUrl?.endsWith('.m3u8')
-  
+function CctvLiveFeed({
+  id,
+  name,
+  status,
+  coordinates,
+  streamUrl,
+  type = 'static_snapshot',
+}: {
+  id: string
+  name: string
+  status: string
+  coordinates: [number, number]
+  streamUrl?: string
+  type?: 'iframe_embed' | 'static_snapshot'
+}) {
+  const [snapshotError, setSnapshotError] = React.useState(false)
+  const [secondsSinceLoad, setSecondsSinceLoad] = React.useState(0)
+
+  React.useEffect(() => {
+    setSnapshotError(false)
+    setSecondsSinceLoad(0)
+    const interval = setInterval(() => {
+      setSecondsSinceLoad((prev) => prev + 1)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [id])
+
   const reportBrokenLink = () => {
     const issueTitle = encodeURIComponent(`CCTV Failure Report: Camera ${id}`)
     const issueBody = encodeURIComponent(`Operational Failure Report for CCTV Surveillance Endpoint:\n- Camera: ${name}\n- Coordinates: [${coordinates[1]}, ${coordinates[0]}]\n- Stream URL: ${streamUrl || 'N/A'}\n- Reported Status: ${status}`)
     window.open(`https://github.com/marcorzzn/panopticon/issues/new?title=${issueTitle}&body=${issueBody}`, '_blank')
   }
 
-  // 1. STATE C: OFFLINE
-  if (status === 'offline') {
+  // 1. STATE C: OFFLINE (Explicitly marked offline or image load failed)
+  if (status === 'offline' || snapshotError) {
     return (
       <div className="relative border border-red-500/30 rounded aspect-video bg-[#0c0f1a] flex flex-col items-center justify-center font-mono gap-2 border-dashed select-none">
         <Video className="w-8 h-8 text-red-500/50 animate-pulse" />
-        <span className="text-red-500 font-bold uppercase tracking-wider text-[10px]">ENDPOINT OFFLINE</span>
-        <span className="text-secondary text-[8px]">CONNECTION DEAD — NO POWER / SIGNAL LOSS</span>
+        <span className="text-red-500 font-bold uppercase tracking-wider text-[10px]">CONNECTION OFFLINE</span>
+        <span className="text-secondary text-[8px]">FEED TIMEOUT / SIGNAL ACQUISITION FAILED</span>
         <button 
           type="button"
           onClick={reportBrokenLink}
@@ -117,55 +141,38 @@ function CctvLiveFeed({ id, name, status, coordinates, streamUrl }: { id: string
     )
   }
 
-  // 2. STATE B: STREAM_URL_AVAILABLE (HLS/WebRTC streaming)
-  if (isHls && !videoError) {
+  // 2. STATE B: IFRAME_EMBED
+  if (type === 'iframe_embed' && streamUrl) {
     return (
       <div className="relative border border-accent/30 rounded overflow-hidden bg-deepest aspect-video select-none">
-        <video
+        <iframe
           src={streamUrl}
-          autoPlay
-          muted
-          controls
-          className="w-full h-full object-cover"
-          onError={() => setVideoError(true)}
+          title={name}
+          className="w-full h-full border-0 object-cover"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
         />
         <div className="absolute top-2 left-2 flex items-center gap-1 font-mono text-[8px] bg-black/60 text-primary px-1.5 py-0.5 border border-weak rounded">
           <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          <span className="uppercase text-secondary font-bold">LIVE STREAM ACTIVE</span>
+          <span className="uppercase text-secondary font-bold">LIVE EMBED ACTIVE</span>
         </div>
       </div>
     )
   }
 
-  // 3. STATE A: THUMBNAIL_AVAILABLE (Standard baseline snapshots)
+  // 3. STATE A: STATIC_SNAPSHOT
   return (
     <div className="relative border border-accent/20 rounded overflow-hidden bg-deepest aspect-video flex flex-col items-center justify-center select-none group">
       <img
         src={streamUrl || "https://images.webcams.travel/preview/1173873454.jpg"}
         alt={name}
         className="w-full h-full object-cover animate-fade-in"
-        onError={(e) => {
-          e.currentTarget.style.display = 'none'
-          const parent = e.currentTarget.parentElement
-          if (parent) {
-            const fallbackDiv = parent.querySelector('.proxy-fallback')
-            if (!fallbackDiv) {
-              const div = document.createElement('div')
-              div.className = 'proxy-fallback w-full h-full flex flex-col items-center justify-center bg-[#0b0f1a] text-secondary font-mono text-[9px] gap-2 border-dashed border border-accent/25'
-              div.innerHTML = `
-                <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-ping"></div>
-                <span class="text-yellow-400 font-bold uppercase tracking-wider">SNAPSHOT OFFLINE</span>
-                <span class="opacity-70 text-[8px]">ACQUISITION INTERRUPTED</span>
-              `
-              parent.appendChild(div)
-            }
-          }
-        }}
+        onError={() => setSnapshotError(true)}
       />
       
       {/* Attribution Overlay */}
       <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between font-mono text-[8px] bg-black/60 text-secondary px-2 py-1 border border-weak rounded opacity-0 group-hover:opacity-100 transition-opacity">
-        <span>SOURCE: CORE CATALOG</span>
+        <span>SOURCE: AMOS NETWORK</span>
         <button
           type="button"
           onClick={reportBrokenLink}
@@ -175,9 +182,11 @@ function CctvLiveFeed({ id, name, status, coordinates, streamUrl }: { id: string
         </button>
       </div>
 
-      <div className="absolute top-2 left-2 flex items-center gap-1 font-mono text-[8px] bg-black/60 text-primary px-1.5 py-0.5 border border-weak rounded">
+      <div className="absolute top-2 left-2 flex items-center gap-1.5 font-mono text-[8px] bg-black/60 text-primary px-1.5 py-0.5 border border-weak rounded">
         <div className={`w-1.5 h-1.5 rounded-full ${status === 'healthy' ? 'bg-green-400 animate-pulse' : 'bg-yellow-400 animate-pulse'}`} />
         <span className="uppercase text-secondary font-bold">SNAPSHOT ACTIVE</span>
+        <span className="text-secondary opacity-60">|</span>
+        <span className="text-[7px] text-[#00f0ff] uppercase tracking-wide">loaded {secondsSinceLoad}s ago</span>
       </div>
     </div>
   )
@@ -680,6 +689,17 @@ export default function DetailInspector() {
     const ne = newsEvents.find((item) => item.id === selectedEntityId)
     if (ne) return { type: 'news-event', data: ne }
 
+    // Search Context Markers
+    if (selectedEntityId.startsWith('context-hub-')) {
+      const markers = getMapMarkers(newsEvents)
+      const marker = markers.find((m) => m.id === selectedEntityId)
+      if (marker) return { type: 'news-context', data: marker }
+    }
+
+    // Search Persistent Conflicts
+    const conflict = (persistentConflicts as any[]).find((item) => item.id === selectedEntityId)
+    if (conflict) return { type: 'active-conflict', data: conflict }
+
     return null
   }, [selectedEntityId, webcams, activeReconScan, aircraft, wildfires, airquality, acledEvents, earthquakes, gdeltEvents, satellites, newsEvents])
 
@@ -713,6 +733,8 @@ export default function DetailInspector() {
           {entity.type === 'gdelt' && <Globe className="w-4 h-4 text-emerald-400" />}
           {entity.type === 'news-event' && <BookOpen className="w-4 h-4 text-[#00f0ff]" />}
           {entity.type === 'space' && <Satellite className="w-4 h-4 text-[#00f0ff]" />}
+          {entity.type === 'active-conflict' && <Shield className="w-4 h-4 text-[#ff1a1a]" />}
+          {entity.type === 'news-context' && <BookOpen className="w-4 h-4 text-[#af52de]" />}
           <span className="text-[10px] font-mono font-bold tracking-widest text-secondary uppercase">
             {entity.type} DETAILED INTEL
           </span>
@@ -744,7 +766,7 @@ export default function DetailInspector() {
               </div>
 
               {/* Simulated Live Feed Canvas */}
-              <CctvLiveFeed id={cam.id} name={cam.label} status={cam.status} coordinates={cam.coordinates} streamUrl={cam.streamUrl} />
+              <CctvLiveFeed id={cam.id} name={cam.label} status={cam.status} coordinates={cam.coordinates} streamUrl={cam.streamUrl} type={cam.type} />
 
               {/* Status and details grid */}
               <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2.5">
@@ -1459,6 +1481,196 @@ export default function DetailInspector() {
                   🛡️ OSINT CYBER SEC-OPS
                 </span>
                 <EntityReconPanel entity={entity} />
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* ── NEWS CONTEXT DETAILS ── */}
+        {entity.type === 'news-context' && (() => {
+          const marker = entity.data as any
+          const timeline = marker.timeline || []
+          return (
+            <div className="space-y-4 font-mono">
+              <div className="p-3 bg-deepest/60 border border-[#af52de]/30 rounded flex flex-col gap-1 items-center justify-center">
+                <BookOpen className="w-8 h-8 text-[#af52de] animate-pulse" />
+                <span className="text-sm font-bold tracking-wider text-[#af52de] mt-1 text-center">
+                  GEOFENCED CONTEXT HUB
+                </span>
+                <span className="text-[9px] text-secondary">
+                  CONSOLIDATED TIMELINE ({timeline.length} ALERTS)
+                </span>
+              </div>
+
+              {/* Coordinates & stats */}
+              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2">
+                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-[#1e3050] pb-1">TIMELINE METRICS</span>
+                <div className="flex justify-between items-center text-[10px]">
+                  <span className="text-secondary text-[8px] uppercase">Anchor Location:</span>
+                  <span className="font-semibold text-primary">{timeline[0]?.source || 'Odessa Sector'}</span>
+                </div>
+                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                  <span className="text-secondary text-[8px] uppercase">Anchor Lat/Lon:</span>
+                  <span className="text-primary tabular-nums">
+                    [{marker.coordinates[1]?.toFixed(4)}, {marker.coordinates[0]?.toFixed(4)}]
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                  <span className="text-secondary text-[8px] uppercase">Consolidation window:</span>
+                  <span className="text-primary font-semibold">48 Hours</span>
+                </div>
+              </div>
+
+              {/* Scrollable timeline events list */}
+              <div className="space-y-3">
+                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-[#1e3050] pb-1">CHRONOLOGICAL DISPATCHES</span>
+                <div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+                  {timeline.map((item: any, idx: number) => {
+                    const isNewest = idx === 0
+                    return (
+                      <div 
+                        key={item.id || idx} 
+                        className={`p-2.5 rounded border text-[10px] space-y-1.5 transition-all ${
+                          isNewest 
+                            ? 'bg-[#af52de]/5 border-[#af52de]/30 hover:border-[#af52de]' 
+                            : 'bg-deepest/30 border-weak hover:border-strong'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start gap-1">
+                          <span className={`text-[8px] font-bold px-1 rounded uppercase tracking-wide border ${
+                            item.severity === 'critical' ? 'bg-[#ff3b30]/10 border-[#ff3b30]/30 text-[#ff3b30]' :
+                            item.severity === 'high' ? 'bg-[#ff9500]/10 border-[#ff9500]/30 text-[#ff9500]' :
+                            item.severity === 'moderate' ? 'bg-yellow-400/10 border-yellow-400/30 text-yellow-400' :
+                            'bg-[#34c759]/10 border-[#34c759]/30 text-[#34c759]'
+                          }`}>
+                            {item.severity}
+                          </span>
+                          <span className="text-[7px] text-secondary tabular-nums">
+                            {new Date(item.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })} ({new Date(item.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })})
+                          </span>
+                        </div>
+                        <div className="font-semibold text-primary leading-snug">
+                          {item.title}
+                        </div>
+                        <div className="text-[9px] text-secondary leading-normal">
+                          {item.summary}
+                        </div>
+                        <div className="flex justify-between items-center text-[7px] text-secondary border-t border-weak/50 pt-1">
+                          <span>SOURCE: {item.source.toUpperCase()}</span>
+                          {item.url && (
+                            <a 
+                              href={item.url} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="text-accent hover:underline flex items-center gap-0.5"
+                            >
+                              <span>REF</span>
+                              <ExternalLink className="w-2 h-2" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* ── ACTIVE CONFLICT DETAILS ── */}
+        {entity.type === 'active-conflict' && (() => {
+          const conflict = entity.data as any
+          return (
+            <div className="space-y-4 font-mono">
+              <div className="p-3 bg-deepest/60 border border-[var(--pan-marker-conflict)]/30 rounded flex flex-col gap-1 items-center justify-center">
+                <Shield className="w-8 h-8 text-[#ff1a1a] animate-pulse" />
+                <span className="text-sm font-bold tracking-wider text-[#ff1a1a] mt-1 text-center">
+                  ACTIVE MILITARY CONFLICT
+                </span>
+                <span className="text-[9px] text-secondary">
+                  LONG-TERM GEOPOLITICAL STANDOFF
+                </span>
+              </div>
+
+              {/* Status and intensity widget */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                  <span className="text-[8px] text-secondary uppercase">Conflict Intensity</span>
+                  <span className={`text-sm font-semibold mt-0.5 ${
+                    conflict.intensity === 'HIGH' ? 'text-red-500' : conflict.intensity === 'MEDIUM' ? 'text-yellow-400' : 'text-blue-400'
+                  }`}>
+                    {conflict.intensity}
+                  </span>
+                </div>
+
+                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                  <span className="text-[8px] text-secondary uppercase">Operational Category</span>
+                  <span className="text-xs font-semibold mt-0.5 text-primary uppercase">
+                    {conflict.category.replace('-', ' ')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Conflict description */}
+              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2">
+                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-[#1e3050] pb-1">TACTICAL MONITOR</span>
+                
+                <div className="flex justify-between items-center text-[10px]">
+                  <span className="text-secondary text-[8px] uppercase">Conflict Name:</span>
+                  <span className="font-semibold text-primary">{conflict.name}</span>
+                </div>
+
+                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                  <span className="text-secondary text-[8px] uppercase">Conflict ID:</span>
+                  <span className="text-secondary select-all text-[9px]">{conflict.id}</span>
+                </div>
+
+                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                  <span className="text-secondary text-[8px] uppercase">Start Date:</span>
+                  <span className="text-primary tabular-nums">
+                    {new Date(conflict.startDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                  <span className="text-secondary text-[8px] uppercase">Last Updated:</span>
+                  <span className="text-primary tabular-nums">
+                    {new Date(conflict.lastUpdated).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                  <span className="text-secondary text-[8px] uppercase">Coordinates:</span>
+                  <span className="text-primary tabular-nums">
+                    [{conflict.lat.toFixed(4)}, {conflict.lon.toFixed(4)}]
+                  </span>
+                </div>
+              </div>
+
+              {/* Node detailed description paragraph */}
+              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded">
+                <span className="text-[8px] text-secondary uppercase block mb-1">Geopolitical Background</span>
+                <p className="text-[10px] text-secondary leading-relaxed bg-deepest/20 p-2 border border-[#1e3050]/50 rounded">
+                  {conflict.description}
+                </p>
+              </div>
+
+              {/* OSINT SEC-OPS / Copy URL block */}
+              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2">
+                <span className="text-[8px] text-secondary uppercase block border-b border-[#1e3050] pb-1">Attributed Source Reference</span>
+                <div className="bg-deepest/50 p-2 rounded border border-weak break-all text-primary select-all text-[9px] mb-2">
+                  {conflict.sourceUrl}
+                </div>
+                <a
+                  href={conflict.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full text-center py-2 px-3 border border-red-500/30 hover:border-red-500 bg-red-500/5 hover:bg-red-500/15 text-red-500 font-bold rounded transition-all uppercase flex items-center justify-center gap-1.5"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  <span>VISIT PRIMARY REFERENCE</span>
+                </a>
               </div>
             </div>
           )

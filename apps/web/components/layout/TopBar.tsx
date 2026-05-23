@@ -188,7 +188,8 @@ export default function TopBar() {
           <button
             onClick={handleForceRefresh}
             disabled={isRefreshing}
-            className={`flex items-center justify-center p-1.5 rounded border border-weak hover:border-accent text-secondary hover:text-accent bg-deepest bg-opacity-40 transition-all ${
+            aria-label="Force immediate revalidation of all active OSINT caches"
+            className={`flex items-center justify-center p-1.5 rounded border border-[var(--pan-border-default)] hover:border-[var(--pan-border-strong)] text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] bg-[var(--pan-btn-secondary-bg)] hover:bg-[var(--pan-btn-secondary-hover)] transition-all ${
               isRefreshing ? 'opacity-50 pointer-events-none' : ''
             }`}
           >
@@ -200,10 +201,11 @@ export default function TopBar() {
         <Tooltip content={globalRefreshPaused ? 'Resume live background SWR polling cycles' : 'Pause background data revalidations'}>
           <button
             onClick={toggleGlobalRefresh}
+            aria-label={globalRefreshPaused ? 'Resume live background SWR polling cycles' : 'Pause background data revalidations'}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-[10px] font-mono transition-all ${
               globalRefreshPaused
-                ? 'bg-status-critical-bg border-status-critical text-status-critical-text'
-                : 'bg-status-ok-bg border-status-ok text-status-ok-text'
+                ? 'bg-[var(--pan-sev-critical-bg)] border-[var(--pan-sev-critical-border)] text-[var(--pan-sev-critical-text)]'
+                : 'bg-[var(--pan-sev-moderate-bg)] border-[var(--pan-sev-moderate-border)] text-[var(--pan-sev-moderate-text)]'
             }`}
           >
             <Activity className="w-3 h-3" />
@@ -215,7 +217,8 @@ export default function TopBar() {
         <Tooltip content={`Cycle interface theme (Current: ${theme})`}>
           <button
             onClick={cycleTheme}
-            className="p-1.5 rounded hover:bg-hover border border-transparent hover:border-weak text-secondary hover:text-primary transition-all"
+            aria-label={`Cycle interface theme (Current: ${theme})`}
+            className="p-1.5 rounded border border-[var(--pan-border-default)] hover:border-[var(--pan-border-strong)] text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] bg-[var(--pan-btn-secondary-bg)] hover:bg-[var(--pan-btn-secondary-hover)] transition-all"
           >
             <SunMoon className="w-4 h-4" />
           </button>
@@ -225,7 +228,8 @@ export default function TopBar() {
         <Tooltip content="Open telemetry credentials & webcam settings panel">
           <button
             onClick={toggleSettingsDrawer}
-            className="p-1.5 rounded hover:bg-hover border border-transparent hover:border-weak text-secondary hover:text-primary transition-all animate-none"
+            aria-label="Open telemetry credentials and settings panel"
+            className="p-1.5 rounded border border-[var(--pan-border-default)] hover:border-[var(--pan-border-strong)] text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] bg-[var(--pan-btn-secondary-bg)] hover:bg-[var(--pan-btn-secondary-hover)] transition-all animate-none"
           >
             <Settings className="w-4 h-4" />
           </button>
@@ -235,8 +239,11 @@ export default function TopBar() {
         <Tooltip content="Toggle daily AI strategic brief overlay [A]">
           <button
             onClick={toggleAiBrief}
-            className={`p-1.5 rounded hover:bg-hover border border-transparent hover:border-weak transition-all ${
-              aiBriefOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
+            aria-label="Toggle daily AI strategic brief overlay"
+            className={`p-1.5 rounded border transition-all ${
+              aiBriefOpen 
+                ? 'bg-[var(--pan-btn-active-bg)] border-[var(--pan-btn-active-border)] text-[var(--pan-btn-active-text)]' 
+                : 'border-[var(--pan-border-default)] hover:border-[var(--pan-border-strong)] text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] bg-[var(--pan-btn-secondary-bg)] hover:bg-[var(--pan-btn-secondary-hover)]'
             }`}
           >
             <Cpu className="w-4 h-4" />
@@ -246,12 +253,15 @@ export default function TopBar() {
         <div className="w-px h-5 bg-border-weak" />
 
         {/* Layout Control Switches */}
-        <div className="flex items-center gap-0.5 bg-deepest bg-opacity-40 p-0.5 rounded border border-weak">
+        <div className="flex items-center gap-0.5 bg-[var(--pan-bg-raised)] p-0.5 rounded border border-[var(--pan-border-default)]">
           <Tooltip content="Toggle left map layer toggles panel">
             <button
               onClick={toggleLayerPanel}
+              aria-label="Toggle left map layer panel"
               className={`p-1.5 rounded transition-all ${
-                layerPanelOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
+                layerPanelOpen 
+                  ? 'bg-[var(--pan-btn-active-bg)] border border-[var(--pan-btn-active-border)] text-[var(--pan-btn-active-text)]' 
+                  : 'text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] hover:bg-[var(--pan-btn-secondary-hover)]'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
@@ -260,8 +270,11 @@ export default function TopBar() {
           <Tooltip content="Toggle bottom tabular list telemetry inspector">
             <button
               onClick={toggleBottomPanel}
+              aria-label="Toggle bottom tabular telemetry panel"
               className={`p-1.5 rounded transition-all ${
-                bottomPanelOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
+                bottomPanelOpen 
+                  ? 'bg-[var(--pan-btn-active-bg)] border border-[var(--pan-btn-active-border)] text-[var(--pan-btn-active-text)]' 
+                  : 'text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] hover:bg-[var(--pan-btn-secondary-hover)]'
               }`}
             >
               <Table className="w-3.5 h-3.5" />
@@ -270,8 +283,11 @@ export default function TopBar() {
           <Tooltip content="Toggle right real-time geopolitical & cyber tickers">
             <button
               onClick={toggleIntelPanel}
+              aria-label="Toggle right tickers panel"
               className={`p-1.5 rounded transition-all ${
-                intelPanelOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
+                intelPanelOpen 
+                  ? 'bg-[var(--pan-btn-active-bg)] border border-[var(--pan-btn-active-border)] text-[var(--pan-btn-active-text)]' 
+                  : 'text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] hover:bg-[var(--pan-btn-secondary-hover)]'
               }`}
             >
               <Rss className="w-3.5 h-3.5" />
@@ -280,8 +296,11 @@ export default function TopBar() {
           <Tooltip content="Toggle OSINT cyber toolkit overlay scanner [S]">
             <button
               onClick={toggleReconToolkit}
+              aria-label="Toggle OSINT cyber toolkit"
               className={`p-1.5 rounded transition-all ${
-                reconToolkitOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
+                reconToolkitOpen 
+                  ? 'bg-[var(--pan-btn-active-bg)] border border-[var(--pan-btn-active-border)] text-[var(--pan-btn-active-text)]' 
+                  : 'text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] hover:bg-[var(--pan-btn-secondary-hover)]'
               }`}
             >
               <Terminal className="w-3.5 h-3.5" />
@@ -293,7 +312,8 @@ export default function TopBar() {
         <Tooltip content="Toggle browser workspace fullscreen mode">
           <button
             onClick={handleFullscreenClick}
-            className="p-1.5 rounded bg-deepest bg-opacity-40 border border-weak hover:bg-hover text-secondary hover:text-primary transition-all"
+            aria-label="Toggle browser fullscreen mode"
+            className="p-1.5 rounded border border-[var(--pan-border-default)] hover:border-[var(--pan-border-strong)] text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] bg-[var(--pan-btn-secondary-bg)] hover:bg-[var(--pan-btn-secondary-hover)] transition-all"
           >
             {mapFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>

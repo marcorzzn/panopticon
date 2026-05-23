@@ -3,20 +3,8 @@
 import * as React from 'react'
 import { Map, Source, Layer, NavigationControl, ScaleControl } from 'react-map-gl/maplibre'
 import type { MapRef } from 'react-map-gl/maplibre'
-import { useMapStore, useAppStore, useNewsStore } from '@panopticon/core/stores'
-import layersConfig from '@panopticon/core/src/config/layers.json'
-
-// ── DETERMINISTIC SEED-HASHED RANDOM GENERATOR ────────────────────────────────
-function seedRandom(seedStr: string) {
-  let hash = 0
-  for (let i = 0; i < seedStr.length; i++) {
-    hash = seedStr.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  return function() {
-    const x = Math.sin(hash++) * 10000
-    return x - Math.floor(x)
-  }
-}
+import { useMapStore, useAppStore, useNewsStore, getMapMarkers } from '@panopticon/core/stores'
+import persistentConflicts from '../../../core/src/config/persistent-conflicts.json'
 import { getTerminatorPolygon } from '../layers/terminator-layer'
 import { LayerManager } from '../layers/LayerFactory'
 import type { EarthquakeEntity, GdeltEvent, WeatherPoint, AircraftEntity, WildfireEntity, AirQualityEntity, AcledEventEntity, WebcamEntity, SatelliteEntity, Coordinate } from '@panopticon/core/types'
@@ -418,77 +406,57 @@ export default function MapView({
   }, [satellites])
 
   const newsEventsGeoJson = React.useMemo(() => {
+    const markers = getMapMarkers(newsEvents)
     return {
       type: 'FeatureCollection',
-      features: newsEvents
-        .filter((ev) => ev.coordinates)
-        .map((ev, idx) => ({
-          type: 'Feature',
-          id: ev.id || `news-event-${idx}`,
-          geometry: {
-            type: 'Point',
-            coordinates: ev.coordinates!,
-          },
-          properties: {
-            id: ev.id || `news-event-${idx}`,
-            category: ev.category,
-            title: ev.title,
-            label: ev.title,
-            source: ev.source,
-            severity: ev.severity,
-            summary: ev.summary,
-            timestamp: ev.timestamp,
-            url: ev.url,
-          },
-        })),
+      features: markers.map((ev) => ({
+        type: 'Feature',
+        id: ev.id,
+        geometry: {
+          type: 'Point',
+          coordinates: ev.coordinates,
+        },
+        properties: {
+          id: ev.id,
+          type: ev.type,
+          category: ev.category,
+          title: ev.title,
+          label: ev.title,
+          source: ev.timeline ? (ev.timeline[0]?.source || 'Consolidated Wire') : (ev as any).source,
+          severity: ev.severity,
+          summary: ev.summary,
+          timestamp: ev.timestamp,
+          url: ev.url,
+          isContext: ev.type === 'context',
+        },
+      })),
     }
   }, [newsEvents])
-  // 13. Deterministic Procedural Custom Layers GeoJSON Generator
-  const activeCustomLayersData = React.useMemo(() => {
-    const data: Record<string, any> = {}
-    Object.keys(layerStates).forEach((layerId) => {
-      if (layerId.includes('-add-') && layerStates[layerId]?.visible === true) {
-        const layerDef = (layersConfig as any[]).find((l) => l.id === layerId)
-        if (layerDef) {
-          // Generate deterministic GeoJSON features
-          const rand = seedRandom(layerId)
-          const count = Math.floor(rand() * 11) + 5 // 5 to 15 nodes
-          const features = []
-          for (let i = 0; i < count; i++) {
-            const lat = rand() * 140 - 70 // -70 to 70
-            const lng = rand() * 360 - 180 // -180 to 180
-            const intensity = Math.floor(rand() * 100)
-            
-            features.push({
-              type: 'Feature',
-              id: `${layerId}-node-${i}`,
-              geometry: {
-                type: 'Point',
-                coordinates: [lng, lat],
-              },
-              properties: {
-                id: `${layerId}-node-${i}`,
-                label: `${layerDef.name} Node #${i + 1}`,
-                intensity,
-                description: `Operational Telemetry Node for ${layerDef.name}. Signal strength: ${intensity}%. Status: ACTIVE.`,
-              },
-            })
-          }
-          data[layerId] = {
-            type: 'FeatureCollection',
-            features,
-          }
-        }
-      }
-    })
-    return data
-  }, [layerStates])
-
-  const activeCustomLayerIds = React.useMemo(() => {
-    return Object.keys(layerStates).filter(
-      (id) => id.includes('-add-') && layerStates[id]?.visible === true
-    )
-  }, [layerStates])
+  // Transform Persistent Conflicts to GeoJSON
+  const conflictsGeoJson = React.useMemo(() => {
+    return {
+      type: 'FeatureCollection',
+      features: (persistentConflicts as any[]).map((c) => ({
+        type: 'Feature',
+        id: c.id,
+        geometry: {
+          type: 'Point',
+          coordinates: [c.lon, c.lat],
+        },
+        properties: {
+          id: c.id,
+          name: c.name,
+          label: c.name,
+          sourceUrl: c.sourceUrl,
+          description: c.description,
+          category: c.category,
+          intensity: c.intensity,
+          startDate: c.startDate,
+          lastUpdated: c.lastUpdated,
+        },
+      })),
+    }
+  }, [])
 
   const interactiveIds = React.useMemo(() => {
     return [
@@ -499,12 +467,12 @@ export default function MapView({
       'airquality-layer',
       'acled-layer',
       'webcams-layer',
+      'active-conflicts-layer',
       'recon-hops-layer',
       'satellites-layer',
       'news-events-layer',
-      ...activeCustomLayerIds
     ]
-  }, [activeCustomLayerIds])
+  }, [])
 
   const selectedSatellite = React.useMemo(() => {
     if (!selectedEntityId) return null
@@ -734,10 +702,48 @@ export default function MapView({
         </Source>
 
         {/* ── 3. GDELT EVENTS LAYER ───────────────────────────────────────── */}
-        <Source id="gdelt-source" type="geojson" data={gdeltGeoJson as any}>
+        <Source id="gdelt-source" type="geojson" data={gdeltGeoJson as any} cluster={true} clusterMaxZoom={14} clusterRadius={50}>
+          {/* Cluster circles */}
+          <Layer
+            id="gdelt-cluster-circle"
+            type="circle"
+            filter={['has', 'point_count']}
+            layout={{ visibility: isLayerVisible('gdelt') }}
+            paint={{
+              'circle-color': '#3498db',
+              'circle-radius': [
+                'step',
+                ['get', 'point_count'],
+                15,
+                10, 20,
+                50, 25
+              ],
+              'circle-opacity': 0.7,
+              'circle-stroke-width': 1.5,
+              'circle-stroke-color': '#ffffff'
+            }}
+          />
+          {/* Cluster labels */}
+          <Layer
+            id="gdelt-cluster-count"
+            type="symbol"
+            filter={['has', 'point_count']}
+            layout={{
+              visibility: isLayerVisible('gdelt'),
+              'text-field': '{point_count}',
+              'text-font': ['Open Sans Bold', 'Arial Unicode MS Regular'],
+              'text-size': 10,
+              'text-allow-overlap': true
+            }}
+            paint={{
+              'text-color': '#ffffff'
+            }}
+          />
+          {/* Single point */}
           <Layer
             id="gdelt-layer"
             type="circle"
+            filter={['!', ['has', 'point_count']]}
             layout={{ visibility: isLayerVisible('gdelt') }}
             paint={{
               'circle-radius': [
@@ -1080,11 +1086,48 @@ export default function MapView({
         </Source>
 
         {/* ── 9. GLOBAL CCTV WEBCAMS LAYER ───────────────────────── */}
-        <Source id="webcams-source" type="geojson" data={webcamsGeoJson as any}>
+        <Source id="webcams-source" type="geojson" data={webcamsGeoJson as any} cluster={true} clusterMaxZoom={14} clusterRadius={40}>
+          {/* Cluster circle */}
+          <Layer
+            id="webcams-cluster-circle"
+            type="circle"
+            filter={['has', 'point_count']}
+            layout={{ visibility: isLayerVisible('webcams') }}
+            paint={{
+              'circle-color': '#fffb00',
+              'circle-radius': [
+                'step',
+                ['get', 'point_count'],
+                14,
+                10, 18,
+                50, 22
+              ],
+              'circle-opacity': 0.7,
+              'circle-stroke-width': 1.5,
+              'circle-stroke-color': '#0b0f1a'
+            }}
+          />
+          {/* Cluster count */}
+          <Layer
+            id="webcams-cluster-count"
+            type="symbol"
+            filter={['has', 'point_count']}
+            layout={{
+              visibility: isLayerVisible('webcams'),
+              'text-field': '{point_count}',
+              'text-font': ['Open Sans Bold', 'Arial Unicode MS Regular'],
+              'text-size': 9,
+              'text-allow-overlap': true
+            }}
+            paint={{
+              'text-color': '#0b0f1a'
+            }}
+          />
           {/* Webcam Neon-yellow glow */}
           <Layer
             id="webcams-glow-layer"
             type="circle"
+            filter={['!', ['has', 'point_count']]}
             layout={{ visibility: isLayerVisible('webcams') }}
             paint={{
               'circle-radius': 14,
@@ -1097,6 +1140,7 @@ export default function MapView({
           <Layer
             id="webcams-layer"
             type="circle"
+            filter={['!', ['has', 'point_count']]}
             layout={{ visibility: isLayerVisible('webcams') }}
             paint={{
               'circle-radius': 5,
@@ -1110,6 +1154,7 @@ export default function MapView({
           <Layer
             id="webcams-label-layer"
             type="symbol"
+            filter={['!', ['has', 'point_count']]}
             layout={{
               visibility: isLayerVisible('webcams'),
               'text-field': '📹',
@@ -1126,26 +1171,152 @@ export default function MapView({
           />
         </Source>
 
-        {/* ── 9b. NEWS EVENTS GEOLOCATED LAYER ───────────────────────── */}
-        <Source id="news-events-source" type="geojson" data={newsEventsGeoJson as any}>
+        {/* ── 9b. ACTIVE CONFLICTS LAYER (PERSISTENT) ────────────────────── */}
+        <Source id="active-conflicts-source" type="geojson" data={conflictsGeoJson as any}>
+          {/* Outer glowing warning backdrop */}
+          <Layer
+            id="active-conflicts-glow-layer"
+            type="circle"
+            layout={{ visibility: isLayerVisible('active-conflicts') }}
+            paint={{
+              'circle-radius': [
+                'match',
+                ['get', 'intensity'],
+                'HIGH', 18,
+                'MEDIUM', 12,
+                'LOW', 8,
+                12
+              ],
+              'circle-color': '#ff1a1a',
+              'circle-opacity': 0.18,
+              'circle-blur': 0.85,
+            }}
+          />
+          {/* Pulsing warning perimeter stroke */}
+          <Layer
+            id="active-conflicts-pulse-layer"
+            type="circle"
+            layout={{ visibility: isLayerVisible('active-conflicts') }}
+            paint={{
+              'circle-radius': [
+                'match',
+                ['get', 'intensity'],
+                'HIGH', 22,
+                'MEDIUM', 16,
+                'LOW', 11,
+                16
+              ],
+              'circle-color': 'transparent',
+              'circle-stroke-width': 1.2,
+              'circle-stroke-color': '#ff1a1a',
+              'circle-stroke-opacity': 0.5,
+            }}
+          />
+          {/* Solid warning center core dot */}
+          <Layer
+            id="active-conflicts-layer"
+            type="circle"
+            layout={{ visibility: isLayerVisible('active-conflicts') }}
+            paint={{
+              'circle-radius': [
+                'match',
+                ['get', 'intensity'],
+                'HIGH', 6.5,
+                'MEDIUM', 4.5,
+                'LOW', 3.5,
+                4.5
+              ],
+              'circle-color': '#ff1a1a',
+              'circle-stroke-width': 1.5,
+              'circle-stroke-color': '#0b0f1a',
+              'circle-opacity': 0.9,
+            }}
+          />
+          {/* Label icon */}
+          <Layer
+            id="active-conflicts-label-layer"
+            type="symbol"
+            layout={{
+              visibility: isLayerVisible('active-conflicts'),
+              'text-field': '💥',
+              'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+              'text-size': 9,
+              'text-offset': [0, -1.2],
+              'text-allow-overlap': false,
+            }}
+            paint={{
+              'text-color': '#ff1a1a',
+              'text-halo-color': '#0b0f1a',
+              'text-halo-width': 1.2,
+            }}
+          />
+        </Source>
+
+        {/* ── 9c. NEWS EVENTS GEOLOCATED LAYER ───────────────────────── */}
+        <Source id="news-events-source" type="geojson" data={newsEventsGeoJson as any} cluster={true} clusterMaxZoom={14} clusterRadius={45}>
+          {/* Cluster circle */}
+          <Layer
+            id="news-events-cluster-circle"
+            type="circle"
+            filter={['has', 'point_count']}
+            layout={{ visibility: isLayerVisible('news-events') }}
+            paint={{
+              'circle-color': '#00f0ff',
+              'circle-radius': [
+                'step',
+                ['get', 'point_count'],
+                14,
+                10, 18,
+                50, 22
+              ],
+              'circle-opacity': 0.7,
+              'circle-stroke-width': 1.5,
+              'circle-stroke-color': '#ffffff'
+            }}
+          />
+          {/* Cluster count */}
+          <Layer
+            id="news-events-cluster-count"
+            type="symbol"
+            filter={['has', 'point_count']}
+            layout={{
+              visibility: isLayerVisible('news-events'),
+              'text-field': '{point_count}',
+              'text-font': ['Open Sans Bold', 'Arial Unicode MS Regular'],
+              'text-size': 9,
+              'text-allow-overlap': true
+            }}
+            paint={{
+              'text-color': '#0b0f1a'
+            }}
+          />
           {/* Soft neon outer glow based on severity */}
           <Layer
             id="news-events-glow-layer"
             type="circle"
+            filter={['!', ['has', 'point_count']]}
             layout={{ visibility: isLayerVisible('news-events') }}
             paint={{
-              'circle-radius': 14,
-              'circle-color': [
-                'match',
-                ['get', 'category'],
-                'geopolitical', '#ff3b30',
-                'cyber', '#00f0ff',
-                'maritime', '#007aff',
-                'hazard', '#ff9500',
-                'markets', '#34c759',
-                '#ffffff'
+              'circle-radius': [
+                'case',
+                ['get', 'isContext'], 22,
+                14
               ],
-              'circle-opacity': 0.15,
+              'circle-color': [
+                'case',
+                ['get', 'isContext'], '#af52de',
+                [
+                  'match',
+                  ['get', 'category'],
+                  'geopolitical', '#ff3b30',
+                  'cyber', '#00f0ff',
+                  'maritime', '#007aff',
+                  'hazard', '#ff9500',
+                  'markets', '#34c759',
+                  '#ffffff'
+                ]
+              ],
+              'circle-opacity': 0.18,
               'circle-blur': 0.85,
             }}
           />
@@ -1153,31 +1324,45 @@ export default function MapView({
           <Layer
             id="news-events-layer"
             type="circle"
+            filter={['!', ['has', 'point_count']]}
             layout={{ visibility: isLayerVisible('news-events') }}
             paint={{
-              'circle-radius': 5.5,
+              'circle-radius': [
+                'case',
+                ['get', 'isContext'], 8.5,
+                5.5
+              ],
               'circle-color': [
-                'match',
-                ['get', 'category'],
-                'geopolitical', '#ff3b30',
-                'cyber', '#00f0ff',
-                'maritime', '#007aff',
-                'hazard', '#ff9500',
-                'markets', '#34c759',
-                '#ffffff'
+                'case',
+                ['get', 'isContext'], '#af52de',
+                [
+                  'match',
+                  ['get', 'category'],
+                  'geopolitical', '#ff3b30',
+                  'cyber', '#00f0ff',
+                  'maritime', '#007aff',
+                  'hazard', '#ff9500',
+                  'markets', '#34c759',
+                  '#ffffff'
+                ]
               ],
               'circle-stroke-width': 1.2,
               'circle-stroke-color': '#ffffff',
-              'circle-opacity': 0.9,
+              'circle-opacity': 0.95,
             }}
           />
           {/* News Ticker Label symbol */}
           <Layer
             id="news-events-label-layer"
             type="symbol"
+            filter={['!', ['has', 'point_count']]}
             layout={{
               visibility: isLayerVisible('news-events'),
-              'text-field': '📰',
+              'text-field': [
+                'case',
+                ['get', 'isContext'], '📚',
+                '📰'
+              ],
               'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
               'text-size': 9,
               'text-offset': [0, -1.2],
@@ -1362,27 +1547,6 @@ export default function MapView({
             />
           </Source>
         )}
-        {/* ── 12. DYNAMIC THREAT CHANNELS (CUSTOM LAYERS) ────────────────── */}
-        {Object.keys(activeCustomLayersData).map((layerId) => {
-          const layerDef = (layersConfig as any[]).find((l) => l.id === layerId)
-          if (!layerDef) return null
-          
-          return (
-            <Source key={layerId} id={layerId} type="geojson" data={activeCustomLayersData[layerId]}>
-              <Layer
-                id={layerId}
-                type="circle"
-                paint={{
-                  'circle-radius': layerDef.paint['circle-radius'] || 5,
-                  'circle-color': layerDef.paint['circle-color'] || '#0066cc',
-                  'circle-stroke-width': layerDef.paint['circle-stroke-width'] || 1.2,
-                  'circle-stroke-color': layerDef.paint['circle-stroke-color'] || '#ffffff',
-                  'circle-opacity': 0.85,
-                }}
-              />
-            </Source>
-          )
-        })}
       </Map>
     </div>
   )
