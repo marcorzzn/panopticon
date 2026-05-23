@@ -159,6 +159,38 @@
     }
   },
   {
+    "id": "news-events",
+    "name": "News Events",
+    "source_type": "GeoJSON",
+    "paint": {
+      "circle-radius": 5,
+      "circle-color": [
+        "match",
+        ["get", "category"],
+        "geopolitical", "#ff3b30",
+        "cyber", "#00f0ff",
+        "maritime", "#007aff",
+        "hazard", "#ff9500",
+        "markets", "#34c759",
+        "#ffffff"
+      ],
+      "circle-stroke-width": 1,
+      "circle-stroke-color": "#ffffff"
+    },
+    "layout": {
+      "visibility": "none"
+    },
+    "minZoom": 2,
+    "maxZoom": 20,
+    "opacity": 0.85,
+    "tier": 0,
+    "legend": {
+      "type": "circle",
+      "label": "News Events Feed",
+      "color": "#00f0ff"
+    }
+  },
+  {
     "id": "aircraft",
     "name": "OpenSky ADS-B Feeds",
     "source_type": "GeoJSON",

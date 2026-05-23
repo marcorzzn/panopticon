@@ -130,6 +130,24 @@ export default function SettingsDrawer() {
                 Used to run active domain & IP threat reputation scoring scans in the Recon drawer.
               </p>
             </div>
+
+            {/* Input 3: Windy API Key (Coming Soon) */}
+            <div className="flex flex-col gap-1.5 opacity-65">
+              <label className="text-[9px] font-mono font-bold uppercase tracking-wider text-status-warning-text flex items-center gap-1.5">
+                Windy API Key <span className="text-[8px] bg-yellow-400/10 px-1 border border-yellow-400/20 text-yellow-400 rounded">COMING SOON</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  disabled
+                  placeholder="[REQUIRES BACKEND PROXY GATEWAY]"
+                  className="w-full bg-deepest/50 border border-weak text-xs font-mono px-3 py-2 rounded text-secondary outline-none cursor-not-allowed select-none placeholder:opacity-40"
+                />
+              </div>
+              <p className="text-[8px] text-secondary leading-tight">
+                Windy Webcam v3 integration requires custom server-side CORS proxy tunnels to prevent key leakages and header drop failures. Operating in catalog mode only.
+              </p>
+            </div>
           </div>
 
           {/* Action Buttons */}

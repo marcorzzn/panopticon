@@ -15,11 +15,81 @@ import {
   SunMoon,
   Settings,
   Terminal,
+  RefreshCw,
 } from 'lucide-react'
+import { useSWRConfig } from 'swr'
 import { usePanelStore, useAppStore } from '@panopticon/core/stores'
 import LiveClock from '../widgets/LiveClock'
 
+function Tooltip({ content, children }: { content: string; children: React.ReactElement }) {
+  const [visible, setVisible] = React.useState(false)
+  const [coords, setCoords] = React.useState({ x: 0, y: 0 })
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+
+  const handleMouseEnter = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    setCoords({
+      x: rect.left + rect.width / 2,
+      y: rect.bottom + 8
+    })
+    timeoutRef.current = setTimeout(() => {
+      setVisible(true)
+    }, 400) // 400ms delay
+  }
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setVisible(false)
+  }
+
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
+
+  return (
+    <>
+      {React.cloneElement(children, {
+        onMouseEnter: handleMouseEnter,
+        onMouseLeave: handleMouseLeave,
+      } as any)}
+      {visible && (
+        <div
+          className="fixed z-50 px-2 py-1 text-[9px] font-mono font-semibold tracking-wider text-accent bg-[#0b0f1a] border border-accent/40 rounded shadow-[0_0_10px_rgba(0,240,255,0.25)] -translate-x-1/2 pointer-events-none transition-all duration-150 animate-fade-in"
+          style={{ left: coords.x, top: coords.y }}
+        >
+          {content}
+        </div>
+      )}
+    </>
+  )
+}
+
 export default function TopBar() {
+  const { mutate } = useSWRConfig()
+  const [isRefreshing, setIsRefreshing] = React.useState(false)
+
+  const handleForceRefresh = async () => {
+    setIsRefreshing(true)
+    const keys = [
+      'usgs-earthquakes-core',
+      'opensky-aircraft-core',
+      'nasa-wildfires-core',
+      'openaq-airquality-core',
+      'acled-conflicts-core',
+      'webcams-core',
+      'space-satellites-core'
+    ]
+    await Promise.all([
+      ...keys.map(k => mutate(k)),
+      mutate(['gdelt-events-core', 'protest'])
+    ])
+    setTimeout(() => {
+      setIsRefreshing(false)
+    }, 600)
+  }
+
   const {
     layerPanelOpen,
     intelPanelOpen,
@@ -113,99 +183,121 @@ export default function TopBar() {
           </div>
         </div>
 
+        {/* Force Refresh Button */}
+        <Tooltip content="Force immediate revalidation of all active OSINT caches">
+          <button
+            onClick={handleForceRefresh}
+            disabled={isRefreshing}
+            className={`flex items-center justify-center p-1.5 rounded border border-weak hover:border-accent text-secondary hover:text-accent bg-deepest bg-opacity-40 transition-all ${
+              isRefreshing ? 'opacity-50 pointer-events-none' : ''
+            }`}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </button>
+        </Tooltip>
+
         {/* Global Pause Refresh Switch */}
-        <button
-          onClick={toggleGlobalRefresh}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-[10px] font-mono transition-all ${
-            globalRefreshPaused
-              ? 'bg-status-critical-bg border-status-critical text-status-critical-text'
-              : 'bg-status-ok-bg border-status-ok text-status-ok-text'
-          }`}
-          title={globalRefreshPaused ? 'Resume Global Data Polling' : 'Pause Global Data Polling'}
-        >
-          <Activity className="w-3 h-3" />
-          <span className="uppercase font-semibold">{globalRefreshPaused ? 'PAUSED' : 'LIVE'}</span>
-        </button>
+        <Tooltip content={globalRefreshPaused ? 'Resume live background SWR polling cycles' : 'Pause background data revalidations'}>
+          <button
+            onClick={toggleGlobalRefresh}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-[10px] font-mono transition-all ${
+              globalRefreshPaused
+                ? 'bg-status-critical-bg border-status-critical text-status-critical-text'
+                : 'bg-status-ok-bg border-status-ok text-status-ok-text'
+            }`}
+          >
+            <Activity className="w-3 h-3" />
+            <span className="uppercase font-semibold">{globalRefreshPaused ? 'PAUSED' : 'LIVE'}</span>
+          </button>
+        </Tooltip>
 
         {/* Theme Cycler */}
-        <button
-          onClick={cycleTheme}
-          className="p-1.5 rounded hover:bg-hover border border-transparent hover:border-weak text-secondary hover:text-primary transition-all"
-          title={`Cycle UI Theme (Current: ${theme})`}
-        >
-          <SunMoon className="w-4 h-4" />
-        </button>
+        <Tooltip content={`Cycle interface theme (Current: ${theme})`}>
+          <button
+            onClick={cycleTheme}
+            className="p-1.5 rounded hover:bg-hover border border-transparent hover:border-weak text-secondary hover:text-primary transition-all"
+          >
+            <SunMoon className="w-4 h-4" />
+          </button>
+        </Tooltip>
 
         {/* Operational Settings Drawer */}
-        <button
-          onClick={toggleSettingsDrawer}
-          className="p-1.5 rounded hover:bg-hover border border-transparent hover:border-weak text-secondary hover:text-primary transition-all animate-none"
-          title="Open Operational Settings"
-        >
-          <Settings className="w-4 h-4" />
-        </button>
+        <Tooltip content="Open telemetry credentials & webcam settings panel">
+          <button
+            onClick={toggleSettingsDrawer}
+            className="p-1.5 rounded hover:bg-hover border border-transparent hover:border-weak text-secondary hover:text-primary transition-all animate-none"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        </Tooltip>
 
-        {/* AI Brief Console Drawer */}
-        <button
-          onClick={toggleAiBrief}
-          className={`p-1.5 rounded hover:bg-hover border border-transparent hover:border-weak transition-all ${
-            aiBriefOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
-          }`}
-          title="Open AI Brief Console [A]"
-        >
-          <Cpu className="w-4 h-4" />
-        </button>
+        {/* AI Brief Drawer */}
+        <Tooltip content="Toggle daily AI strategic brief overlay [A]">
+          <button
+            onClick={toggleAiBrief}
+            className={`p-1.5 rounded hover:bg-hover border border-transparent hover:border-weak transition-all ${
+              aiBriefOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
+            }`}
+          >
+            <Cpu className="w-4 h-4" />
+          </button>
+        </Tooltip>
 
         <div className="w-px h-5 bg-border-weak" />
 
         {/* Layout Control Switches */}
         <div className="flex items-center gap-0.5 bg-deepest bg-opacity-40 p-0.5 rounded border border-weak">
-          <button
-            onClick={toggleLayerPanel}
-            className={`p-1.5 rounded transition-all ${
-              layerPanelOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
-            }`}
-            title="Toggle Left Layers Drawer"
-          >
-            <Layers className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={toggleBottomPanel}
-            className={`p-1.5 rounded transition-all ${
-              bottomPanelOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
-            }`}
-            title="Toggle Bottom Details Panel"
-          >
-            <Table className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={toggleIntelPanel}
-            className={`p-1.5 rounded transition-all ${
-              intelPanelOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
-            }`}
-            title="Toggle Right Intelligence Feeds"
-          >
-            <Rss className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={toggleReconToolkit}
-            className={`p-1.5 rounded transition-all ${
-              reconToolkitOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
-            }`}
-            title="Toggle OSINT Recon Toolkit [S]"
-          >
-            <Terminal className="w-3.5 h-3.5" />
-          </button>
+          <Tooltip content="Toggle left map layer toggles panel">
+            <button
+              onClick={toggleLayerPanel}
+              className={`p-1.5 rounded transition-all ${
+                layerPanelOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+            </button>
+          </Tooltip>
+          <Tooltip content="Toggle bottom tabular list telemetry inspector">
+            <button
+              onClick={toggleBottomPanel}
+              className={`p-1.5 rounded transition-all ${
+                bottomPanelOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
+              }`}
+            >
+              <Table className="w-3.5 h-3.5" />
+            </button>
+          </Tooltip>
+          <Tooltip content="Toggle right real-time geopolitical & cyber tickers">
+            <button
+              onClick={toggleIntelPanel}
+              className={`p-1.5 rounded transition-all ${
+                intelPanelOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
+              }`}
+            >
+              <Rss className="w-3.5 h-3.5" />
+            </button>
+          </Tooltip>
+          <Tooltip content="Toggle OSINT cyber toolkit overlay scanner [S]">
+            <button
+              onClick={toggleReconToolkit}
+              className={`p-1.5 rounded transition-all ${
+                reconToolkitOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
+              }`}
+            >
+              <Terminal className="w-3.5 h-3.5" />
+            </button>
+          </Tooltip>
         </div>
 
         {/* Fullscreen Map Toggle */}
-        <button
-          onClick={handleFullscreenClick}
-          className="p-1.5 rounded bg-deepest bg-opacity-40 border border-weak hover:bg-hover text-secondary hover:text-primary transition-all"
-          title="Toggle Fullscreen Mode"
-        >
-          {mapFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-        </button>
+        <Tooltip content="Toggle browser workspace fullscreen mode">
+          <button
+            onClick={handleFullscreenClick}
+            className="p-1.5 rounded bg-deepest bg-opacity-40 border border-weak hover:bg-hover text-secondary hover:text-primary transition-all"
+          >
+            {mapFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+          </button>
+        </Tooltip>
       </div>
     </header>
   )

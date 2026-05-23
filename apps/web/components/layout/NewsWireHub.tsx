@@ -2,8 +2,8 @@
 
 import * as React from 'react'
 import { Rss, Globe, Radio, Shield, HelpCircle, Activity, Play, Search, MapPin, ExternalLink, AlertTriangle } from 'lucide-react'
-import { useMapStore, useAppStore } from '@panopticon/core/stores'
-import { fetchGdeltEvents } from '@panopticon/data-pipeline'
+import { useSWRConfig } from 'swr'
+import { useMapStore, useAppStore, useNewsStore } from '@panopticon/core/stores'
 
 // 5 tactical domains for filtering
 type Category = 'geopolitical' | 'cyber' | 'maritime' | 'hazard' | 'markets'
@@ -123,71 +123,22 @@ const CuratedRegistry = curatingFeedsList()
 
 export default function NewsWireHub() {
   const { flyTo, setSelectedEntityId } = useMapStore()
+  const { newsEvents } = useNewsStore()
   const [activeCategory, setActiveCategory] = React.useState<Category | 'all'>('all')
   const [searchQuery, setSearchQuery] = React.useState('')
-  const [liveRSS, setLiveRSS] = React.useState<FeedItem[]>([])
+  const [clickedCardId, setClickedCardId] = React.useState<string | null>(null)
+  const { mutate } = useSWRConfig()
   const [loading, setLoading] = React.useState(false)
 
-  // NOTE 1 — RSS Feed CORS:
-  // Fetch actual RSS feed cleanly client-side. We route through HTTPS CORS proxy allorigins.win
-  // If the query fails, it catches cleanly and fails silently, keeping the application fully crash-free.
-  const fetchLiveRSSFeeds = async () => {
+  const handleManualRefresh = async () => {
     setLoading(true)
-    try {
-      const targetRssUrl = 'https://hnrss.org/frontpage' // Clean CORS-relay test feed
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetRssUrl)}`
-      
-      const res = await fetch(proxyUrl)
-      if (!res.ok) throw new Error('CORS proxy returned error')
-      const container = await res.json()
-      
-      // Parse XML in client browser
-      const parser = new DOMParser()
-      const xml = parser.parseFromString(container.contents, 'text/xml')
-      const items = xml.querySelectorAll('item')
-      
-      const parsedItems: FeedItem[] = []
-      items.forEach((item, idx) => {
-        if (idx < 5) {
-          const title = item.querySelector('title')?.textContent || 'Live Feed Article'
-          const link = item.querySelector('link')?.textContent || ''
-          const description = item.querySelector('description')?.textContent || 'No summary available.'
-          
-          parsedItems.push({
-            id: `live-rss-${idx}`,
-            category: 'cyber', // Map tech news to cyber
-            source: 'Hacker News RSS Relay',
-            title: title,
-            summary: description.replace(/<[^>]*>/g, '').slice(0, 150) + '...',
-            timestamp: 'Just now',
-            url: link,
-            severity: 'low'
-          })
-        }
-      })
-      setLiveRSS(parsedItems)
-    } catch (e) {
-      // NOTE 1 — RSS Feed CORS:
-      // Fail silently and do not crash the panel
-      console.warn('Silent RSS fetch failure via proxy:', e)
-    } finally {
-      setLoading(false)
-    }
+    await mutate(['gdelt-events-core', 'protest'])
+    setTimeout(() => setLoading(false), 500)
   }
-
-  // Fetch live RSS on mount
-  React.useEffect(() => {
-    fetchLiveRSSFeeds()
-  }, [])
-
-  // Combine simulated registry with live fetched RSS feeds
-  const allFeeds = React.useMemo(() => {
-    return [...liveRSS, ...CuratedRegistry]
-  }, [liveRSS])
 
   // Filter feeds locally
   const filteredFeeds = React.useMemo(() => {
-    let list = allFeeds
+    let list = newsEvents as FeedItem[]
     if (activeCategory !== 'all') {
       list = list.filter(f => f.category === activeCategory)
     }
@@ -200,12 +151,16 @@ export default function NewsWireHub() {
       )
     }
     return list
-  }, [allFeeds, activeCategory, searchQuery])
+  }, [newsEvents, activeCategory, searchQuery])
 
   const handleFeedClick = (feed: FeedItem) => {
     if (feed.coordinates && feed.coordinates.length === 2) {
       flyTo(feed.coordinates[0], feed.coordinates[1], 11) // flyTo map integration
       setSelectedEntityId(feed.id)
+      
+      // Visual confirm flash animation trigger
+      setClickedCardId(feed.id)
+      setTimeout(() => setClickedCardId(null), 800)
     }
   }
 
@@ -244,7 +199,7 @@ export default function NewsWireHub() {
           />
         </div>
         <button
-          onClick={fetchLiveRSSFeeds}
+          onClick={handleManualRefresh}
           disabled={loading}
           className="p-1.5 rounded hover:bg-hover text-secondary border border-weak transition-all hover:text-primary"
           title="Manual Force Refresh Feeds"
@@ -284,6 +239,10 @@ export default function NewsWireHub() {
             key={feed.id}
             onClick={() => handleFeedClick(feed)}
             className={`glass-panel p-2.5 flex flex-col gap-1.5 cursor-pointer hover:bg-hover hover:bg-opacity-25 border border-weak transition-all duration-150 border-l-2 ${
+              feed.id === clickedCardId
+                ? 'bg-accent/25 border-accent shadow-[0_0_12px_rgba(0,240,255,0.4)]'
+                : ''
+            } ${
               feed.severity === 'critical' ? 'border-l-status-critical' : feed.severity === 'high' ? 'border-l-status-critical opacity-90' : feed.severity === 'moderate' ? 'border-l-status-warning' : 'border-l-accent'
             }`}
           >

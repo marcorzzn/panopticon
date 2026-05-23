@@ -9,3 +9,6 @@ export type { AppStore } from './app-store'
 
 export { useOsintStore } from './osint-store'
 export type { OsintStore, OsintEvent, TelemetryPoint, AssociatedSource, CorrelationEdge } from './osint-store'
+
+export { useNewsStore } from './news-store'
+export type { NewsStore, NewsFeedItem, NewsCategory } from './news-store'
