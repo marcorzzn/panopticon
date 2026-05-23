@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { Rss, Globe, Radio, Shield, HelpCircle, Activity, Play, Search, MapPin, ExternalLink, AlertTriangle } from 'lucide-react'
+import { useSWRConfig } from 'swr'
 import { useMapStore, useAppStore, useNewsStore } from '@panopticon/core/stores'
 
 // 5 tactical domains for filtering
@@ -126,6 +127,14 @@ export default function NewsWireHub() {
   const [activeCategory, setActiveCategory] = React.useState<Category | 'all'>('all')
   const [searchQuery, setSearchQuery] = React.useState('')
   const [clickedCardId, setClickedCardId] = React.useState<string | null>(null)
+  const { mutate } = useSWRConfig()
+  const [loading, setLoading] = React.useState(false)
+
+  const handleManualRefresh = async () => {
+    setLoading(true)
+    await mutate(['gdelt-events-core', 'protest'])
+    setTimeout(() => setLoading(false), 500)
+  }
 
   // Filter feeds locally
   const filteredFeeds = React.useMemo(() => {
@@ -190,7 +199,7 @@ export default function NewsWireHub() {
           />
         </div>
         <button
-          onClick={fetchLiveRSSFeeds}
+          onClick={handleManualRefresh}
           disabled={loading}
           className="p-1.5 rounded hover:bg-hover text-secondary border border-weak transition-all hover:text-primary"
           title="Manual Force Refresh Feeds"
