@@ -45,17 +45,7 @@ import type { WebcamEntity, SatelliteEntity } from '@panopticon/core/types'
 import layersConfig from '../../../../packages/core/src/config/layers.json'
 import persistentConflicts from '../../../../packages/core/src/config/persistent-conflicts.json'
 
-// ── DETERMINISTIC SEED-HASHED RANDOM GENERATOR ────────────────────────────────
-function seedRandom(seedStr: string) {
-  let hash = 0
-  for (let i = 0; i < seedStr.length; i++) {
-    hash = seedStr.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  return function() {
-    const x = Math.sin(hash++) * 10000
-    return x - Math.floor(x)
-  }
-}
+
 
 // ── 1. HELPER FOR ENTITY RECON TARGET GENERATION ────────────────────────────
 const getEntityReconTarget = (entity: { type: string; data: any }) => {
@@ -684,50 +674,7 @@ export default function DetailInspector() {
   const entity = React.useMemo(() => {
     if (!selectedEntityId) return null
 
-    // Search custom add-on layers
-    if (selectedEntityId.includes('-add-') && selectedEntityId.includes('-node-')) {
-      const match = selectedEntityId.match(/^([a-z]+-add-\d+)-node-(\d+)$/)
-      if (match) {
-        const layerId = match[1]
-        const nodeIndex = parseInt(match[2]!, 10)
-        // Find the layer definition in config
-        const layerDef = (layersConfig as any[]).find(l => l.id === layerId)
-        if (layerDef) {
-          // Re-generate the feature using our deterministic generator
-          const rand = seedRandom(layerId)
-          const count = Math.floor(rand() * 11) + 5
-          if (nodeIndex >= 0 && nodeIndex < count) {
-            // Find that specific node's data
-            let targetNode = null
-            for (let i = 0; i <= nodeIndex; i++) {
-              const lat = rand() * 140 - 70
-              const lng = rand() * 360 - 180
-              const intensity = Math.floor(rand() * 100)
-              const status = rand() > 0.15 ? 'NOMINAL' : 'DEGRADED'
-              if (i === nodeIndex) {
-                targetNode = {
-                  id: selectedEntityId,
-                  coordinates: [lng, lat],
-                  label: `${layerDef.name} Node #${i + 1}`,
-                  intensity,
-                  status,
-                  description: `Operational Telemetry Node for ${layerDef.name}. Signal strength: ${intensity}%. Status: ACTIVE.`,
-                  layerName: layerDef.name,
-                  color: layerDef.paint['circle-color'] || '#0066cc',
-                  domainName: layerDef.id.startsWith('climate') ? 'Climate & Atmosphere' :
-                              layerDef.id.startsWith('geopol') ? 'Geopolitical & Threat' :
-                              layerDef.id.startsWith('cyber') ? 'OSINT & Cyber Recon' : 'Logistics & Infrastructure'
-                }
-                break
-              }
-            }
-            if (targetNode) {
-              return { type: 'custom-node', data: targetNode }
-            }
-          }
-        }
-      }
-    }
+
 
     // Search Space Satellites
     const sat = satellites.find((item) => item.id === selectedEntityId)
@@ -1758,81 +1705,7 @@ export default function DetailInspector() {
           )
         })()}
 
-        {/* ── CUSTOM NODE DETAILS ── */}
-        {entity.type === 'custom-node' && (() => {
-          const node = entity.data as any
-          return (
-            <div className="space-y-4 font-mono">
-              <div className="p-3 bg-deepest/60 border rounded flex flex-col gap-1 items-center justify-center" style={{ borderColor: `${node.color}3f` }}>
-                <Compass className="w-8 h-8 animate-pulse" style={{ color: node.color }} />
-                <span className="text-sm font-bold tracking-wider mt-1 text-center" style={{ color: node.color }}>
-                  TACTICAL DATA NODE
-                </span>
-                <span className="text-[9px] text-secondary uppercase">
-                  {node.domainName}
-                </span>
-              </div>
 
-              {/* Status and intensity widget */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
-                  <span className="text-[8px] text-secondary uppercase">Signal Strength</span>
-                  <span className="text-sm font-semibold mt-0.5" style={{ color: node.color }}>
-                    {node.intensity}%
-                  </span>
-                </div>
-
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
-                  <span className="text-[8px] text-secondary uppercase">Status</span>
-                  <span className={`text-sm font-semibold mt-0.5 ${node.status === 'NOMINAL' ? 'text-green-400' : 'text-yellow-400'}`}>
-                    {node.status}
-                  </span>
-                </div>
-              </div>
-
-              {/* Node description */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2">
-                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-[#1e3050] pb-1">NODE METRICS</span>
-                
-                <div className="flex justify-between items-center text-[10px]">
-                  <span className="text-secondary text-[8px] uppercase">Node Label:</span>
-                  <span className="font-semibold text-primary">{node.label}</span>
-                </div>
-
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
-                  <span className="text-secondary text-[8px] uppercase">Layer Source:</span>
-                  <span className="font-semibold text-primary">{node.layerName}</span>
-                </div>
-
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
-                  <span className="text-secondary text-[8px] uppercase">Latitude:</span>
-                  <span className="text-primary tabular-nums">{node.coordinates[1]?.toFixed(5)}</span>
-                </div>
-
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
-                  <span className="text-secondary text-[8px] uppercase">Longitude:</span>
-                  <span className="text-primary tabular-nums">{node.coordinates[0]?.toFixed(5)}</span>
-                </div>
-              </div>
-
-              {/* Node detailed description paragraph */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded">
-                <span className="text-[8px] text-secondary uppercase block mb-1">Observation Log</span>
-                <p className="text-[10px] text-secondary leading-relaxed bg-deepest/20 p-2 border border-[#1e3050]/50 rounded">
-                  {node.description}
-                </p>
-              </div>
-
-              {/* OSINT CYBER RECON BLOCK */}
-              <div className="border-t border-[#1e3050] pt-4 space-y-3 font-mono">
-                <span className="text-[8px] font-bold tracking-widest text-[#00ff00] uppercase block">
-                  🛡️ OSINT CYBER SEC-OPS
-                </span>
-                <EntityReconPanel entity={entity} />
-              </div>
-            </div>
-          )
-        })()}
 
       </div>
     </div>
