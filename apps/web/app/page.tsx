@@ -15,6 +15,7 @@ import {
   fetchSatellites,
 } from '@panopticon/data-pipeline'
 import { useMapStore, usePanelStore, useAppStore } from '@panopticon/core/stores'
+import { X, HelpCircle } from 'lucide-react'
 
 // Layout & Panel Imports
 import DashboardLayout from '@/components/layout/DashboardLayout'
@@ -48,6 +49,11 @@ export default function Home() {
   const toggleIntelPanel = usePanelStore((s) => s.toggleIntelPanel)
   const toggleMapFullscreen = usePanelStore((s) => s.toggleMapFullscreen)
   const collapseAll = usePanelStore((s) => s.collapseAll)
+  const toggleReconToolkit = usePanelStore((s) => s.toggleReconToolkit)
+  const toggleAiBrief = usePanelStore((s) => s.toggleAiBrief)
+
+  const [showHelp, setShowHelp] = React.useState(false)
+  const presetIndexRef = React.useRef(0)
 
   const globalRefreshPaused = useAppStore((s) => s.globalRefreshPaused)
 
@@ -183,6 +189,15 @@ export default function Home() {
   // ── 2. GEOPOLITICAL C2 KEYBOARD SHORTCUTS SYSTEM ─────────────────────────
 
   React.useEffect(() => {
+    const REGION_PRESETS = [
+      { longitude: 121.0, latitude: 23.5, zoom: 6.5, pitch: 0, bearing: 0 }, // Taiwan Strait
+      { longitude: 56.3, latitude: 26.6, zoom: 6.5, pitch: 0, bearing: 0 },  // Strait of Hormuz
+      { longitude: 32.5, latitude: 30.1, zoom: 7.0, pitch: 0, bearing: 0 },  // Suez Canal
+      { longitude: 127.2, latitude: 38.3, zoom: 7.5, pitch: 0, bearing: 0 }, // Korean DMZ
+      { longitude: -66.5, latitude: 6.4, zoom: 5.5, pitch: 0, bearing: 0 },  // Venezuela Frontier
+      { longitude: -74.0, latitude: 40.73, zoom: 11.0, pitch: 0, bearing: 0 } // New York Harbor
+    ]
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Safe guard against typing in Search boxes or input controls
       if (
@@ -210,7 +225,7 @@ export default function Home() {
           break
         case 's':
           e.preventDefault()
-          toggleLayer('space')
+          toggleReconToolkit() // [S] = Recon Toolkit Toggle
           break
         case 'w':
           e.preventDefault()
@@ -218,7 +233,10 @@ export default function Home() {
           break
         case 'r':
           e.preventDefault()
-          toggleLayer('recon')
+          // [R] = Smoothly cycle through Geographical presets
+          const preset = REGION_PRESETS[presetIndexRef.current]
+          setViewState(preset)
+          presetIndexRef.current = (presetIndexRef.current + 1) % REGION_PRESETS.length
           break
         case 'g':
           e.preventDefault()
@@ -226,7 +244,7 @@ export default function Home() {
           break
         case 'a':
           e.preventDefault()
-          toggleLayer('airquality')
+          toggleAiBrief() // [A] = AI Brief Drawer Toggle
           break
         case 'c':
           e.preventDefault()
@@ -239,6 +257,10 @@ export default function Home() {
         case 'i':
           e.preventDefault()
           toggleIntelPanel()
+          break
+        case '?':
+          e.preventDefault()
+          setShowHelp((prev) => !prev) // [?] = Toggle Help Overlay
           break
         case 'escape':
           e.preventDefault()
@@ -280,6 +302,8 @@ export default function Home() {
     toggleLayer,
     toggleLayerPanel,
     toggleIntelPanel,
+    toggleReconToolkit,
+    toggleAiBrief,
     collapseAll,
     setSelectedEntityId,
     setViewState,
@@ -287,21 +311,64 @@ export default function Home() {
   ])
 
   return (
-    <DashboardLayout
-      earthquakePanel={<EarthquakePanel />}
-      spaceWeatherPanel={<SpaceWeatherPanel />}
-    >
-      <MapView
-        earthquakes={earthquakes}
-        weatherPoints={weatherPoints}
-        gdeltEvents={gdeltEvents}
-        aircraft={aircraft}
-        wildfires={wildfires}
-        airquality={airquality}
-        acledEvents={acledEvents}
-        webcams={webcams}
-        satellites={satellites}
-      />
-    </DashboardLayout>
+    <>
+      <DashboardLayout
+        earthquakePanel={<EarthquakePanel />}
+        spaceWeatherPanel={<SpaceWeatherPanel />}
+      >
+        <MapView
+          earthquakes={earthquakes}
+          weatherPoints={weatherPoints}
+          gdeltEvents={gdeltEvents}
+          aircraft={aircraft}
+          wildfires={wildfires}
+          airquality={airquality}
+          acledEvents={acledEvents}
+          webcams={webcams}
+          satellites={satellites}
+        />
+      </DashboardLayout>
+
+      {showHelp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-deepest bg-opacity-75 backdrop-blur-sm select-none animate-in fade-in duration-200" onClick={() => setShowHelp(false)}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-[360px] bg-surface border border-weak rounded p-5 flex flex-col gap-4 shadow-2xl relative font-sans animate-in zoom-in-95 duration-200"
+          >
+            <button
+              onClick={() => setShowHelp(false)}
+              className="absolute top-3 right-3 text-secondary hover:text-primary p-1 hover:bg-hover rounded transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            
+            <div className="flex items-center gap-2 font-display text-xs font-bold uppercase tracking-wider text-accent border-b border-weak pb-2">
+              <HelpCircle className="w-4 h-4" />
+              <span>TACTICAL COMMAND HOTKEYS</span>
+            </div>
+
+            <div className="flex flex-col gap-2 font-mono text-[9px] text-secondary">
+              {[
+                { key: 'F', desc: 'Toggle Fullscreen Map' },
+                { key: 'S', desc: 'Toggle OSINT Recon Toolkit' },
+                { key: 'A', desc: 'Toggle AI Brief Console' },
+                { key: 'R', desc: 'Cycle Geographical presets' },
+                { key: 'L', desc: 'Toggle Left Layers Drawer' },
+                { key: 'I', desc: 'Toggle Right Intel & CII sidebar' },
+                { key: '?', desc: 'Toggle this help overlay' },
+                { key: 'ESC', desc: 'Collapse all operational panels' },
+                { key: '1', desc: 'Fly camera out to global scale' },
+                { key: '+ / -', desc: 'Zoom camera in / out' }
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between border-b border-weak border-dashed pb-1.5">
+                  <span className="font-bold text-accent">[{item.key}]</span>
+                  <span className="text-primary">{item.desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

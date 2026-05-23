@@ -12,6 +12,9 @@ export interface PanelStore {
   layerPanelOpen: boolean
   intelPanelOpen: boolean
   bottomPanelOpen: boolean
+  settingsDrawerOpen: boolean
+  reconToolkitOpen: boolean
+  aiBriefOpen: boolean
 
   // ── Panel sizes — flat numbers (percentages of viewport) ──────────────
   layerPanelSize: number
@@ -31,6 +34,9 @@ export interface PanelStore {
   toggleLayerPanel: () => void
   toggleIntelPanel: () => void
   toggleBottomPanel: () => void
+  toggleSettingsDrawer: () => void
+  toggleReconToolkit: () => void
+  toggleAiBrief: () => void
   toggleMapFullscreen: () => void
   setLayerPanelSize: (size: number) => void
   setIntelPanelSize: (size: number) => void
@@ -52,6 +58,9 @@ const DEFAULTS = {
   layerPanelOpen: true,
   intelPanelOpen: false,
   bottomPanelOpen: false,
+  settingsDrawerOpen: false,
+  reconToolkitOpen: false,
+  aiBriefOpen: false,
   layerPanelSize: 18,
   intelPanelSize: 22,
   bottomPanelSize: 30,
@@ -80,6 +89,15 @@ export const usePanelStore = create<PanelStore>()(
       toggleBottomPanel: () =>
         set((s) => ({ bottomPanelOpen: !s.bottomPanelOpen })),
 
+      toggleSettingsDrawer: () =>
+        set((s) => ({ settingsDrawerOpen: !s.settingsDrawerOpen })),
+
+      toggleReconToolkit: () =>
+        set((s) => ({ reconToolkitOpen: !s.reconToolkitOpen })),
+
+      toggleAiBrief: () =>
+        set((s) => ({ aiBriefOpen: !s.aiBriefOpen })),
+
       toggleMapFullscreen: () =>
         set((s) => ({
           mapFullscreen: !s.mapFullscreen,
@@ -90,6 +108,9 @@ export const usePanelStore = create<PanelStore>()(
                 layerPanelOpen: false,
                 intelPanelOpen: false,
                 bottomPanelOpen: false,
+                settingsDrawerOpen: false,
+                reconToolkitOpen: false,
+                aiBriefOpen: false,
               }),
         })),
 
@@ -113,6 +134,9 @@ export const usePanelStore = create<PanelStore>()(
           layerPanelOpen: false,
           intelPanelOpen: false,
           bottomPanelOpen: false,
+          settingsDrawerOpen: false,
+          reconToolkitOpen: false,
+          aiBriefOpen: false,
         }),
 
       resetLayout: () => set({ ...DEFAULTS }),
@@ -124,6 +148,9 @@ export const usePanelStore = create<PanelStore>()(
         layerPanelOpen: state.layerPanelOpen,
         intelPanelOpen: state.intelPanelOpen,
         bottomPanelOpen: state.bottomPanelOpen,
+        settingsDrawerOpen: state.settingsDrawerOpen,
+        reconToolkitOpen: state.reconToolkitOpen,
+        aiBriefOpen: state.aiBriefOpen,
         layerPanelSize: state.layerPanelSize,
         intelPanelSize: state.intelPanelSize,
         bottomPanelSize: state.bottomPanelSize,

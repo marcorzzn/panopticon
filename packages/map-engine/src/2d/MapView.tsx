@@ -123,7 +123,7 @@ export default function MapView({
       layerManagerRef.current = new LayerManager(map)
 
       // Silence missing sprite images from public styles once
-      map.on('styleimagemissing', (e) => {
+      map.on('styleimagemissing', (e: any) => {
         const id = e.id
         if (!map.hasImage(id)) {
           const width = 1
@@ -629,7 +629,7 @@ export default function MapView({
       <Map
         {...viewState}
         ref={mapRef}
-        onMove={(evt) => setViewState(evt.viewState)}
+        onMove={(evt: any) => setViewState(evt.viewState)}
         onLoad={onMapLoad}
         onMoveEnd={syncBounds}
         transformRequest={transformRequest}

@@ -13,6 +13,8 @@ import {
   Cpu,
   Tv,
   SunMoon,
+  Settings,
+  Terminal,
 } from 'lucide-react'
 import { usePanelStore, useAppStore } from '@panopticon/core/stores'
 import LiveClock from '../widgets/LiveClock'
@@ -27,6 +29,11 @@ export default function TopBar() {
     toggleIntelPanel,
     toggleBottomPanel,
     toggleMapFullscreen,
+    toggleSettingsDrawer,
+    reconToolkitOpen,
+    toggleReconToolkit,
+    aiBriefOpen,
+    toggleAiBrief,
   } = usePanelStore()
 
   const {
@@ -129,6 +136,26 @@ export default function TopBar() {
           <SunMoon className="w-4 h-4" />
         </button>
 
+        {/* Operational Settings Drawer */}
+        <button
+          onClick={toggleSettingsDrawer}
+          className="p-1.5 rounded hover:bg-hover border border-transparent hover:border-weak text-secondary hover:text-primary transition-all animate-none"
+          title="Open Operational Settings"
+        >
+          <Settings className="w-4 h-4" />
+        </button>
+
+        {/* AI Brief Console Drawer */}
+        <button
+          onClick={toggleAiBrief}
+          className={`p-1.5 rounded hover:bg-hover border border-transparent hover:border-weak transition-all ${
+            aiBriefOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
+          }`}
+          title="Open AI Brief Console [A]"
+        >
+          <Cpu className="w-4 h-4" />
+        </button>
+
         <div className="w-px h-5 bg-border-weak" />
 
         {/* Layout Control Switches */}
@@ -159,6 +186,15 @@ export default function TopBar() {
             title="Toggle Right Intelligence Feeds"
           >
             <Rss className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={toggleReconToolkit}
+            className={`p-1.5 rounded transition-all ${
+              reconToolkitOpen ? 'bg-accent bg-opacity-20 text-accent' : 'text-secondary hover:text-primary'
+            }`}
+            title="Toggle OSINT Recon Toolkit [S]"
+          >
+            <Terminal className="w-3.5 h-3.5" />
           </button>
         </div>
 

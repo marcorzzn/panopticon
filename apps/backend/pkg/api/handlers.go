@@ -29,10 +29,6 @@ func writeJSON(w http.ResponseWriter, status int, data interface{}) {
 }
 
 // 1. Get Sources Operational Status
-func GetSourcesHandler(w http.ResponseWriter, r *http.Response) {
-	// Dummy signature for router helper
-}
-
 // Actual handler implementation supporting chi Signature: func(w http.ResponseWriter, r *http.Request)
 func GetSourcesHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
