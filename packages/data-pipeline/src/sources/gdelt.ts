@@ -9,9 +9,8 @@ function getSeverityFromGoldstein(goldstein: number): SeverityLevel {
   if (goldstein <= 4.0) return 'low' as SeverityLevel
   return 'info' as SeverityLevel
 }
-
 export async function fetchGdeltEvents(query: string = 'protest'): Promise<GdeltEvent[]> {
-  const targetUrl = `https://api.gdeltproject.org/api/v2/geo/geo?query=${encodeURIComponent(query)}&maxrecords=150&mode=pointdata&format=GeoJSON`
+  const targetUrl = `https://api.gdeltproject.org/api/v2/geo/geo?query=${encodeURIComponent(query)}&maxrecords=250&mode=pointdata&timespan=LAST24H&format=json`
   const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
   
   // Retrieve the client-side Gemini key from localStorage if available

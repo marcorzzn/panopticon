@@ -78,7 +78,8 @@ export default function TopBar() {
       'openaq-airquality-core',
       'acled-conflicts-core',
       'webcams-core',
-      'space-satellites-core'
+      'space-satellites-core',
+      'rss-news-wire-core'
     ]
     await Promise.all([
       ...keys.map(k => mutate(k)),

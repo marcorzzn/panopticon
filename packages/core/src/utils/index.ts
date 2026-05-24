@@ -9,6 +9,11 @@ export {
 } from './geo'
 
 export {
+  GridSpatialIndex,
+  type SpatialEntry,
+} from './spatial-index'
+
+export {
   relativeTime,
   formatUtc,
   formatLocal,

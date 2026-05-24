@@ -14,5 +14,6 @@ export * from './sources/webcams'
 export * from './sources/recon'
 export * from './sources/space'
 export * from './sources/gemini'
+export * from './sources/news'
 export * from './registry'
 

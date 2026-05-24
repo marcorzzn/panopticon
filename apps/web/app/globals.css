@@ -36,7 +36,9 @@
 :root {
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
+}
 
+:root, [data-theme="dark"] {
   /* Background layers */
   --pan-bg-base:        #06080b;   /* Map canvas background */
   --pan-bg-surface:     #0d1117;   /* Sidebars, sliding drawers */
@@ -93,6 +95,65 @@
   --pan-marker-space:     #cca3ff;   /* Space lavender */
   --pan-marker-cctv:      #ffd700;   /* Surveillance amber */
   --pan-marker-conflict:  #ff1a1a;   /* Long-term wars */
+}
+
+[data-theme="light"] {
+  /* Background layers */
+  --pan-bg-base:        #f0f2f5;   /* Map canvas background */
+  --pan-bg-surface:     #ffffff;   /* Sidebars, sliding drawers */
+  --pan-bg-raised:      #f7f9fa;   /* Cards, selectors, interactive layers */
+  --pan-bg-overlay:     #ffffff;   /* Tooltips, context modals */
+  --pan-bg-interactive: #e4e6eb;   /* Active row hover, list clicks */
+
+  /* Border styling */
+  --pan-border-subtle:  rgba(0, 0, 0, 0.04);
+  --pan-border-default: rgba(0, 0, 0, 0.10);
+  --pan-border-strong:  rgba(0, 0, 0, 0.22);
+  --pan-border-accent:  rgba(0, 150, 100, 0.35);
+
+  /* Typography color hierarchy */
+  --pan-text-primary:   #1c1e21;   /* Active headlines, tabular values */
+  --pan-text-secondary: #606770;   /* General description, metadata labels */
+  --pan-text-muted:     #0066cc;   /* Secondary tags, informational labels */
+  --pan-text-accent:    #00a875;   /* Verified active green status */
+  --pan-text-warning:   #b86d00;   /* Degraded status alerts */
+  --pan-text-danger:    #d32f2f;   /* Critical telemetry alerts */
+
+  /* Cyberpunk Interactive Buttons */
+  --pan-btn-primary-bg:    #0066cc;
+  --pan-btn-primary-text:  #ffffff;
+  --pan-btn-primary-hover: #0052a3;
+  --pan-btn-secondary-bg:  #f7f9fa;
+  --pan-btn-secondary-text:#606770;
+  --pan-btn-secondary-hover:#e4e6eb;
+  --pan-btn-active-bg:     #e6f7f0;
+  --pan-btn-active-text:   #00a875;
+  --pan-btn-active-border: #00a875;
+
+  /* Severity mapping system */
+  --pan-sev-critical-bg:   #ffebee;
+  --pan-sev-critical-text: #c62828;
+  --pan-sev-critical-border:#ef5350;
+  --pan-sev-high-bg:       #fff3e0;
+  --pan-sev-high-text:     #ef6c00;
+  --pan-sev-high-border:   #ffb74d;
+  --pan-sev-moderate-bg:   #e8f5e9;
+  --pan-sev-moderate-text: #2e7d32;
+  --pan-sev-moderate-border:#81c784;
+  --pan-sev-low-bg:        #e3f2fd;
+  --pan-sev-low-text:      #1565c0;
+  --pan-sev-low-border:    #64b5f6;
+
+  /* Tactical Layer Marker Colors */
+  --pan-marker-geopol:    #d32f2f;   /* Geopolitical red */
+  --pan-marker-cyber:     #7b1fa2;   /* Cyber purple */
+  --pan-marker-maritime:  #1565c0;   /* Maritime blue */
+  --pan-marker-hazard:    #e65100;   /* Natural hazards orange */
+  --pan-marker-markets:   #2e7d32;   /* Financial teal */
+  --pan-marker-aviation:  #0097a7;   /* Flights cyan */
+  --pan-marker-space:     #651fff;   /* Space lavender */
+  --pan-marker-cctv:      #f57f17;   /* Surveillance amber */
+  --pan-marker-conflict:  #b71c1c;   /* Long-term wars */
 }
 
 body {

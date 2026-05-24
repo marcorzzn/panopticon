@@ -4,6 +4,7 @@ import * as React from 'react'
 import { Map, Source, Layer, NavigationControl, ScaleControl } from 'react-map-gl/maplibre'
 import type { MapRef } from 'react-map-gl/maplibre'
 import { useMapStore, useAppStore, useNewsStore, getMapMarkers } from '@panopticon/core/stores'
+import { GridSpatialIndex, type SpatialEntry } from '@panopticon/core/utils'
 import persistentConflicts from '../../../core/src/config/persistent-conflicts.json'
 import { getTerminatorPolygon } from '../layers/terminator-layer'
 import { LayerManager } from '../layers/LayerFactory'
@@ -57,10 +58,67 @@ export default function MapView({
     setHoveredEntityId,
     selectedEntityId,
     activeReconScan,
+    setLayerEntityCount,
   } = useMapStore()
 
   const { theme } = useAppStore()
   const { newsEvents } = useNewsStore()
+
+  // Instantiate and load spatial index for webcams
+  const spatialIndex = React.useMemo(() => {
+    const index = new GridSpatialIndex()
+    const entries: SpatialEntry[] = webcams.map((cam) => ({
+      id: cam.id,
+      lat: cam.coordinates[1] ?? 0,
+      lon: cam.coordinates[0] ?? 0,
+      name: cam.label || 'Webcam Feed',
+      url: cam.streamUrl || '',
+      source: cam.provider || 'AMOS',
+      status: cam.status || 'healthy'
+    }))
+    index.load(entries)
+    return index
+  }, [webcams])
+
+  // Reactively query culling
+  const culledWebcams = React.useMemo(() => {
+    if (!bounds || bounds.length !== 4) return []
+    // Add 20% viewport buffer
+    const [w, s, e, n] = bounds
+    const latHeight = n - s
+    const lngWidth = e >= w ? e - w : (e + 360) - w
+
+    const bufferedBounds: [number, number, number, number] = [
+      w - lngWidth * 0.2,
+      Math.max(-90, s - latHeight * 0.2),
+      e + lngWidth * 0.2,
+      Math.min(90, n + latHeight * 0.2)
+    ]
+
+    // Wrap around boundaries
+    if (bufferedBounds[0] < -180) bufferedBounds[0] += 360
+    if (bufferedBounds[2] > 180) bufferedBounds[2] -= 360
+
+    return spatialIndex.query(bufferedBounds, 500)
+  }, [spatialIndex, bounds])
+
+  const activeWebcams: WebcamEntity[] = React.useMemo(() => {
+    return culledWebcams.map((entry) => ({
+      id: entry.id,
+      coordinates: [entry.lon, entry.lat] as [number, number],
+      label: entry.name,
+      streamUrl: entry.url,
+      status: entry.status,
+      provider: entry.source as any,
+      domain: 'surveillance' as any,
+      timestamp: Date.now()
+    } as WebcamEntity))
+  }, [culledWebcams])
+
+  // Sync culled count back to layer HUD
+  React.useEffect(() => {
+    setLayerEntityCount('webcams', activeWebcams.length)
+  }, [activeWebcams, setLayerEntityCount])
 
   // 1. Calculate Day/Night Terminator Polygon
   const [terminatorGeoJson, setTerminatorGeoJson] = React.useState<any>(null)
@@ -166,11 +224,13 @@ export default function MapView({
     }
   }, [earthquakes])
 
-  // 5. Transform GDELT Events to GeoJSON
-  const gdeltGeoJson = React.useMemo(() => {
-    return {
-      type: 'FeatureCollection',
-      features: gdeltEvents.map((ev) => ({
+  // 5. Consolidate geopolitical and news event layers into a unified WebGL source
+  const unifiedEventsGeoJson = React.useMemo(() => {
+    const features: any[] = []
+
+    // GDELT
+    gdeltEvents.forEach((ev) => {
+      features.push({
         type: 'Feature',
         id: ev.id,
         geometry: {
@@ -179,15 +239,101 @@ export default function MapView({
         },
         properties: {
           id: ev.id,
+          layerId: 'gdelt',
           label: ev.label,
           actor1: ev.actor1,
           actor2: ev.actor2,
           goldsteinScale: ev.goldsteinScale,
           avgTone: ev.avgTone,
+          severity: ev.severity,
+          sourceUrl: ev.sourceUrl,
         },
-      })),
+      })
+    })
+
+    // ACLED
+    acledEvents.forEach((ev, idx) => {
+      features.push({
+        type: 'Feature',
+        id: ev.id || `acled-${idx}`,
+        geometry: {
+          type: 'Point',
+          coordinates: ev.coordinates,
+        },
+        properties: {
+          id: ev.id || `acled-${idx}`,
+          layerId: 'acled',
+          eventType: ev.eventType,
+          subEventType: ev.subEventType,
+          actor1: ev.actor1,
+          actor2: ev.actor2,
+          country: ev.country,
+          location: ev.location,
+          fatalities: ev.fatalities,
+          notes: ev.notes,
+          source: ev.source || 'ACLED',
+          label: ev.label,
+        },
+      })
+    })
+
+    // Persistent Conflicts
+    ;(persistentConflicts as any[]).forEach((c) => {
+      features.push({
+        type: 'Feature',
+        id: c.id,
+        geometry: {
+          type: 'Point',
+          coordinates: [c.lon, c.lat],
+        },
+        properties: {
+          id: c.id,
+          layerId: 'active-conflicts',
+          name: c.name,
+          label: c.name,
+          sourceUrl: c.sourceUrl,
+          description: c.description,
+          category: c.category,
+          intensity: c.intensity,
+          startDate: c.startDate,
+          lastUpdated: c.lastUpdated,
+        },
+      })
+    })
+
+    // News RSS
+    const newsMarkers = getMapMarkers(newsEvents)
+    newsMarkers.forEach((ev) => {
+      features.push({
+        type: 'Feature',
+        id: ev.id,
+        geometry: {
+          type: 'Point',
+          coordinates: ev.coordinates,
+        },
+        properties: {
+          id: ev.id,
+          layerId: 'news-events',
+          type: ev.type,
+          category: ev.category,
+          title: ev.title,
+          label: ev.title,
+          source: ev.timeline ? (ev.timeline[0]?.source || 'Consolidated Wire') : (ev as any).source,
+          severity: ev.severity,
+          summary: ev.summary,
+          timestamp: ev.timestamp,
+          url: ev.url,
+          isContext: ev.type === 'context',
+        },
+      })
+    })
+
+    return {
+      type: 'FeatureCollection',
+      features,
     }
-  }, [gdeltEvents])
+  }, [gdeltEvents, acledEvents, newsEvents])
+
 
   // 6. Transform Weather points to GeoJSON
   const weatherGeoJson = React.useMemo(() => {
@@ -279,33 +425,7 @@ export default function MapView({
     }
   }, [airquality])
 
-  // 10. Transform ACLED Events to GeoJSON (Phase 3 Additions)
-  const acledGeoJson = React.useMemo(() => {
-    return {
-      type: 'FeatureCollection',
-      features: acledEvents.map((ev, idx) => ({
-        type: 'Feature',
-        id: ev.id || `acled-${idx}`,
-        geometry: {
-          type: 'Point',
-          coordinates: ev.coordinates,
-        },
-        properties: {
-          id: ev.id || `acled-${idx}`,
-          eventType: ev.eventType,
-          subEventType: ev.subEventType,
-          actor1: ev.actor1,
-          actor2: ev.actor2,
-          country: ev.country,
-          location: ev.location,
-          fatalities: ev.fatalities,
-          notes: ev.notes,
-          source: ev.source,
-          label: ev.label,
-        },
-      })),
-    }
-  }, [acledEvents])
+  // 10. Unified events layer serves as datasource for ACLED, GDELT, active conflicts, and RSS wire.
 
   // 11. Transform Webcams to GeoJSON (Phase 4 Additions)
   const webcamsGeoJson = React.useMemo(() => {
@@ -315,7 +435,7 @@ export default function MapView({
     const isDeepZoom = viewState.zoom >= 10
     const hasBounds = bounds && bounds.length === 4
     
-    webcams.forEach((cam) => {
+    activeWebcams.forEach((cam) => {
       // 1. Add the baseline verified camera
       features.push({
         type: 'Feature',
@@ -377,7 +497,7 @@ export default function MapView({
       type: 'FeatureCollection',
       features,
     }
-  }, [webcams, viewState.zoom, bounds])
+  }, [activeWebcams, viewState.zoom, bounds])
 
   // 12. Transform Recon scan hops to GeoJSON points & line paths (Phase 4 Additions)
   const reconHopsGeoJson = React.useMemo(() => {
@@ -456,58 +576,7 @@ export default function MapView({
     }
   }, [satellites])
 
-  const newsEventsGeoJson = React.useMemo(() => {
-    const markers = getMapMarkers(newsEvents)
-    return {
-      type: 'FeatureCollection',
-      features: markers.map((ev) => ({
-        type: 'Feature',
-        id: ev.id,
-        geometry: {
-          type: 'Point',
-          coordinates: ev.coordinates,
-        },
-        properties: {
-          id: ev.id,
-          type: ev.type,
-          category: ev.category,
-          title: ev.title,
-          label: ev.title,
-          source: ev.timeline ? (ev.timeline[0]?.source || 'Consolidated Wire') : (ev as any).source,
-          severity: ev.severity,
-          summary: ev.summary,
-          timestamp: ev.timestamp,
-          url: ev.url,
-          isContext: ev.type === 'context',
-        },
-      })),
-    }
-  }, [newsEvents])
-  // Transform Persistent Conflicts to GeoJSON
-  const conflictsGeoJson = React.useMemo(() => {
-    return {
-      type: 'FeatureCollection',
-      features: (persistentConflicts as any[]).map((c) => ({
-        type: 'Feature',
-        id: c.id,
-        geometry: {
-          type: 'Point',
-          coordinates: [c.lon, c.lat],
-        },
-        properties: {
-          id: c.id,
-          name: c.name,
-          label: c.name,
-          sourceUrl: c.sourceUrl,
-          description: c.description,
-          category: c.category,
-          intensity: c.intensity,
-          startDate: c.startDate,
-          lastUpdated: c.lastUpdated,
-        },
-      })),
-    }
-  }, [])
+  // 13. Map interactive IDs and telemetry data.
 
   const interactiveIds = React.useMemo(() => {
     return [
@@ -675,7 +744,6 @@ export default function MapView({
   return (
     <div className="w-full h-full relative" style={{ minHeight: '300px' }}>
       <Map
-        key={theme}
         {...viewState}
         ref={mapRef}
         onMove={(evt: any) => setViewState(evt.viewState)}
@@ -691,6 +759,9 @@ export default function MapView({
       >
         <NavigationControl position="top-right" showCompass={true} />
         <ScaleControl position="bottom-left" unit="metric" />
+
+        {/* ── UNIFIED EVENTS GEOPOLITICAL & NEWS SOURCE ─────────────────────── */}
+        <Source id="panopticon-events-source" type="geojson" data={unifiedEventsGeoJson as any} />
 
         {/* ── 1. DAY/NIGHT TERMINATOR LAYER ───────────────────────────────── */}
         {terminatorGeoJson && (
@@ -754,70 +825,32 @@ export default function MapView({
         </Source>
 
         {/* ── 3. GDELT EVENTS LAYER ───────────────────────────────────────── */}
-        <Source id="gdelt-source" type="geojson" data={gdeltGeoJson as any} cluster={true} clusterMaxZoom={14} clusterRadius={50}>
-          {/* Cluster circles */}
-          <Layer
-            id="gdelt-cluster-circle"
-            type="circle"
-            filter={['has', 'point_count']}
-            layout={{ visibility: isLayerVisible('gdelt') }}
-            paint={{
-              'circle-color': '#3498db',
-              'circle-radius': [
-                'step',
-                ['get', 'point_count'],
-                15,
-                10, 20,
-                50, 25
-              ],
-              'circle-opacity': 0.7,
-              'circle-stroke-width': 1.5,
-              'circle-stroke-color': '#ffffff'
-            }}
-          />
-          {/* Cluster labels */}
-          <Layer
-            id="gdelt-cluster-count"
-            type="symbol"
-            filter={['has', 'point_count']}
-            layout={{
-              visibility: isLayerVisible('gdelt'),
-              'text-field': '{point_count}',
-              'text-font': ['Open Sans Bold', 'Arial Unicode MS Regular'],
-              'text-size': 10,
-              'text-allow-overlap': true
-            }}
-            paint={{
-              'text-color': '#ffffff'
-            }}
-          />
-          {/* Single point */}
-          <Layer
-            id="gdelt-layer"
-            type="circle"
-            filter={['!', ['has', 'point_count']]}
-            layout={{ visibility: isLayerVisible('gdelt') }}
-            paint={{
-              'circle-radius': [
-                'interpolate',
-                ['linear'],
-                ['get', 'avgTone'],
-                -10, 8,
-                0, 5,
-                10, 8,
-              ],
-              'circle-color': [
-                'case',
-                ['<=', ['get', 'goldsteinScale'], -4.0], '#b10000',
-                ['<=', ['get', 'goldsteinScale'], 0.0], '#e8b00f',
-                '#27ae60',
-              ],
-              'circle-stroke-width': 1,
-              'circle-stroke-color': '#ffffff',
-              'circle-opacity': 0.7,
-            }}
-          />
-        </Source>
+        <Layer
+          id="gdelt-layer"
+          type="circle"
+          source="panopticon-events-source"
+          filter={['==', ['get', 'layerId'], 'gdelt']}
+          layout={{ visibility: isLayerVisible('gdelt') }}
+          paint={{
+            'circle-radius': [
+              'interpolate',
+              ['linear'],
+              ['get', 'avgTone'],
+              -10, 8,
+              0, 5,
+              10, 8,
+            ],
+            'circle-color': [
+              'case',
+              ['<=', ['get', 'goldsteinScale'], -4.0], '#b10000',
+              ['<=', ['get', 'goldsteinScale'], 0.0], '#e8b00f',
+              '#27ae60',
+            ],
+            'circle-stroke-width': 1,
+            'circle-stroke-color': '#ffffff',
+            'circle-opacity': 0.7,
+          }}
+        />
 
         {/* ── 4. EARTHQUAKES LAYER ────────────────────────────────────────── */}
         <Source id="earthquakes-source" type="geojson" data={earthquakesGeoJson as any}>
@@ -1052,90 +1085,96 @@ export default function MapView({
         </Source>
 
         {/* ── 8. ACLED GEOPOLITICAL CONFLICTS LAYER ───────────────────────── */}
-        <Source id="acled-source" type="geojson" data={acledGeoJson as any}>
-          {/* Large wide hazard warning ring */}
-          <Layer
-            id="acled-glow-layer"
-            type="circle"
-            layout={{ visibility: isLayerVisible('acled') }}
-            paint={{
-              'circle-radius': [
-                'interpolate',
-                ['linear'],
-                ['get', 'fatalities'],
-                0, 12,
-                5, 24,
-                50, 48
-              ],
-              'circle-color': '#ff9500',
-              'circle-opacity': 0.12,
-              'circle-blur': 0.8,
-            }}
-          />
-          {/* Pulsing warning perimeter stroke */}
-          <Layer
-            id="acled-pulse-layer"
-            type="circle"
-            layout={{ visibility: isLayerVisible('acled') }}
-            paint={{
-              'circle-radius': [
-                'interpolate',
-                ['linear'],
-                ['get', 'fatalities'],
-                0, 16,
-                5, 28,
-                50, 56
-              ],
-              'circle-color': 'transparent',
-              'circle-stroke-width': 1.0,
-              'circle-stroke-color': '#ff9500',
-              'circle-stroke-opacity': 0.6,
-            }}
-          />
-          {/* Solid warning center core dot */}
-          <Layer
-            id="acled-layer"
-            type="circle"
-            layout={{ visibility: isLayerVisible('acled') }}
-            paint={{
-              'circle-radius': [
-                'interpolate',
-                ['linear'],
-                ['get', 'fatalities'],
-                0, 4.5,
-                5, 7.5,
-                50, 12
-              ],
-              'circle-color': '#ff9500',
-              'circle-stroke-width': 1.5,
-              'circle-stroke-color': '#ff3b30',
-              'circle-opacity': 0.85,
-            }}
-          />
-          {/* Fatalities badge label */}
-          <Layer
-            id="acled-label-layer"
-            type="symbol"
-            layout={{
-              visibility: isLayerVisible('acled'),
-              'text-field': [
-                'case',
-                ['>', ['get', 'fatalities'], 0],
-                ['concat', '⚠️ ', ['to-string', ['get', 'fatalities']]],
-                '⚠️'
-              ],
-              'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-              'text-size': 8.5,
-              'text-offset': [0, 1.4],
-              'text-allow-overlap': false,
-            }}
-            paint={{
-              'text-color': '#ff9500',
-              'text-halo-color': '#0b0f1a',
-              'text-halo-width': 1.2,
-            }}
-          />
-        </Source>
+        {/* Large wide hazard warning ring */}
+        <Layer
+          id="acled-glow-layer"
+          type="circle"
+          source="panopticon-events-source"
+          filter={['==', ['get', 'layerId'], 'acled']}
+          layout={{ visibility: isLayerVisible('acled') }}
+          paint={{
+            'circle-radius': [
+              'interpolate',
+              ['linear'],
+              ['get', 'fatalities'],
+              0, 12,
+              5, 24,
+              50, 48
+            ],
+            'circle-color': '#ff9500',
+            'circle-opacity': 0.12,
+            'circle-blur': 0.8,
+          }}
+        />
+        {/* Pulsing warning perimeter stroke */}
+        <Layer
+          id="acled-pulse-layer"
+          type="circle"
+          source="panopticon-events-source"
+          filter={['==', ['get', 'layerId'], 'acled']}
+          layout={{ visibility: isLayerVisible('acled') }}
+          paint={{
+            'circle-radius': [
+              'interpolate',
+              ['linear'],
+              ['get', 'fatalities'],
+              0, 16,
+              5, 28,
+              50, 56
+            ],
+            'circle-color': 'transparent',
+            'circle-stroke-width': 1.0,
+            'circle-stroke-color': '#ff9500',
+            'circle-stroke-opacity': 0.6,
+          }}
+        />
+        {/* Solid warning center core dot */}
+        <Layer
+          id="acled-layer"
+          type="circle"
+          source="panopticon-events-source"
+          filter={['==', ['get', 'layerId'], 'acled']}
+          layout={{ visibility: isLayerVisible('acled') }}
+          paint={{
+            'circle-radius': [
+              'interpolate',
+              ['linear'],
+              ['get', 'fatalities'],
+              0, 4.5,
+              5, 7.5,
+              50, 12
+            ],
+            'circle-color': '#ff9500',
+            'circle-stroke-width': 1.5,
+            'circle-stroke-color': '#ff3b30',
+            'circle-opacity': 0.85,
+          }}
+        />
+        {/* Fatalities badge label */}
+        <Layer
+          id="acled-label-layer"
+          type="symbol"
+          source="panopticon-events-source"
+          filter={['==', ['get', 'layerId'], 'acled']}
+          layout={{
+            visibility: isLayerVisible('acled'),
+            'text-field': [
+              'case',
+              ['>', ['get', 'fatalities'], 0],
+              ['concat', '⚠️ ', ['to-string', ['get', 'fatalities']]],
+              '⚠️'
+            ],
+            'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+            'text-size': 8.5,
+            'text-offset': [0, 1.4],
+            'text-allow-overlap': false,
+          }}
+          paint={{
+            'text-color': '#ff9500',
+            'text-halo-color': '#0b0f1a',
+            'text-halo-width': 1.2,
+          }}
+        />
 
         {/* ── 9. GLOBAL CCTV WEBCAMS LAYER ───────────────────────── */}
         <Source id="webcams-source" type="geojson" data={webcamsGeoJson as any} cluster={true} clusterMaxZoom={14} clusterRadius={50}>
@@ -1224,209 +1263,180 @@ export default function MapView({
         </Source>
 
         {/* ── 9b. ACTIVE CONFLICTS LAYER (PERSISTENT) ────────────────────── */}
-        <Source id="active-conflicts-source" type="geojson" data={conflictsGeoJson as any}>
-          {/* Outer glowing warning backdrop */}
-          <Layer
-            id="active-conflicts-glow-layer"
-            type="circle"
-            layout={{ visibility: isLayerVisible('active-conflicts') }}
-            paint={{
-              'circle-radius': [
-                'match',
-                ['get', 'intensity'],
-                'HIGH', 18,
-                'MEDIUM', 12,
-                'LOW', 8,
-                12
-              ],
-              'circle-color': '#ff1a1a',
-              'circle-opacity': 0.18,
-              'circle-blur': 0.85,
-            }}
-          />
-          {/* Pulsing warning perimeter stroke */}
-          <Layer
-            id="active-conflicts-pulse-layer"
-            type="circle"
-            layout={{ visibility: isLayerVisible('active-conflicts') }}
-            paint={{
-              'circle-radius': [
-                'match',
-                ['get', 'intensity'],
-                'HIGH', 22,
-                'MEDIUM', 16,
-                'LOW', 11,
-                16
-              ],
-              'circle-color': 'transparent',
-              'circle-stroke-width': 1.2,
-              'circle-stroke-color': '#ff1a1a',
-              'circle-stroke-opacity': 0.5,
-            }}
-          />
-          {/* Solid warning center core dot */}
-          <Layer
-            id="active-conflicts-layer"
-            type="circle"
-            layout={{ visibility: isLayerVisible('active-conflicts') }}
-            paint={{
-              'circle-radius': [
-                'match',
-                ['get', 'intensity'],
-                'HIGH', 6.5,
-                'MEDIUM', 4.5,
-                'LOW', 3.5,
-                4.5
-              ],
-              'circle-color': '#ff1a1a',
-              'circle-stroke-width': 1.5,
-              'circle-stroke-color': '#0b0f1a',
-              'circle-opacity': 0.9,
-            }}
-          />
-          {/* Label icon */}
-          <Layer
-            id="active-conflicts-label-layer"
-            type="symbol"
-            layout={{
-              visibility: isLayerVisible('active-conflicts'),
-              'text-field': '💥',
-              'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-              'text-size': 9,
-              'text-offset': [0, -1.2],
-              'text-allow-overlap': false,
-            }}
-            paint={{
-              'text-color': '#ff1a1a',
-              'text-halo-color': '#0b0f1a',
-              'text-halo-width': 1.2,
-            }}
-          />
-        </Source>
+        {/* Outer glowing warning backdrop */}
+        <Layer
+          id="active-conflicts-glow-layer"
+          type="circle"
+          source="panopticon-events-source"
+          filter={['==', ['get', 'layerId'], 'active-conflicts']}
+          layout={{ visibility: isLayerVisible('active-conflicts') }}
+          paint={{
+            'circle-radius': [
+              'match',
+              ['get', 'intensity'],
+              'HIGH', 18,
+              'MEDIUM', 12,
+              'LOW', 8,
+              12
+            ],
+            'circle-color': '#ff1a1a',
+            'circle-opacity': 0.18,
+            'circle-blur': 0.85,
+          }}
+        />
+        {/* Pulsing warning perimeter stroke */}
+        <Layer
+          id="active-conflicts-pulse-layer"
+          type="circle"
+          source="panopticon-events-source"
+          filter={['==', ['get', 'layerId'], 'active-conflicts']}
+          layout={{ visibility: isLayerVisible('active-conflicts') }}
+          paint={{
+            'circle-radius': [
+              'match',
+              ['get', 'intensity'],
+              'HIGH', 22,
+              'MEDIUM', 16,
+              'LOW', 11,
+              16
+            ],
+            'circle-color': 'transparent',
+            'circle-stroke-width': 1.2,
+            'circle-stroke-color': '#ff1a1a',
+            'circle-stroke-opacity': 0.5,
+          }}
+        />
+        {/* Solid warning center core dot */}
+        <Layer
+          id="active-conflicts-layer"
+          type="circle"
+          source="panopticon-events-source"
+          filter={['==', ['get', 'layerId'], 'active-conflicts']}
+          layout={{ visibility: isLayerVisible('active-conflicts') }}
+          paint={{
+            'circle-radius': [
+              'match',
+              ['get', 'intensity'],
+              'HIGH', 6.5,
+              'MEDIUM', 4.5,
+              'LOW', 3.5,
+              4.5
+            ],
+            'circle-color': '#ff1a1a',
+            'circle-stroke-width': 1.5,
+            'circle-stroke-color': '#0b0f1a',
+            'circle-opacity': 0.9,
+          }}
+        />
+        {/* Label icon */}
+        <Layer
+          id="active-conflicts-label-layer"
+          type="symbol"
+          source="panopticon-events-source"
+          filter={['==', ['get', 'layerId'], 'active-conflicts']}
+          layout={{
+            visibility: isLayerVisible('active-conflicts'),
+            'text-field': '💥',
+            'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+            'text-size': 9,
+            'text-offset': [0, -1.2],
+            'text-allow-overlap': false,
+          }}
+          paint={{
+            'text-color': '#ff1a1a',
+            'text-halo-color': '#0b0f1a',
+            'text-halo-width': 1.2,
+          }}
+        />
 
         {/* ── 9c. NEWS EVENTS GEOLOCATED LAYER ───────────────────────── */}
-        <Source id="news-events-source" type="geojson" data={newsEventsGeoJson as any} cluster={true} clusterMaxZoom={14} clusterRadius={45}>
-          {/* Cluster circle */}
-          <Layer
-            id="news-events-cluster-circle"
-            type="circle"
-            filter={['has', 'point_count']}
-            layout={{ visibility: isLayerVisible('news-events') }}
-            paint={{
-              'circle-color': '#00f0ff',
-              'circle-radius': [
-                'step',
-                ['get', 'point_count'],
-                14,
-                10, 18,
-                50, 22
-              ],
-              'circle-opacity': 0.7,
-              'circle-stroke-width': 1.5,
-              'circle-stroke-color': '#ffffff'
-            }}
-          />
-          {/* Cluster count */}
-          <Layer
-            id="news-events-cluster-count"
-            type="symbol"
-            filter={['has', 'point_count']}
-            layout={{
-              visibility: isLayerVisible('news-events'),
-              'text-field': '{point_count}',
-              'text-font': ['Open Sans Bold', 'Arial Unicode MS Regular'],
-              'text-size': 9,
-              'text-allow-overlap': true
-            }}
-            paint={{
-              'text-color': '#0b0f1a'
-            }}
-          />
-          {/* Soft neon outer glow based on severity */}
-          <Layer
-            id="news-events-glow-layer"
-            type="circle"
-            filter={['!', ['has', 'point_count']]}
-            layout={{ visibility: isLayerVisible('news-events') }}
-            paint={{
-              'circle-radius': [
-                'case',
-                ['get', 'isContext'], 22,
-                14
-              ],
-              'circle-color': [
-                'case',
-                ['get', 'isContext'], '#af52de',
-                [
-                  'match',
-                  ['get', 'category'],
-                  'geopolitical', '#ff3b30',
-                  'cyber', '#00f0ff',
-                  'maritime', '#007aff',
-                  'hazard', '#ff9500',
-                  'markets', '#34c759',
-                  '#ffffff'
-                ]
-              ],
-              'circle-opacity': 0.18,
-              'circle-blur': 0.85,
-            }}
-          />
-          {/* Solid color core dot based on category */}
-          <Layer
-            id="news-events-layer"
-            type="circle"
-            filter={['!', ['has', 'point_count']]}
-            layout={{ visibility: isLayerVisible('news-events') }}
-            paint={{
-              'circle-radius': [
-                'case',
-                ['get', 'isContext'], 8.5,
-                5.5
-              ],
-              'circle-color': [
-                'case',
-                ['get', 'isContext'], '#af52de',
-                [
-                  'match',
-                  ['get', 'category'],
-                  'geopolitical', '#ff3b30',
-                  'cyber', '#00f0ff',
-                  'maritime', '#007aff',
-                  'hazard', '#ff9500',
-                  'markets', '#34c759',
-                  '#ffffff'
-                ]
-              ],
-              'circle-stroke-width': 1.2,
-              'circle-stroke-color': '#ffffff',
-              'circle-opacity': 0.95,
-            }}
-          />
-          {/* News Ticker Label symbol */}
-          <Layer
-            id="news-events-label-layer"
-            type="symbol"
-            filter={['!', ['has', 'point_count']]}
-            layout={{
-              visibility: isLayerVisible('news-events'),
-              'text-field': [
-                'case',
-                ['get', 'isContext'], '📚',
-                '📰'
-              ],
-              'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-              'text-size': 9,
-              'text-offset': [0, -1.2],
-              'text-allow-overlap': false,
-            }}
-            paint={{
-              'text-color': '#00f0ff',
-              'text-halo-color': '#0b0f1a',
-              'text-halo-width': 1.2,
-            }}
-          />
-        </Source>
+        {/* Soft neon outer glow based on severity */}
+        <Layer
+          id="news-events-glow-layer"
+          type="circle"
+          source="panopticon-events-source"
+          filter={['==', ['get', 'layerId'], 'news-events']}
+          layout={{ visibility: isLayerVisible('news-events') }}
+          paint={{
+            'circle-radius': [
+              'case',
+              ['get', 'isContext'], 22,
+              14
+            ],
+            'circle-color': [
+              'case',
+              ['get', 'isContext'], '#af52de',
+              [
+                'match',
+                ['get', 'category'],
+                'geopolitical', '#ff3b30',
+                'cyber', '#00f0ff',
+                'maritime', '#007aff',
+                'hazard', '#ff9500',
+                'markets', '#34c759',
+                '#ffffff'
+              ]
+            ],
+            'circle-opacity': 0.18,
+            'circle-blur': 0.85,
+          }}
+        />
+        {/* Solid color core dot based on category */}
+        <Layer
+          id="news-events-layer"
+          type="circle"
+          source="panopticon-events-source"
+          filter={['==', ['get', 'layerId'], 'news-events']}
+          layout={{ visibility: isLayerVisible('news-events') }}
+          paint={{
+            'circle-radius': [
+              'case',
+              ['get', 'isContext'], 8.5,
+              5.5
+            ],
+            'circle-color': [
+              'case',
+              ['get', 'isContext'], '#af52de',
+              [
+                'match',
+                ['get', 'category'],
+                'geopolitical', '#ff3b30',
+                'cyber', '#00f0ff',
+                'maritime', '#007aff',
+                'hazard', '#ff9500',
+                'markets', '#34c759',
+                '#ffffff'
+              ]
+            ],
+            'circle-stroke-width': 1.2,
+            'circle-stroke-color': '#ffffff',
+            'circle-opacity': 0.95,
+          }}
+        />
+        {/* News Ticker Label symbol */}
+        <Layer
+          id="news-events-label-layer"
+          type="symbol"
+          source="panopticon-events-source"
+          filter={['==', ['get', 'layerId'], 'news-events']}
+          layout={{
+            visibility: isLayerVisible('news-events'),
+            'text-field': [
+              'case',
+              ['get', 'isContext'], '📚',
+              '📰'
+            ],
+            'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+            'text-size': 9,
+            'text-offset': [0, -1.2],
+            'text-allow-overlap': false,
+          }}
+          paint={{
+            'text-color': '#00f0ff',
+            'text-halo-color': '#0b0f1a',
+            'text-halo-width': 1.2,
+          }}
+        />
 
         {/* ── 10. OSINT CYBER RECON SCANS LAYER ───────────────────────── */}
         {activeReconScan && (

@@ -13,8 +13,9 @@ import {
   fetchAcledEvents,
   fetchWebcams,
   fetchSatellites,
+  fetchRssEvents,
 } from '@panopticon/data-pipeline'
-import { useMapStore, usePanelStore, useAppStore } from '@panopticon/core/stores'
+import { useMapStore, usePanelStore, useAppStore, useNewsStore } from '@panopticon/core/stores'
 import persistentConflicts from '../../../packages/core/src/config/persistent-conflicts.json'
 import { X, HelpCircle } from 'lucide-react'
 
@@ -79,7 +80,8 @@ export default function Home() {
       'openaq-airquality-core',
       'acled-conflicts-core',
       'webcams-core',
-      'space-satellites-core'
+      'space-satellites-core',
+      'rss-news-wire-core'
     ]
 
     const pollingInterval = setInterval(async () => {
@@ -185,6 +187,22 @@ export default function Home() {
     }
   )
 
+  // RSS News Wire Feed (Phase 3 Stabilization)
+  const { data: rssEvents = EMPTY_ARRAY } = useSWR(
+    'rss-news-wire-core',
+    fetchRssEvents,
+    {
+      refreshInterval: globalRefreshPaused ? 0 : 45000, // 45s refresh loop
+      revalidateOnFocus: false,
+    }
+  )
+
+  const setNewsEvents = useNewsStore((s) => s.setNewsEvents)
+  React.useEffect(() => {
+    setNewsEvents(rssEvents)
+    setLayerEntityCount('news-events', rssEvents.length)
+  }, [rssEvents, setNewsEvents, setLayerEntityCount])
+
   // Sync layer entity counts for map-markers on load
   React.useEffect(() => {
     setLayerEntityCount('earthquakes', earthquakes.length)
@@ -213,10 +231,6 @@ export default function Home() {
   React.useEffect(() => {
     setLayerEntityCount('acled', acledEvents.length)
   }, [acledEvents, setLayerEntityCount])
-
-  React.useEffect(() => {
-    setLayerEntityCount('webcams', webcams.length * 1000)
-  }, [webcams, setLayerEntityCount])
 
   React.useEffect(() => {
     setLayerEntityCount('space', satellites.length)

@@ -10,9 +10,6 @@ const EARTH_RADIUS_KM = 6371.0088
 /** Degrees → radians */
 const DEG_TO_RAD = Math.PI / 180
 
-/** Radians → degrees */
-const RAD_TO_DEG = 180 / Math.PI
-
 /**
  * Approximate metres-per-pixel at the equator for Web Mercator zoom level 0.
  * Derived from Earth circumference ÷ 256 px tile size.

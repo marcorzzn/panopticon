@@ -99,7 +99,7 @@ function LayerRow({ id, label, icon, description, locked }: LayerRowProps) {
             </span>
           ) : isVisible && entityCount > 0 && !locked ? (
             <span className="text-[9px] font-mono font-semibold px-1 rounded bg-[var(--pan-bg-base)] border border-[var(--pan-border-default)] text-[var(--pan-text-accent)] tabular-nums">
-              {entityCount}
+              {id === 'webcams' ? `${entityCount} VISIBLE` : entityCount}
             </span>
           ) : null}
           
