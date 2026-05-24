@@ -657,7 +657,7 @@ function FlyoverTimers({ sat }: { sat: SatelliteEntity }) {
 
 // ── 4. MAIN DETAIL INSPECTOR PANEL EXPORT ────────────────────────────────────
 export default function DetailInspector() {
-  const { selectedEntityId, setSelectedEntityId, activeReconScan } = useMapStore()
+  const { selectedEntityId, setSelectedEntityId, activeReconScan, flyTo } = useMapStore()
   const { newsEvents } = useNewsStore()
 
   // Fetch SWR Cache states
@@ -1350,12 +1350,32 @@ export default function DetailInspector() {
             low: 'text-blue-400 border-blue-400/35 bg-blue-400/10',
           } as Record<string, string>)[ne.severity] || 'text-blue-400 border-blue-400/35 bg-blue-400/10')
 
+          // Find Spokes for Hubs
+          const spokes = ne.eventType === 'hub' 
+            ? newsEvents.filter(e => e.eventType === 'spoke' && e.parentHubId === ne.id)
+            : []
+
+          // Find Parent Hub for Spokes
+          const parentHub = ne.eventType === 'spoke'
+            ? ((persistentConflicts as any[]).find(c => c.id === ne.parentHubId) || newsEvents.find(e => e.id === ne.parentHubId))
+            : null
+
+          // Calculate instant event sweep countdown
+          let sweepCountdown = ''
+          if (ne.eventType === 'instant' && ne.isEnded && ne.endedAt) {
+            const timeSinceEnd = Date.now() - new Date(ne.endedAt).getTime()
+            const timeLeft = Math.max(0, 24 * 3600 * 1000 - timeSinceEnd)
+            const hoursLeft = Math.floor(timeLeft / (3600 * 1000))
+            const minsLeft = Math.floor((timeLeft % (3600 * 1000)) / (60 * 1000))
+            sweepCountdown = `${hoursLeft}H ${minsLeft}M`
+          }
+
           return (
             <div className="space-y-4 font-mono">
               <div className={`p-3 bg-deepest/60 border ${catColors.border} rounded flex flex-col gap-1 items-center justify-center`}>
                 <BookOpen className={`w-7 h-7 ${catColors.text}`} />
                 <span className={`text-[10px] font-bold tracking-wider ${catColors.text} mt-1 uppercase`}>
-                  {ne.category} INTEL REPORT
+                  {ne.eventType ? `${ne.eventType} ` : ''}{ne.category} INTEL REPORT
                 </span>
                 <span className="text-[9px] text-secondary text-center leading-normal max-w-[200px] truncate">
                   Source: {ne.source || 'Public Feed'}
@@ -1374,7 +1394,7 @@ export default function DetailInspector() {
                 <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col text-secondary">
                   <span className="text-[8px] uppercase">Incident Age</span>
                   <span className="text-xs font-bold text-primary mt-0.5">
-                    {ne.timestamp || 'N/A'}
+                    {ne.timestamp ? new Date(ne.timestamp).toLocaleTimeString() : 'N/A'}
                   </span>
                 </div>
               </div>
@@ -1388,6 +1408,106 @@ export default function DetailInspector() {
                   {ne.summary}
                 </p>
               </div>
+
+              {/* Instant ended status overlay */}
+              {ne.eventType === 'instant' && ne.isEnded && (
+                <div className="p-3 bg-red-950/20 border border-red-500/30 rounded flex flex-col gap-1 text-center font-mono">
+                  <span className="text-red-500 font-bold text-[9px] uppercase tracking-wider">
+                    STATUS: RESOLVED / COMPLETED
+                  </span>
+                  <span className="text-secondary text-[8px]">
+                    Daily sweep reset in: <span className="text-primary font-bold">{sweepCountdown}</span>
+                  </span>
+                </div>
+              )}
+
+              {/* Persistent Event: Temporal Evolution Timeline */}
+              {ne.eventType === 'persistent' && ne.updates && ne.updates.length > 0 && (
+                <div className="space-y-2 border-t border-weak/50 pt-3">
+                  <span className="text-[8px] text-secondary tracking-widest uppercase block">
+                    TEMPORAL EVOLUTION TIMELINE
+                  </span>
+                  <div className="space-y-2.5 border-l border-weak pl-2.5 ml-1.5 mt-1">
+                    {ne.updates.map((update: any, uidx: number) => (
+                      <div key={uidx} className="relative text-[9px] leading-normal space-y-0.5">
+                        <div className="absolute -left-[14px] top-1 w-2 h-2 rounded-full border border-accent bg-deepest flex items-center justify-center">
+                          <div className="w-1 h-1 rounded-full bg-accent" />
+                        </div>
+                        <span className="text-[7.5px] text-secondary tabular-nums">
+                          {new Date(update.timestamp).toLocaleTimeString()} ({new Date(update.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })})
+                        </span>
+                        <p className="text-primary font-mono opacity-90 leading-tight">{update.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Hub Event: Spokes List */}
+              {ne.eventType === 'hub' && (
+                <div className="space-y-2 border-t border-weak/50 pt-3 font-mono">
+                  <span className="text-[8px] text-secondary tracking-widest uppercase block">
+                    TACTICAL SPOKES IN THEATRE ({spokes.length})
+                  </span>
+                  {spokes.length > 0 ? (
+                    <div className="space-y-2 max-h-[140px] overflow-y-auto custom-scrollbar">
+                      {spokes.map((spoke: any) => (
+                        <div 
+                          key={spoke.id}
+                          onClick={() => {
+                            if (spoke.coordinates) {
+                              flyTo(spoke.coordinates[0], spoke.coordinates[1], 12)
+                              setSelectedEntityId(spoke.id)
+                            }
+                          }}
+                          className="p-2 bg-deepest/35 border border-weak hover:border-accent rounded cursor-pointer transition-all flex flex-col gap-1"
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="text-accent text-[7.5px] font-bold uppercase">SPOKE DISPATCH</span>
+                            <span className="text-secondary text-[7px] tabular-nums">
+                              {new Date(spoke.timestamp).toLocaleTimeString()}
+                            </span>
+                          </div>
+                          <span className="text-[8.5px] text-primary uppercase font-bold truncate">
+                            {spoke.title}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-secondary text-[8px] uppercase italic block pt-1">
+                      No active micro-events orbiting this hub center.
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Spoke Event: Back Link to Hub */}
+              {ne.eventType === 'spoke' && parentHub && (
+                <div className="space-y-2 border-t border-weak/50 pt-3">
+                  <span className="text-[8px] text-secondary tracking-widest uppercase block">
+                    THEATRE ANCHOR HUB
+                  </span>
+                  <div 
+                    onClick={() => {
+                      const coords = parentHub.coordinates || [parentHub.lon, parentHub.lat]
+                      if (coords) {
+                        flyTo(coords[0], coords[1], 10)
+                        setSelectedEntityId(parentHub.id)
+                      }
+                    }}
+                    className="p-2.5 bg-purple-950/15 border border-purple-500/30 hover:border-purple-400 rounded cursor-pointer transition-all flex flex-col gap-1 items-center text-center text-purple-400 font-bold"
+                  >
+                    <Globe className="w-4 h-4 text-purple-400 animate-pulse" />
+                    <span className="text-[7.5px] text-secondary uppercase tracking-widest">
+                      [ FOCUS PARENT THEATRE HUB ]
+                    </span>
+                    <span className="text-[9px] uppercase leading-tight text-primary">
+                      {parentHub.title || parentHub.name}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Geolocated Anchors */}
               {ne.coordinates && (

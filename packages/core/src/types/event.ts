@@ -20,6 +20,11 @@ export type EventCategory =
   | 'space-event'
   | 'news-event';
 
+export interface NewsUpdate {
+  timestamp: string;
+  text: string;
+}
+
 export interface PanopticonEvent extends GeoEntity {
   source: string;                // e.g. "GDELT", "USGS", "NASA_FIRMS"
   sourceUrl: string;             // Direct URL to the original record — MANDATORY
@@ -43,6 +48,13 @@ export interface PanopticonEvent extends GeoEntity {
   
   additionalSources?: string[];  // Optional: 1-3 more corroborating source URLs
   tags?: string[];               // e.g. ["armed-conflict", "civilian-casualties"]
+
+  // Dot Display Rules:
+  eventType?: 'instant' | 'persistent' | 'hub' | 'spoke';
+  parentHubId?: string;
+  endedAt?: string;
+  isEnded?: boolean;
+  updates?: NewsUpdate[];
 }
 
 export interface PersistentConflict {
@@ -58,3 +70,4 @@ export interface PersistentConflict {
   intensity: 'HIGH' | 'MEDIUM' | 'LOW';
   childEventIds: string[];       // IDs of time-bounded events under this conflict
 }
+

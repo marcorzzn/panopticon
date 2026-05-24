@@ -12,11 +12,18 @@ export interface NewsFeedItem {
   coordinates?: [number, number] // [lng, lat]
   severity: 'low' | 'moderate' | 'high' | 'critical'
   url?: string
+  
+  // Dot Display Rules Logic:
+  eventType?: 'instant' | 'persistent' | 'hub' | 'spoke'
+  parentHubId?: string
+  endedAt?: string
+  isEnded?: boolean
+  updates?: { timestamp: string; text: string }[]
 }
 
 export interface MapMarker {
   id: string
-  type: 'daily' | 'context'
+  type: 'daily' | 'context' | 'hub' | 'spoke' | 'persistent'
   category: NewsCategory
   title: string
   summary: string
@@ -24,13 +31,114 @@ export interface MapMarker {
   coordinates: [number, number]
   severity: 'low' | 'moderate' | 'high' | 'critical'
   url?: string
-  timeline?: NewsFeedItem[] // Chronological alerts inside a Context Marker
+  timeline?: NewsFeedItem[] // Chronological dispatches inside Context/Hub/Persistent Marker
+  
+  // Display rules mappings:
+  eventType?: 'instant' | 'persistent' | 'hub' | 'spoke'
+  parentHubId?: string
+  updates?: { timestamp: string; text: string }[]
 }
 
 // 25 Curated Real-World Geocoded Geopolitical and Security Wire alerts
 export const initialNewsEvents = (): NewsFeedItem[] => {
   const now = Date.now();
   return [
+    {
+      id: 'real-instant-ended-1',
+      category: 'maritime',
+      source: 'ANSA Mondo',
+      title: 'Cargo Carrier Vessel Salvage Mission Concluded',
+      summary: 'Salvage command verifies the successful towing of the container ship off the shoal near Suez. Incident declared resolved and ended.',
+      timestamp: new Date(now - 1 * 3600 * 1000).toISOString(), // 1h ago
+      coordinates: [32.3275, 30.5853],
+      severity: 'low',
+      url: 'https://www.ansa.it',
+      eventType: 'instant',
+      isEnded: true,
+      endedAt: new Date(now - 12 * 3600 * 1000).toISOString(), // Ended 12 hours ago (within 24h)
+    },
+    {
+      id: 'real-instant-swept-2',
+      category: 'geopolitical',
+      source: 'Associated Press',
+      title: 'Minor Security Demonstration in Tbilisi Center',
+      summary: 'Small political protest resolved peacefully. Riot control elements recalled. Swept from visual HUD due to daily reset sweep.',
+      timestamp: new Date(now - 35 * 3600 * 1000).toISOString(), // 35h ago
+      coordinates: [44.8028, 41.6941],
+      severity: 'low',
+      url: 'https://apnews.com',
+      eventType: 'instant',
+      isEnded: true,
+      endedAt: new Date(now - 30 * 3600 * 1000).toISOString(), // Ended 30 hours ago (>24h, should be culled)
+    },
+    {
+      id: 'real-persistent-wildfire-1',
+      category: 'hazard',
+      source: 'NASA FIRMS Sensor',
+      title: 'Ongoing Uncontrolled Forest Fire in Sumatra Sector',
+      summary: 'Widespread crop-burning fire remains highly active. Heavy smoke plumes detected via MODIS thermal grids. Operational sweeps ongoing.',
+      timestamp: new Date(now - 2 * 3600 * 1000).toISOString(), // 2h ago
+      coordinates: [102.3214, -0.9821],
+      severity: 'high',
+      url: 'https://firms.modaps.eosdis.nasa.gov',
+      eventType: 'persistent',
+      updates: [
+        { timestamp: new Date(now - 36 * 3600 * 1000).toISOString(), text: "MODIS thermal scanner registers initial 10-hectare heat anomaly." },
+        { timestamp: new Date(now - 20 * 3600 * 1000).toISOString(), text: "High winds accelerate perimeter expansion to 1,200 hectares. Local evacuations ordered." },
+        { timestamp: new Date(now - 2 * 3600 * 1000).toISOString(), text: "Smoke index degrades to hazardous levels across Malacca Strait. Drone monitoring active." }
+      ]
+    },
+    {
+      id: 'conflict-hub-russo-ukrainian',
+      category: 'geopolitical',
+      source: 'Reuters Geopolitics',
+      title: 'Russo-Ukrainian War: Kharkiv Sector Tactical Operations Hub',
+      summary: 'Operational campaign command center. Geopolitical standoff remains highly active with ongoing millimetric strikes orbiting the coordinates.',
+      timestamp: new Date(now - 5 * 60 * 1000).toISOString(), // 5m ago
+      coordinates: [36.2304, 50.0000],
+      severity: 'critical',
+      url: 'https://www.reuters.com',
+      eventType: 'hub',
+    },
+    {
+      id: 'conflict-spoke-bridge-bombing',
+      category: 'geopolitical',
+      source: 'ANSA Mondo',
+      title: 'Precision Missile Strike Targets Lyman Rail Bridge',
+      summary: 'Direct structural hit confirmed on supply lane. Logistics assets temporarily degraded. Spoke node linked to Kharkiv Hub.',
+      timestamp: new Date(now - 30 * 60 * 1000).toISOString(), // 30m ago
+      coordinates: [36.2512, 49.9820],
+      severity: 'high',
+      url: 'https://www.ansa.it',
+      eventType: 'spoke',
+      parentHubId: 'conflict-hub-russo-ukrainian',
+    },
+    {
+      id: 'conflict-spoke-street-skirmish',
+      category: 'geopolitical',
+      source: 'AFP Geopolitical',
+      title: 'Urban Trench Skirmishes Reported near Vovchansk Outskirts',
+      summary: 'Recon elements clash near defensive line 2. Heavy machinegun fire logged. Spoke node linked to Kharkiv Hub.',
+      timestamp: new Date(now - 45 * 60 * 1000).toISOString(), // 45m ago
+      coordinates: [36.9312, 50.2831],
+      severity: 'high',
+      url: 'https://www.afp.com',
+      eventType: 'spoke',
+      parentHubId: 'conflict-hub-russo-ukrainian',
+    },
+    {
+      id: 'conflict-spoke-ew-system',
+      category: 'geopolitical',
+      source: 'BBC World News',
+      title: 'GPS Spoofing & Signal Jamming Grid Detected',
+      summary: 'Civilian aviation telemetry reporting severe anomalies in drone navigation frequencies. Spoke node linked to Kharkiv Hub.',
+      timestamp: new Date(now - 80 * 60 * 1000).toISOString(), // 1.3h ago
+      coordinates: [36.1284, 50.1254],
+      severity: 'high',
+      url: 'https://www.bbc.com',
+      eventType: 'spoke',
+      parentHubId: 'conflict-hub-russo-ukrainian',
+    },
     {
       id: 'real-geopol-1',
       category: 'geopolitical',
@@ -309,9 +417,20 @@ export const initialNewsEvents = (): NewsFeedItem[] => {
   ]
 }
 
-// 48-Hour Geofenced Spatial Grouping Algorithm
 export function getMapMarkers(events: NewsFeedItem[]): MapMarker[] {
-  const activeEvents = events.filter((e) => e.coordinates);
+  const now = Date.now();
+  
+  // Filter out events that lack coordinates, or ended instant events older than 24h (Daily Reset Rule)
+  const activeEvents = events.filter((e) => {
+    if (!e.coordinates) return false;
+    if (e.eventType === 'instant' && e.isEnded && e.endedAt) {
+      const age = now - new Date(e.endedAt).getTime();
+      if (age > 24 * 3600 * 1000) {
+        return false;
+      }
+    }
+    return true;
+  });
   
   // Sort events chronologically descending (newest first)
   const sorted = [...activeEvents].sort(
@@ -324,6 +443,26 @@ export function getMapMarkers(events: NewsFeedItem[]): MapMarker[] {
   for (let i = 0; i < sorted.length; i++) {
     const primary = sorted[i]!;
     if (processed.has(primary.id)) continue;
+
+    // Hub, Spoke, and Persistent events are rendered independently with specific styling/visuals per display rules
+    if (primary.eventType === 'hub' || primary.eventType === 'spoke' || primary.eventType === 'persistent') {
+      processed.add(primary.id);
+      markers.push({
+        id: primary.id,
+        type: primary.eventType as 'hub' | 'spoke' | 'persistent',
+        category: primary.category,
+        title: primary.title,
+        summary: primary.summary,
+        timestamp: primary.timestamp,
+        coordinates: primary.coordinates!,
+        severity: primary.severity,
+        url: primary.url,
+        eventType: primary.eventType,
+        parentHubId: primary.parentHubId,
+        updates: primary.updates,
+      });
+      continue;
+    }
 
     // Critical events retain independent daily pins per requirement
     if (primary.severity === 'critical') {
@@ -338,6 +477,7 @@ export function getMapMarkers(events: NewsFeedItem[]): MapMarker[] {
         coordinates: primary.coordinates!,
         severity: primary.severity,
         url: primary.url,
+        eventType: primary.eventType,
       });
       continue;
     }
@@ -349,7 +489,13 @@ export function getMapMarkers(events: NewsFeedItem[]): MapMarker[] {
 
     for (let j = i + 1; j < sorted.length; j++) {
       const candidate = sorted[j]!;
-      if (processed.has(candidate.id) || candidate.severity === 'critical') continue;
+      if (
+        processed.has(candidate.id) || 
+        candidate.severity === 'critical' ||
+        candidate.eventType === 'hub' ||
+        candidate.eventType === 'spoke' ||
+        candidate.eventType === 'persistent'
+      ) continue;
 
       const candidateTime = new Date(candidate.timestamp).getTime();
       const timeDiff = Math.abs(primaryTime - candidateTime);
@@ -381,6 +527,7 @@ export function getMapMarkers(events: NewsFeedItem[]): MapMarker[] {
         coordinates: primary.coordinates!,
         severity: 'high', // Group context markers upgrade to high visibility
         timeline: clusterEvents, // Retain the chronological feed inside the cluster
+        eventType: primary.eventType,
       });
     } else {
       // Keep as individual Daily Marker
@@ -394,6 +541,7 @@ export function getMapMarkers(events: NewsFeedItem[]): MapMarker[] {
         coordinates: primary.coordinates!,
         severity: primary.severity,
         url: primary.url,
+        eventType: primary.eventType,
       });
     }
   }

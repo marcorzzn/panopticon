@@ -334,6 +334,52 @@ export default function MapView({
     }
   }, [gdeltEvents, acledEvents, newsEvents])
 
+  // 5b. Compute visual dashed connector lines from active Spoke markers to their parent Hub coordinate
+  const spokeLinesGeoJson = React.useMemo(() => {
+    const features: any[] = []
+    const newsMarkers = getMapMarkers(newsEvents)
+    
+    newsMarkers.forEach((marker) => {
+      if (marker.type === 'spoke' && marker.parentHubId && marker.coordinates) {
+        let hubCoords: [number, number] | undefined = undefined
+        
+        // 1. Search persistent conflicts configurations
+        const conflict = (persistentConflicts as any[]).find(c => c.id === marker.parentHubId)
+        if (conflict) {
+          hubCoords = [conflict.lon, conflict.lat]
+        }
+        
+        // 2. Search active geopolitical news event markers
+        if (!hubCoords) {
+          const parentEvent = newsMarkers.find(e => e.id === marker.parentHubId)
+          if (parentEvent && parentEvent.coordinates) {
+            hubCoords = parentEvent.coordinates
+          }
+        }
+        
+        if (hubCoords) {
+          features.push({
+            type: 'Feature',
+            id: `spoke-line-${marker.id}`,
+            geometry: {
+              type: 'LineString',
+              coordinates: [marker.coordinates, hubCoords],
+            },
+            properties: {
+              id: `spoke-line-${marker.id}`,
+              parentHubId: marker.parentHubId,
+            }
+          })
+        }
+      }
+    })
+    
+    return {
+      type: 'FeatureCollection',
+      features,
+    }
+  }, [newsEvents])
+
 
   // 6. Transform Weather points to GeoJSON
   const weatherGeoJson = React.useMemo(() => {
@@ -1349,8 +1395,27 @@ export default function MapView({
           }}
         />
 
+        {/* ── 9b. NEWS SPOKES CONNECTIONS LAYER ───────────────────────── */}
+        <Source id="news-spoke-lines-source" type="geojson" data={spokeLinesGeoJson as any}>
+          <Layer
+            id="news-spoke-lines-layer"
+            type="line"
+            layout={{
+              visibility: isLayerVisible('news-events'),
+              'line-join': 'round',
+              'line-cap': 'round',
+            }}
+            paint={{
+              'line-color': '#af52de',
+              'line-width': 1.2,
+              'line-opacity': 0.65,
+              'line-dasharray': [3, 3],
+            }}
+          />
+        </Source>
+
         {/* ── 9c. NEWS EVENTS GEOLOCATED LAYER ───────────────────────── */}
-        {/* Soft neon outer glow based on severity */}
+        {/* Soft neon outer glow based on severity & event type */}
         <Layer
           id="news-events-glow-layer"
           type="circle"
@@ -1360,12 +1425,18 @@ export default function MapView({
           paint={{
             'circle-radius': [
               'case',
-              ['get', 'isContext'], 22,
+              ['==', ['get', 'type'], 'hub'], 26,
+              ['==', ['get', 'type'], 'persistent'], 20,
+              ['==', ['get', 'type'], 'spoke'], 12,
+              ['==', ['get', 'type'], 'context'], 22,
               14
             ],
             'circle-color': [
               'case',
-              ['get', 'isContext'], '#af52de',
+              ['==', ['get', 'type'], 'hub'], '#af52de',
+              ['==', ['get', 'type'], 'spoke'], '#e0a0ff',
+              ['==', ['get', 'type'], 'persistent'], '#ff9500',
+              ['==', ['get', 'type'], 'context'], '#af52de',
               [
                 'match',
                 ['get', 'category'],
@@ -1381,7 +1452,7 @@ export default function MapView({
             'circle-blur': 0.85,
           }}
         />
-        {/* Solid color core dot based on category */}
+        {/* Solid color core dot based on category & event type */}
         <Layer
           id="news-events-layer"
           type="circle"
@@ -1391,12 +1462,18 @@ export default function MapView({
           paint={{
             'circle-radius': [
               'case',
-              ['get', 'isContext'], 8.5,
+              ['==', ['get', 'type'], 'hub'], 10.5,
+              ['==', ['get', 'type'], 'persistent'], 7.5,
+              ['==', ['get', 'type'], 'spoke'], 4.5,
+              ['==', ['get', 'type'], 'context'], 8.5,
               5.5
             ],
             'circle-color': [
               'case',
-              ['get', 'isContext'], '#af52de',
+              ['==', ['get', 'type'], 'hub'], '#af52de',
+              ['==', ['get', 'type'], 'spoke'], '#e0a0ff',
+              ['==', ['get', 'type'], 'persistent'], '#ff9500',
+              ['==', ['get', 'type'], 'context'], '#af52de',
               [
                 'match',
                 ['get', 'category'],
@@ -1408,8 +1485,19 @@ export default function MapView({
                 '#ffffff'
               ]
             ],
-            'circle-stroke-width': 1.2,
-            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': [
+              'case',
+              ['==', ['get', 'type'], 'hub'], 2.0,
+              ['==', ['get', 'type'], 'persistent'], 1.5,
+              ['==', ['get', 'type'], 'spoke'], 1.2,
+              ['==', ['get', 'type'], 'context'], 1.2,
+              1.2
+            ],
+            'circle-stroke-color': [
+              'case',
+              ['==', ['get', 'type'], 'persistent'], '#ff3b30',
+              '#ffffff'
+            ],
             'circle-opacity': 0.95,
           }}
         />
@@ -1423,7 +1511,10 @@ export default function MapView({
             visibility: isLayerVisible('news-events'),
             'text-field': [
               'case',
-              ['get', 'isContext'], '📚',
+              ['==', ['get', 'type'], 'hub'], '📚',
+              ['==', ['get', 'type'], 'spoke'], '🎯',
+              ['==', ['get', 'type'], 'persistent'], '🔥',
+              ['==', ['get', 'type'], 'context'], '📚',
               '📰'
             ],
             'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
