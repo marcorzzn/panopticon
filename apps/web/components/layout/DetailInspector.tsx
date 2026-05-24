@@ -207,7 +207,7 @@ function CctvLiveFeed({
           <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
           <span className="uppercase text-secondary font-bold">LIVE EMBED ACTIVE</span>
           <span className="text-secondary opacity-60">|</span>
-          <span className="text-[#00f0ff] uppercase">{provider}</span>
+          <span className="text-accent uppercase">{provider}</span>
         </div>
       </div>
     )
@@ -236,7 +236,7 @@ function CctvLiveFeed({
           <button
             type="button"
             onClick={openSourceNode}
-            className="text-[#00f0ff] hover:underline flex items-center gap-0.5"
+            className="text-accent hover:underline flex items-center gap-0.5"
           >
             <span>SOURCE</span>
             <ExternalLink className="w-2.5 h-2.5" />
@@ -256,9 +256,9 @@ function CctvLiveFeed({
         <div className={`w-1.5 h-1.5 rounded-full ${status === 'healthy' ? 'bg-green-400 animate-pulse' : 'bg-yellow-400 animate-pulse'}`} />
         <span className="uppercase text-secondary font-bold">SNAPSHOT ACTIVE</span>
         <span className="text-secondary opacity-60">|</span>
-        <span className="text-[#00f0ff] uppercase">{provider}</span>
+        <span className="text-accent uppercase">{provider}</span>
         <span className="text-secondary opacity-60">|</span>
-        <span className="text-[7px] text-[#00f0ff] uppercase tracking-wide">refreshed {secondsSinceLoad}s ago</span>
+        <span className="text-[7px] text-accent uppercase tracking-wide">refreshed {secondsSinceLoad}s ago</span>
       </div>
     </div>
   )
@@ -590,7 +590,7 @@ function SatelliteOpticalDownlink({ sat }: { sat: SatelliteEntity }) {
         height={180}
         className="w-full h-auto block aspect-video"
       />
-      <div className="absolute top-2 left-2 flex items-center gap-1 font-mono text-[8px] bg-black/40 text-secondary px-1 border border-[#1e3050] rounded">
+      <div className="absolute top-2 left-2 flex items-center gap-1 font-mono text-[8px] bg-black/40 text-secondary px-1 border border-weak rounded">
         <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
         <span>SATELLITE OPTICAL SENSOR FEED</span>
       </div>
@@ -636,20 +636,20 @@ function FlyoverTimers({ sat }: { sat: SatelliteEntity }) {
   }
 
   return (
-    <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2.5 font-mono">
-      <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-[#1e3050] pb-1">NEXT C2 PASSOVER FLYBYS</span>
+    <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2.5 font-mono">
+      <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-weak pb-1">NEXT C2 PASSOVER FLYBYS</span>
       
       <div className="flex justify-between items-center text-[10px]">
         <span className="text-secondary text-[8px] uppercase">TOKYO DOWNTOWN (NRT):</span>
-        <span className="font-extrabold text-[#00f0ff] tabular-nums">{formatTime(timers.tokyo)}</span>
+        <span className="font-extrabold text-accent tabular-nums">{formatTime(timers.tokyo)}</span>
       </div>
-      <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+      <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
         <span className="text-secondary text-[8px] uppercase">LONDON SECTOR (LHR):</span>
-        <span className="font-extrabold text-[#00f0ff] tabular-nums">{formatTime(timers.london)}</span>
+        <span className="font-extrabold text-accent tabular-nums">{formatTime(timers.london)}</span>
       </div>
-      <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+      <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
         <span className="text-secondary text-[8px] uppercase">NEW YORK HUDSON (JFK):</span>
-        <span className="font-extrabold text-[#00f0ff] tabular-nums">{formatTime(timers.newYork)}</span>
+        <span className="font-extrabold text-accent tabular-nums">{formatTime(timers.newYork)}</span>
       </div>
     </div>
   )
@@ -748,20 +748,20 @@ export default function DetailInspector() {
   }
 
   return (
-    <div className="absolute right-4 top-4 bottom-4 w-80 z-30 flex flex-col bg-[#0b0f1a]/85 backdrop-blur-md border border-[#1e3050] rounded-lg shadow-2xl overflow-hidden animate-slide-in">
+    <div className="absolute right-4 top-4 bottom-4 w-80 z-30 flex flex-col bg-surface/85 backdrop-blur-md border border-weak rounded-lg shadow-2xl overflow-hidden animate-slide-in">
       {/* ── HEADER ────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between p-4 border-b border-[#1e3050] bg-deepest/55">
+      <div className="flex items-center justify-between p-4 border-b border-weak bg-deepest/55">
         <div className="flex items-center gap-2">
           {entity.type === 'webcam' && <Video className="w-4 h-4 text-[#fffb00]" />}
           {entity.type === 'recon-hop' && <Network className="w-4 h-4 text-[#00ff00]" />}
-          {entity.type === 'aviation' && <Plane className="w-4 h-4 text-[#00f0ff]" />}
+          {entity.type === 'aviation' && <Plane className="w-4 h-4 text-accent" />}
           {entity.type === 'wildfire' && <Flame className="w-4 h-4 text-[#ff3b30]" />}
           {entity.type === 'airquality' && <Wind className="w-4 h-4 text-[#34c759]" />}
           {entity.type === 'acled' && <ShieldAlert className="w-4 h-4 text-[#ff9500]" />}
           {entity.type === 'earthquake' && <Activity className="w-4 h-4 text-red-500" />}
           {entity.type === 'gdelt' && <Globe className="w-4 h-4 text-emerald-400" />}
-          {entity.type === 'news-event' && <BookOpen className="w-4 h-4 text-[#00f0ff]" />}
-          {entity.type === 'space' && <Satellite className="w-4 h-4 text-[#00f0ff]" />}
+          {entity.type === 'news-event' && <BookOpen className="w-4 h-4 text-accent" />}
+          {entity.type === 'space' && <Satellite className="w-4 h-4 text-accent" />}
           {entity.type === 'active-conflict' && <Shield className="w-4 h-4 text-[#ff1a1a]" />}
           {entity.type === 'news-context' && <BookOpen className="w-4 h-4 text-[#af52de]" />}
           <span className="text-[10px] font-mono font-bold tracking-widest text-secondary uppercase">
@@ -798,39 +798,39 @@ export default function DetailInspector() {
               <CctvLiveFeed id={cam.id} name={cam.label} status={cam.status} coordinates={cam.coordinates} streamUrl={cam.streamUrl} type={cam.type} provider={cam.provider} />
 
               {/* Status and details grid */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2.5">
-                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-[#1e3050] pb-1">ENDPOINT TELEMETRY</span>
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2.5">
+                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-weak pb-1">ENDPOINT TELEMETRY</span>
                 
                 <div className="flex justify-between items-center text-[10px]">
                   <span className="text-secondary text-[8px] uppercase">ENDPOINT NAME:</span>
                   <span className="font-semibold text-primary max-w-[130px] truncate">{cam.label.replace('CCTV: ', '')}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">ENDPOINT ID:</span>
                   <span className="text-[#fffb00] font-semibold">{cam.id}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">FEED STATUS:</span>
                   <span className={`font-semibold uppercase ${
                     cam.status === 'healthy' ? 'text-green-400' : cam.status === 'degraded' ? 'text-yellow-400' : 'text-red-500'
                   }`}>{cam.status}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">LATITUDE:</span>
                   <span className="text-primary tabular-nums">{cam.coordinates[1]?.toFixed(5)}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">LONGITUDE:</span>
                   <span className="text-primary tabular-nums">{cam.coordinates[0]?.toFixed(5)}</span>
                 </div>
 
-                <div className="flex flex-col gap-1 border-t border-[#1e3050] pt-1.5 pb-2">
+                <div className="flex flex-col gap-1 border-t border-weak pt-1.5 pb-2">
                   <span className="text-secondary text-[8px] uppercase">SECURE RTSP TARGET:</span>
-                  <span className="text-[9px] text-[#00f0ff] break-all bg-deepest/50 p-1.5 rounded border border-[#1e3050] select-all">
+                  <span className="text-[9px] text-accent break-all bg-deepest/50 p-1.5 rounded border border-weak select-all">
                     {cam.streamUrl || `rtsp://admin:secure@${cam.coordinates[1]?.toFixed(3)}:554/live`}
                   </span>
                 </div>
@@ -858,30 +858,30 @@ export default function DetailInspector() {
               </div>
 
               {/* Hop Details */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2.5">
-                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-[#1e3050] pb-1">HOP DATA METRICS</span>
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2.5">
+                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-weak pb-1">HOP DATA METRICS</span>
                 
                 <div className="flex justify-between items-center text-[10px]">
                   <span className="text-secondary text-[8px] uppercase">HOP INDEX:</span>
                   <span className="font-semibold text-[#00ff00]">#{hop.hopNumber}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">IP ADDRESS:</span>
                   <span className="text-primary font-semibold select-all">{hop.ip}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">PING LATENCY:</span>
                   <span className="text-green-400 font-semibold tabular-nums">{hop.pingMs} MS</span>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">ISP / NETWORK:</span>
                   <span className="text-primary font-semibold max-w-[130px] truncate" title={hop.isp}>{hop.isp}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">COORDINATES:</span>
                   <span className="text-primary">[{hop.lat.toFixed(4)}, {hop.lon.toFixed(4)}]</span>
                 </div>
@@ -900,8 +900,8 @@ export default function DetailInspector() {
 
           return (
             <div className="space-y-4 font-mono">
-              <div className="p-3 bg-deepest/60 border border-[#1e3050] rounded flex flex-col gap-1 items-center justify-center">
-                <span className="text-2xl font-bold tracking-wider text-[#00f0ff]">
+              <div className="p-3 bg-deepest/60 border border-weak rounded flex flex-col gap-1 items-center justify-center">
+                <span className="text-2xl font-bold tracking-wider text-accent">
                   {ac.callsign || 'N/A'}
                 </span>
                 <span className="text-[9px] text-secondary">
@@ -911,9 +911,9 @@ export default function DetailInspector() {
 
               {/* Grid Widgets */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase">Altitude</span>
-                  <span className="text-sm font-semibold text-[#00f0ff] mt-0.5">
+                  <span className="text-sm font-semibold text-accent mt-0.5">
                     {altFt > 0 ? `${altFt.toLocaleString(undefined, { maximumFractionDigits: 0 })} FT` : 'GROUND'}
                   </span>
                   {altFt > 0 && (
@@ -921,15 +921,15 @@ export default function DetailInspector() {
                   )}
                 </div>
 
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase">Velocity</span>
-                  <span className="text-sm font-semibold text-[#00f0ff] mt-0.5">
+                  <span className="text-sm font-semibold text-accent mt-0.5">
                     {speedKts > 0 ? `${Math.round(speedKts)} KTS` : '0 KTS'}
                   </span>
                   <span className="text-[8px] text-secondary mt-0.5">{Math.round(ac.velocity || 0)} M/S GS</span>
                 </div>
 
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase flex items-center gap-1">
                     True Track <Compass className="w-2.5 h-2.5" />
                   </span>
@@ -938,14 +938,14 @@ export default function DetailInspector() {
                   </span>
                   <div className="flex items-center gap-1 text-[8px] text-secondary mt-0.5">
                     <Navigation
-                      className="w-2 h-2 text-[#00f0ff]"
+                      className="w-2 h-2 text-accent"
                       style={{ transform: `rotate(${ac.trueTrack || 0}deg)` }}
                     />
                     <span>HEADING VECTOR</span>
                   </div>
                 </div>
 
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase flex items-center gap-1">
                     V-Rate {vRateFpm > 0 ? <TrendingUp className="w-2.5 h-2.5 text-[#34c759]" /> : vRateFpm < 0 ? <TrendingDown className="w-2.5 h-2.5 text-[#ff3b30]" /> : null}
                   </span>
@@ -957,7 +957,7 @@ export default function DetailInspector() {
               </div>
 
               {/* Map positioning details */}
-              <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded space-y-1.5">
+              <div className="p-2.5 bg-deepest/45 border border-weak rounded space-y-1.5">
                 <span className="text-[8px] text-secondary uppercase block">Position Coordinate</span>
                 <div className="flex justify-between text-[10px]">
                   <span>LATITUDE:</span>
@@ -970,7 +970,7 @@ export default function DetailInspector() {
               </div>
 
               {/* OSINT CYBER RECON BLOCK */}
-              <div className="border-t border-[#1e3050] pt-4 space-y-3 font-mono">
+              <div className="border-t border-weak pt-4 space-y-3 font-mono">
                 <span className="text-[8px] font-bold tracking-widest text-[#00ff00] uppercase block">
                   🛡️ OSINT CYBER SEC-OPS
                 </span>
@@ -1008,12 +1008,12 @@ export default function DetailInspector() {
               </div>
 
               {/* Extra parameters */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2">
-                <div className="flex justify-between items-center pb-1.5 border-b border-[#1e3050]">
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2">
+                <div className="flex justify-between items-center pb-1.5 border-b border-weak">
                   <span className="text-[8px] text-secondary uppercase">Confidence</span>
                   <span className="text-[10px] font-semibold text-primary">{wf.confidence || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between items-center pb-1.5 border-b border-[#1e3050]">
+                <div className="flex justify-between items-center pb-1.5 border-b border-weak">
                   <span className="text-[8px] text-secondary uppercase">Brightness</span>
                   <span className="text-[10px] font-semibold text-primary">{wf.brightness?.toFixed(1)} K</span>
                 </div>
@@ -1024,7 +1024,7 @@ export default function DetailInspector() {
               </div>
 
               {/* OSINT CYBER RECON BLOCK */}
-              <div className="border-t border-[#1e3050] pt-4 space-y-3 font-mono">
+              <div className="border-t border-weak pt-4 space-y-3 font-mono">
                 <span className="text-[8px] font-bold tracking-widest text-[#00ff00] uppercase block">
                   🛡️ OSINT CYBER SEC-OPS
                 </span>
@@ -1041,7 +1041,7 @@ export default function DetailInspector() {
 
           return (
             <div className="space-y-4">
-              <div className="p-3 bg-deepest/60 border border-[#1e3050] rounded flex flex-col gap-1 items-center justify-center font-mono">
+              <div className="p-3 bg-deepest/60 border border-weak rounded flex flex-col gap-1 items-center justify-center font-mono">
                 <Wind className="w-7 h-7 text-[#34c759]" />
                 <span className="text-sm font-bold tracking-wider text-primary mt-1 text-center max-w-[200px] truncate">
                   {aq.location || 'Monitoring Station'}
@@ -1068,7 +1068,7 @@ export default function DetailInspector() {
               </div>
 
               {/* Geographic anchor */}
-              <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded space-y-1.5 font-mono">
+              <div className="p-2.5 bg-deepest/45 border border-weak rounded space-y-1.5 font-mono">
                 <div className="flex justify-between text-[10px]">
                   <span className="text-secondary text-[8px] uppercase">COORDINATES:</span>
                   <span className="text-primary">[{aq.coordinates[1]?.toFixed(4)}, {aq.coordinates[0]?.toFixed(4)}]</span>
@@ -1076,7 +1076,7 @@ export default function DetailInspector() {
               </div>
 
               {/* OSINT CYBER RECON BLOCK */}
-              <div className="border-t border-[#1e3050] pt-4 space-y-3 font-mono">
+              <div className="border-t border-weak pt-4 space-y-3 font-mono">
                 <span className="text-[8px] font-bold tracking-widest text-[#00ff00] uppercase block">
                   🛡️ OSINT CYBER SEC-OPS
                 </span>
@@ -1119,8 +1119,8 @@ export default function DetailInspector() {
               </div>
 
               {/* Geopolitical Actors involved */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2.5 font-mono">
-                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-[#1e3050] pb-1">COMBATANTS / ACTORS</span>
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2.5 font-mono">
+                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-weak pb-1">COMBATANTS / ACTORS</span>
                 
                 <div className="space-y-1">
                   <span className="text-[8px] text-secondary uppercase">Primary Actor:</span>
@@ -1128,7 +1128,7 @@ export default function DetailInspector() {
                 </div>
 
                 {acl.actor2 && (
-                  <div className="space-y-1 border-t border-[#1e3050] pt-1.5">
+                  <div className="space-y-1 border-t border-weak pt-1.5">
                     <span className="text-[8px] text-secondary uppercase">Opposing Actor:</span>
                     <span className="text-[11px] font-semibold text-red-400 block leading-tight">{acl.actor2}</span>
                   </div>
@@ -1136,7 +1136,7 @@ export default function DetailInspector() {
               </div>
 
               {/* Location & Log Entries */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2 font-mono">
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2 font-mono">
                 <div className="flex items-start gap-1.5 text-[10px]">
                   <MapPin className="w-3.5 h-3.5 text-secondary flex-shrink-0 mt-0.5" />
                   <div className="flex flex-col leading-tight">
@@ -1145,7 +1145,7 @@ export default function DetailInspector() {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-1.5 text-[10px] border-t border-[#1e3050] pt-2">
+                <div className="flex items-start gap-1.5 text-[10px] border-t border-weak pt-2">
                   <Calendar className="w-3.5 h-3.5 text-secondary flex-shrink-0 mt-0.5" />
                   <div className="flex flex-col leading-tight">
                     <span className="text-[8px] text-secondary uppercase">Intel Timestamp</span>
@@ -1153,18 +1153,18 @@ export default function DetailInspector() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-1 border-t border-[#1e3050] pt-2">
+                <div className="flex flex-col gap-1 border-t border-weak pt-2">
                   <span className="text-[8px] text-secondary uppercase flex items-center gap-1">
                     <BookOpen className="w-2.5 h-2.5 text-[#ff9500]" /> Intelligence Notes:
                   </span>
-                  <p className="text-[10px] text-secondary leading-relaxed bg-deepest/20 p-2 border border-[#1e3050]/50 rounded mt-0.5 max-h-36 overflow-y-auto custom-scrollbar">
+                  <p className="text-[10px] text-secondary leading-relaxed bg-deepest/20 p-2 border border-weak/50 rounded mt-0.5 max-h-36 overflow-y-auto custom-scrollbar">
                     {acl.notes || 'No detailed dispatches cataloged for this incident.'}
                   </p>
                 </div>
               </div>
 
               {/* OSINT CYBER RECON BLOCK */}
-              <div className="border-t border-[#1e3050] pt-4 space-y-3 font-mono">
+              <div className="border-t border-weak pt-4 space-y-3 font-mono">
                 <span className="text-[8px] font-bold tracking-widest text-[#00ff00] uppercase block">
                   🛡️ OSINT CYBER SEC-OPS
                 </span>
@@ -1192,14 +1192,14 @@ export default function DetailInspector() {
 
               {/* Magnitude level card */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase">Magnitude</span>
                   <span className="text-lg font-bold text-red-500 mt-0.5">
                     {eq.magnitude?.toFixed(1) || '0.0'} M
                   </span>
                 </div>
 
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase">Depth</span>
                   <span className="text-lg font-bold text-primary mt-0.5">
                     {eq.depth?.toFixed(1) || '0.0'} KM
@@ -1208,12 +1208,12 @@ export default function DetailInspector() {
               </div>
 
               {/* Extra metrics */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2">
-                <div className="flex justify-between items-center pb-1.5 border-b border-[#1e3050] text-[10px]">
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2">
+                <div className="flex justify-between items-center pb-1.5 border-b border-weak text-[10px]">
                   <span className="text-[8px] text-secondary uppercase">Severity</span>
                   <span className="text-[9px] uppercase font-bold text-red-400">{eq.severity || 'INFO'}</span>
                 </div>
-                <div className="flex justify-between items-center pb-1.5 border-b border-[#1e3050] text-[10px]">
+                <div className="flex justify-between items-center pb-1.5 border-b border-weak text-[10px]">
                   <span className="text-[8px] text-secondary uppercase">Tsunami Alert</span>
                   <span className={`text-[9px] font-bold ${eq.tsunamiAlert ? 'text-red-500' : 'text-secondary'}`}>
                     {eq.tsunamiAlert ? 'YES' : 'NO'}
@@ -1226,7 +1226,7 @@ export default function DetailInspector() {
               </div>
 
               {/* Timestamp and coordinates */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2 text-[10px]">
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2 text-[10px]">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[8px] text-secondary uppercase">Seismic Time</span>
                   <span>{dateStr}</span>
@@ -1236,7 +1236,7 @@ export default function DetailInspector() {
                     href={eq.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-1 text-[9px] text-[#00f0ff] hover:underline pt-1.5 border-t border-[#1e3050]/50"
+                    className="flex items-center gap-1 text-[9px] text-accent hover:underline pt-1.5 border-t border-weak/50"
                   >
                     View USGS Event Page <ExternalLink className="w-2.5 h-2.5" />
                   </a>
@@ -1244,7 +1244,7 @@ export default function DetailInspector() {
               </div>
 
               {/* OSINT CYBER RECON BLOCK */}
-              <div className="border-t border-[#1e3050] pt-4 space-y-3 font-mono">
+              <div className="border-t border-weak pt-4 space-y-3 font-mono">
                 <span className="text-[8px] font-bold tracking-widest text-[#00ff00] uppercase block">
                   🛡️ OSINT CYBER SEC-OPS
                 </span>
@@ -1271,7 +1271,7 @@ export default function DetailInspector() {
 
               {/* Tone and Goldstein Scales */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase">Goldstein Index</span>
                   <span className={`text-base font-bold mt-0.5 ${gd.goldsteinScale < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
                     {gd.goldsteinScale || '0.0'}
@@ -1279,7 +1279,7 @@ export default function DetailInspector() {
                   <span className="text-[7px] text-secondary mt-0.5">Scale (-10 to +10)</span>
                 </div>
 
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase">Average Tone</span>
                   <span className="text-base font-bold text-primary mt-0.5">
                     {gd.avgTone || '0.0'}
@@ -1289,8 +1289,8 @@ export default function DetailInspector() {
               </div>
 
               {/* Combatants / Actors */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2">
-                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-[#1e3050] pb-1">REPORTED ACTORS</span>
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2">
+                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-weak pb-1">REPORTED ACTORS</span>
                 
                 <div className="flex justify-between items-center text-[10px]">
                   <span className="text-secondary text-[8px] uppercase">ACTOR 1:</span>
@@ -1298,7 +1298,7 @@ export default function DetailInspector() {
                 </div>
 
                 {gd.actor2 && (
-                  <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                  <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                     <span className="text-secondary text-[8px] uppercase">ACTOR 2:</span>
                     <span className="font-semibold text-primary">{gd.actor2}</span>
                   </div>
@@ -1307,13 +1307,13 @@ export default function DetailInspector() {
 
               {/* Media links */}
               {gd.sourceUrl && (
-                <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded">
+                <div className="p-3 bg-deepest/45 border border-weak rounded">
                   <span className="text-[8px] text-secondary uppercase block mb-1">Source dispatch Link</span>
                   <a
                     href={gd.sourceUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center justify-between text-[10px] text-[#00f0ff] hover:underline p-1.5 bg-deepest/40 border border-[#1e3050]/50 rounded"
+                    className="flex items-center justify-between text-[10px] text-accent hover:underline p-1.5 bg-deepest/40 border border-weak/50 rounded"
                   >
                     <span className="truncate max-w-[170px]">{gd.sourceUrl}</span>
                     <ExternalLink className="w-3 h-3 flex-shrink-0" />
@@ -1322,7 +1322,7 @@ export default function DetailInspector() {
               )}
 
               {/* OSINT CYBER RECON BLOCK */}
-              <div className="border-t border-[#1e3050] pt-4 space-y-3 font-mono">
+              <div className="border-t border-weak pt-4 space-y-3 font-mono">
                 <span className="text-[8px] font-bold tracking-widest text-[#00ff00] uppercase block">
                   🛡️ OSINT CYBER SEC-OPS
                 </span>
@@ -1337,11 +1337,11 @@ export default function DetailInspector() {
           const ne = entity.data as any
           const catColors = (({
             geopolitical: { text: 'text-[#ff3b30]', bg: 'bg-[#ff3b30]/10', border: 'border-[#ff3b30]/25' },
-            cyber: { text: 'text-[#00f0ff]', bg: 'bg-[#00f0ff]/10', border: 'border-[#00f0ff]/25' },
+            cyber: { text: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/25' },
             maritime: { text: 'text-[#007aff]', bg: 'bg-[#007aff]/10', border: 'border-[#007aff]/25' },
             hazard: { text: 'text-[#ff9500]', bg: 'bg-[#ff9500]/10', border: 'border-[#ff9500]/25' },
             markets: { text: 'text-[#34c759]', bg: 'bg-[#34c759]/10', border: 'border-[#34c759]/25' },
-          } as Record<string, { text: string; bg: string; border: string }>)[ne.category] || { text: 'text-[#00f0ff]', bg: 'bg-[#00f0ff]/10', border: 'border-[#00f0ff]/25' })
+          } as Record<string, { text: string; bg: string; border: string }>)[ne.category] || { text: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/25' })
 
           const sevColors = (({
             critical: 'text-red-500 border-red-500/35 bg-red-500/10',
@@ -1371,7 +1371,7 @@ export default function DetailInspector() {
                   </span>
                 </div>
 
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col text-secondary">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col text-secondary">
                   <span className="text-[8px] uppercase">Incident Age</span>
                   <span className="text-xs font-bold text-primary mt-0.5">
                     {ne.timestamp || 'N/A'}
@@ -1380,8 +1380,8 @@ export default function DetailInspector() {
               </div>
 
               {/* Title & Summary */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2">
-                <span className="text-[8.5px] font-bold text-primary tracking-wide block uppercase border-b border-[#1e3050] pb-1.5 leading-tight">
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2">
+                <span className="text-[8.5px] font-bold text-primary tracking-wide block uppercase border-b border-weak pb-1.5 leading-tight">
                   {ne.title}
                 </span>
                 <p className="text-[9px] text-secondary leading-normal">
@@ -1391,8 +1391,8 @@ export default function DetailInspector() {
 
               {/* Geolocated Anchors */}
               {ne.coordinates && (
-                <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded flex flex-col gap-1.5 text-[9px]">
-                  <span className="text-[8px] text-secondary uppercase block border-b border-[#1e3050] pb-1">COORDINATE MAPPING</span>
+                <div className="p-3 bg-deepest/45 border border-weak rounded flex flex-col gap-1.5 text-[9px]">
+                  <span className="text-[8px] text-secondary uppercase block border-b border-weak pb-1">COORDINATE MAPPING</span>
                   <div className="flex justify-between">
                     <span className="text-secondary">LATITUDE:</span>
                     <span className="font-mono text-primary font-semibold">{ne.coordinates[1].toFixed(4)}°N</span>
@@ -1406,13 +1406,13 @@ export default function DetailInspector() {
 
               {/* Dispatch Links */}
               {ne.url && (
-                <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded">
+                <div className="p-3 bg-deepest/45 border border-weak rounded">
                   <span className="text-[8px] text-secondary uppercase block mb-1">Source dispatch Link</span>
                   <a
                     href={ne.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center justify-between text-[10px] text-[#00f0ff] hover:underline p-1.5 bg-deepest/40 border border-[#1e3050]/50 rounded"
+                    className="flex items-center justify-between text-[10px] text-accent hover:underline p-1.5 bg-deepest/40 border border-weak/50 rounded"
                   >
                     <span className="truncate max-w-[170px]">{ne.url}</span>
                     <ExternalLink className="w-3 h-3 flex-shrink-0" />
@@ -1421,7 +1421,7 @@ export default function DetailInspector() {
               )}
 
               {/* OSINT CYBER RECON BLOCK */}
-              <div className="border-t border-[#1e3050] pt-4 space-y-3 font-mono">
+              <div className="border-t border-weak pt-4 space-y-3 font-mono">
                 <span className="text-[8px] font-bold tracking-widest text-[#00ff00] uppercase block">
                   🛡️ OSINT CYBER SEC-OPS
                 </span>
@@ -1437,8 +1437,8 @@ export default function DetailInspector() {
           return (
             <div className="space-y-4 font-mono">
               <div className="p-3 bg-deepest/60 border border-[#00f0ff]/35 rounded flex flex-col gap-1 items-center justify-center">
-                <Satellite className="w-8 h-8 text-[#00f0ff] animate-pulse" />
-                <span className="text-sm font-bold tracking-wider text-[#00f0ff] mt-1 text-center">
+                <Satellite className="w-8 h-8 text-accent animate-pulse" />
+                <span className="text-sm font-bold tracking-wider text-accent mt-1 text-center">
                   {sat.label}
                 </span>
                 <span className="text-[9px] text-secondary">
@@ -1454,28 +1454,28 @@ export default function DetailInspector() {
 
               {/* Telemetry metrics grid */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase">Altitude</span>
-                  <span className="text-sm font-semibold text-[#00f0ff] mt-0.5">
+                  <span className="text-sm font-semibold text-accent mt-0.5">
                     {sat.altitudeKm.toFixed(2)} KM
                   </span>
                 </div>
 
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase">Velocity</span>
-                  <span className="text-sm font-semibold text-[#00f0ff] mt-0.5">
+                  <span className="text-sm font-semibold text-accent mt-0.5">
                     {sat.velocityKms.toFixed(3)} KM/S
                   </span>
                 </div>
 
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase">Inclination</span>
                   <span className="text-sm font-semibold text-primary mt-0.5">
                     {sat.inclination.toFixed(2)}°
                   </span>
                 </div>
 
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase">Period</span>
                   <span className="text-sm font-semibold text-primary mt-0.5">
                     {Math.round(2 * Math.PI * (6371 + sat.altitudeKm) / sat.velocityKms / 60)} MIN
@@ -1484,7 +1484,7 @@ export default function DetailInspector() {
               </div>
 
               {/* Coordinates */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-1.5">
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-1.5">
                 <span className="text-[8px] text-secondary uppercase block">GROUND TRACK COORDINATES</span>
                 <div className="flex justify-between text-[10px]">
                   <span>LATITUDE:</span>
@@ -1497,15 +1497,15 @@ export default function DetailInspector() {
               </div>
 
               {/* TLE monospace readouts */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2">
-                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-[#1e3050] pb-1">NORAD TLE METRICS</span>
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2">
+                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-weak pb-1">NORAD TLE METRICS</span>
                 <div className="bg-black/60 p-2 border border-[#00f0ff]/20 rounded text-[7px] font-mono text-primary leading-tight overflow-x-auto whitespace-pre">
                   {sat.tleLine1}<br />{sat.tleLine2}
                 </div>
               </div>
 
               {/* OSINT CYBER RECON BLOCK */}
-              <div className="border-t border-[#1e3050] pt-4 space-y-3 font-mono">
+              <div className="border-t border-weak pt-4 space-y-3 font-mono">
                 <span className="text-[8px] font-bold tracking-widest text-[#00ff00] uppercase block">
                   🛡️ OSINT CYBER SEC-OPS
                 </span>
@@ -1532,19 +1532,19 @@ export default function DetailInspector() {
               </div>
 
               {/* Coordinates & stats */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2">
-                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-[#1e3050] pb-1">TIMELINE METRICS</span>
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2">
+                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-weak pb-1">TIMELINE METRICS</span>
                 <div className="flex justify-between items-center text-[10px]">
                   <span className="text-secondary text-[8px] uppercase">Anchor Location:</span>
                   <span className="font-semibold text-primary">{timeline[0]?.source || 'Odessa Sector'}</span>
                 </div>
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">Anchor Lat/Lon:</span>
                   <span className="text-primary tabular-nums">
                     [{marker.coordinates[1]?.toFixed(4)}, {marker.coordinates[0]?.toFixed(4)}]
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">Consolidation window:</span>
                   <span className="text-primary font-semibold">48 Hours</span>
                 </div>
@@ -1552,7 +1552,7 @@ export default function DetailInspector() {
 
               {/* Scrollable timeline events list */}
               <div className="space-y-3">
-                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-[#1e3050] pb-1">CHRONOLOGICAL DISPATCHES</span>
+                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-weak pb-1">CHRONOLOGICAL DISPATCHES</span>
                 <div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
                   {timeline.map((item: any, idx: number) => {
                     const isNewest = idx === 0
@@ -1624,7 +1624,7 @@ export default function DetailInspector() {
 
               {/* Status and intensity widget */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase">Conflict Intensity</span>
                   <span className={`text-sm font-semibold mt-0.5 ${
                     conflict.intensity === 'HIGH' ? 'text-red-500' : conflict.intensity === 'MEDIUM' ? 'text-yellow-400' : 'text-blue-400'
@@ -1633,7 +1633,7 @@ export default function DetailInspector() {
                   </span>
                 </div>
 
-                <div className="p-2.5 bg-deepest/45 border border-[#1e3050] rounded flex flex-col">
+                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col">
                   <span className="text-[8px] text-secondary uppercase">Operational Category</span>
                   <span className="text-xs font-semibold mt-0.5 text-primary uppercase">
                     {conflict.category.replace('-', ' ')}
@@ -1642,34 +1642,34 @@ export default function DetailInspector() {
               </div>
 
               {/* Conflict description */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2">
-                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-[#1e3050] pb-1">TACTICAL MONITOR</span>
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2">
+                <span className="text-[8px] text-secondary tracking-widest uppercase block border-b border-weak pb-1">TACTICAL MONITOR</span>
                 
                 <div className="flex justify-between items-center text-[10px]">
                   <span className="text-secondary text-[8px] uppercase">Conflict Name:</span>
                   <span className="font-semibold text-primary">{conflict.name}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">Conflict ID:</span>
                   <span className="text-secondary select-all text-[9px]">{conflict.id}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">Start Date:</span>
                   <span className="text-primary tabular-nums">
                     {new Date(conflict.startDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">Last Updated:</span>
                   <span className="text-primary tabular-nums">
                     {new Date(conflict.lastUpdated).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] border-t border-[#1e3050] pt-1.5">
+                <div className="flex justify-between items-center text-[10px] border-t border-weak pt-1.5">
                   <span className="text-secondary text-[8px] uppercase">Coordinates:</span>
                   <span className="text-primary tabular-nums">
                     [{conflict.lat.toFixed(4)}, {conflict.lon.toFixed(4)}]
@@ -1678,16 +1678,16 @@ export default function DetailInspector() {
               </div>
 
               {/* Node detailed description paragraph */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded">
+              <div className="p-3 bg-deepest/45 border border-weak rounded">
                 <span className="text-[8px] text-secondary uppercase block mb-1">Geopolitical Background</span>
-                <p className="text-[10px] text-secondary leading-relaxed bg-deepest/20 p-2 border border-[#1e3050]/50 rounded">
+                <p className="text-[10px] text-secondary leading-relaxed bg-deepest/20 p-2 border border-weak/50 rounded">
                   {conflict.description}
                 </p>
               </div>
 
               {/* OSINT SEC-OPS / Copy URL block */}
-              <div className="p-3 bg-deepest/45 border border-[#1e3050] rounded space-y-2">
-                <span className="text-[8px] text-secondary uppercase block border-b border-[#1e3050] pb-1">Attributed Source Reference</span>
+              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2">
+                <span className="text-[8px] text-secondary uppercase block border-b border-weak pb-1">Attributed Source Reference</span>
                 <div className="bg-deepest/50 p-2 rounded border border-weak break-all text-primary select-all text-[9px] mb-2">
                   {conflict.sourceUrl}
                 </div>

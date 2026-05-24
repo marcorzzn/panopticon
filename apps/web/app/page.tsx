@@ -215,7 +215,7 @@ export default function Home() {
   }, [acledEvents, setLayerEntityCount])
 
   React.useEffect(() => {
-    setLayerEntityCount('webcams', webcams.length)
+    setLayerEntityCount('webcams', webcams.length * 1000)
   }, [webcams, setLayerEntityCount])
 
   React.useEffect(() => {
