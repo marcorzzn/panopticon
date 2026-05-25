@@ -83,3 +83,88 @@ export async function generateDailyBriefWithGemini(
     return `Pipeline exception generating intelligence brief: ${error.message || error}`
   }
 }
+
+/**
+ * 4. Daily Sync Threat Deduplication & Geocoding Logic
+ * Transforms raw feeds into 8 distinct intelligence categories, deduplicating
+ * overlapping events based on spatial proximity (50km) and temporal windows (12h).
+ */
+export type ThreatCategory = 'Cyber' | 'Maritime' | 'Space' | 'Aviation' | 'Military' | 'Geopolitical' | 'Energy' | 'Biological'
+
+export interface ProcessedThreatEvent {
+  id: string
+  category: ThreatCategory
+  title: string
+  summary: string
+  coordinates?: [number, number]
+  timestamp: string
+  severity: 'low' | 'moderate' | 'high' | 'critical'
+  sources: string[]
+}
+
+export function deduplicateAndCategorizeThreats(rawEvents: NewsFeedItem[]): ProcessedThreatEvent[] {
+  // Sort by timestamp desc
+  const sorted = [...rawEvents].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+  const processed: ProcessedThreatEvent[] = []
+  
+  // Basic categorization mapping
+  const mapCategory = (cat: string, text: string): ThreatCategory => {
+    const t = text.toLowerCase()
+    if (cat === 'cyber' || t.includes('cyber') || t.includes('ddos') || t.includes('hack')) return 'Cyber'
+    if (cat === 'maritime' || t.includes('ship') || t.includes('vessel') || t.includes('sea')) return 'Maritime'
+    if (cat === 'space' || t.includes('satellite') || t.includes('orbit')) return 'Space'
+    if (cat === 'aviation' || t.includes('aircraft') || t.includes('flight') || t.includes('airspace')) return 'Aviation'
+    if (cat === 'energy' || t.includes('oil') || t.includes('grid') || t.includes('pipeline')) return 'Energy'
+    if (cat === 'hazard' || t.includes('virus') || t.includes('disease') || t.includes('outbreak')) return 'Biological'
+    if (t.includes('military') || t.includes('troops') || t.includes('army')) return 'Military'
+    return 'Geopolitical'
+  }
+
+  for (const event of sorted) {
+    const eventTime = new Date(event.timestamp).getTime()
+    const cat = mapCategory(event.category, `${event.title} ${event.summary}`)
+    
+    // Look for duplicates in already processed events
+    let isDuplicate = false
+    for (const p of processed) {
+      if (p.category !== cat) continue
+      const pTime = new Date(p.timestamp).getTime()
+      const timeDiff = Math.abs(eventTime - pTime)
+      if (timeDiff <= 12 * 3600 * 1000) { // 12h window
+        if (event.coordinates && p.coordinates) {
+          const [lon1, lat1] = event.coordinates
+          const [lon2, lat2] = p.coordinates
+          const dist = Math.sqrt(Math.pow(lon1 - lon2, 2) + Math.pow(lat1 - lat2, 2))
+          if (dist <= 0.5) { // ~50km
+            isDuplicate = true
+            if (!p.sources.includes(event.source)) {
+              p.sources.push(event.source)
+            }
+            break
+          }
+        } else if (!event.coordinates && !p.coordinates) {
+          isDuplicate = true
+          if (!p.sources.includes(event.source)) {
+            p.sources.push(event.source)
+          }
+          break
+        }
+      }
+    }
+    
+    if (!isDuplicate) {
+      processed.push({
+        id: `ai-threat-${event.id}`,
+        category: cat,
+        title: event.title,
+        summary: event.summary,
+        coordinates: event.coordinates,
+        timestamp: event.timestamp,
+        severity: event.severity,
+        sources: [event.source]
+      })
+    }
+  }
+  
+  return processed
+}

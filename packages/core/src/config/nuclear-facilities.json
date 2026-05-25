@@ -1,0 +1,725 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-1.3504",
+          "13.3836"
+        ]
+      },
+      "properties": {
+        "id": "NUK-0",
+        "name": "Kashiwazaki-Kariwa NPP 0",
+        "reactors": 5,
+        "output_mw": 3494,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1000"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "19.0659",
+          "-64.1413"
+        ]
+      },
+      "properties": {
+        "id": "NUK-1",
+        "name": "Bruce NPP 1",
+        "reactors": 3,
+        "output_mw": 4024,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1001"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-179.6299",
+          "-51.8415"
+        ]
+      },
+      "properties": {
+        "id": "NUK-2",
+        "name": "Gravelines NPP 2",
+        "reactors": 3,
+        "output_mw": 8303,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1002"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "132.1046",
+          "23.7946"
+        ]
+      },
+      "properties": {
+        "id": "NUK-3",
+        "name": "Zaporizhzhia NPP 3",
+        "reactors": 5,
+        "output_mw": 5299,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1003"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-150.9981",
+          "6.8231"
+        ]
+      },
+      "properties": {
+        "id": "NUK-4",
+        "name": "Kursk NPP 4",
+        "reactors": 3,
+        "output_mw": 8640,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1004"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "70.3190",
+          "-16.5818"
+        ]
+      },
+      "properties": {
+        "id": "NUK-5",
+        "name": "Hanul NPP 5",
+        "reactors": 6,
+        "output_mw": 4730,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1005"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "127.8108",
+          "57.1844"
+        ]
+      },
+      "properties": {
+        "id": "NUK-6",
+        "name": "Hanbit NPP 6",
+        "reactors": 6,
+        "output_mw": 3913,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1006"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-65.1129",
+          "63.8605"
+        ]
+      },
+      "properties": {
+        "id": "NUK-7",
+        "name": "Fuqing NPP 7",
+        "reactors": 4,
+        "output_mw": 2973,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1007"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "92.8935",
+          "-26.3551"
+        ]
+      },
+      "properties": {
+        "id": "NUK-8",
+        "name": "Tianwan NPP 8",
+        "reactors": 4,
+        "output_mw": 1818,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1008"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "58.7736",
+          "59.7026"
+        ]
+      },
+      "properties": {
+        "id": "NUK-9",
+        "name": "Yangjiang NPP 9",
+        "reactors": 2,
+        "output_mw": 1680,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1009"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-158.5867",
+          "-28.2120"
+        ]
+      },
+      "properties": {
+        "id": "NUK-10",
+        "name": "Kashiwazaki-Kariwa NPP 10",
+        "reactors": 5,
+        "output_mw": 1588,
+        "status": "OFFLINE",
+        "pris_ref": "PRIS-1010"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "125.4558",
+          "-25.2933"
+        ]
+      },
+      "properties": {
+        "id": "NUK-11",
+        "name": "Bruce NPP 11",
+        "reactors": 2,
+        "output_mw": 4484,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1011"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "118.0865",
+          "-38.7589"
+        ]
+      },
+      "properties": {
+        "id": "NUK-12",
+        "name": "Gravelines NPP 12",
+        "reactors": 6,
+        "output_mw": 1496,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1012"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "90.2496",
+          "63.1788"
+        ]
+      },
+      "properties": {
+        "id": "NUK-13",
+        "name": "Zaporizhzhia NPP 13",
+        "reactors": 5,
+        "output_mw": 2114,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1013"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-7.4119",
+          "-13.8128"
+        ]
+      },
+      "properties": {
+        "id": "NUK-14",
+        "name": "Kursk NPP 14",
+        "reactors": 3,
+        "output_mw": 8113,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1014"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "11.5850",
+          "-23.8509"
+        ]
+      },
+      "properties": {
+        "id": "NUK-15",
+        "name": "Hanul NPP 15",
+        "reactors": 6,
+        "output_mw": 2406,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1015"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "129.9391",
+          "-29.9675"
+        ]
+      },
+      "properties": {
+        "id": "NUK-16",
+        "name": "Hanbit NPP 16",
+        "reactors": 6,
+        "output_mw": 5062,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1016"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "132.5272",
+          "68.1748"
+        ]
+      },
+      "properties": {
+        "id": "NUK-17",
+        "name": "Fuqing NPP 17",
+        "reactors": 1,
+        "output_mw": 4022,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1017"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "113.1103",
+          "-50.0920"
+        ]
+      },
+      "properties": {
+        "id": "NUK-18",
+        "name": "Tianwan NPP 18",
+        "reactors": 3,
+        "output_mw": 7621,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1018"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-158.4683",
+          "-38.2820"
+        ]
+      },
+      "properties": {
+        "id": "NUK-19",
+        "name": "Yangjiang NPP 19",
+        "reactors": 6,
+        "output_mw": 2448,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1019"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "179.3036",
+          "-44.6196"
+        ]
+      },
+      "properties": {
+        "id": "NUK-20",
+        "name": "Kashiwazaki-Kariwa NPP 20",
+        "reactors": 5,
+        "output_mw": 6684,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1020"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "100.9126",
+          "-57.2514"
+        ]
+      },
+      "properties": {
+        "id": "NUK-21",
+        "name": "Bruce NPP 21",
+        "reactors": 4,
+        "output_mw": 7340,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1021"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-113.7602",
+          "-62.5917"
+        ]
+      },
+      "properties": {
+        "id": "NUK-22",
+        "name": "Gravelines NPP 22",
+        "reactors": 5,
+        "output_mw": 3570,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1022"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "146.7131",
+          "-22.3470"
+        ]
+      },
+      "properties": {
+        "id": "NUK-23",
+        "name": "Zaporizhzhia NPP 23",
+        "reactors": 6,
+        "output_mw": 1638,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1023"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "29.2687",
+          "-35.0771"
+        ]
+      },
+      "properties": {
+        "id": "NUK-24",
+        "name": "Kursk NPP 24",
+        "reactors": 2,
+        "output_mw": 4260,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1024"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-35.9554",
+          "53.3389"
+        ]
+      },
+      "properties": {
+        "id": "NUK-25",
+        "name": "Hanul NPP 25",
+        "reactors": 3,
+        "output_mw": 7409,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1025"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "95.4722",
+          "12.9810"
+        ]
+      },
+      "properties": {
+        "id": "NUK-26",
+        "name": "Hanbit NPP 26",
+        "reactors": 2,
+        "output_mw": 6824,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1026"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "53.2020",
+          "-68.2098"
+        ]
+      },
+      "properties": {
+        "id": "NUK-27",
+        "name": "Fuqing NPP 27",
+        "reactors": 5,
+        "output_mw": 3788,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1027"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-175.9570",
+          "4.3185"
+        ]
+      },
+      "properties": {
+        "id": "NUK-28",
+        "name": "Tianwan NPP 28",
+        "reactors": 4,
+        "output_mw": 7677,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1028"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "70.5738",
+          "43.4940"
+        ]
+      },
+      "properties": {
+        "id": "NUK-29",
+        "name": "Yangjiang NPP 29",
+        "reactors": 4,
+        "output_mw": 5436,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1029"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "123.2266",
+          "18.9316"
+        ]
+      },
+      "properties": {
+        "id": "NUK-30",
+        "name": "Kashiwazaki-Kariwa NPP 30",
+        "reactors": 6,
+        "output_mw": 3522,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1030"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-120.9251",
+          "67.5609"
+        ]
+      },
+      "properties": {
+        "id": "NUK-31",
+        "name": "Bruce NPP 31",
+        "reactors": 4,
+        "output_mw": 1490,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1031"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "20.7780",
+          "58.8874"
+        ]
+      },
+      "properties": {
+        "id": "NUK-32",
+        "name": "Gravelines NPP 32",
+        "reactors": 5,
+        "output_mw": 8771,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1032"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-7.0400",
+          "-6.4316"
+        ]
+      },
+      "properties": {
+        "id": "NUK-33",
+        "name": "Zaporizhzhia NPP 33",
+        "reactors": 3,
+        "output_mw": 6844,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1033"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "77.6178",
+          "-39.5737"
+        ]
+      },
+      "properties": {
+        "id": "NUK-34",
+        "name": "Kursk NPP 34",
+        "reactors": 1,
+        "output_mw": 4359,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1034"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "2.2691",
+          "18.1643"
+        ]
+      },
+      "properties": {
+        "id": "NUK-35",
+        "name": "Hanul NPP 35",
+        "reactors": 5,
+        "output_mw": 4740,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1035"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "96.8980",
+          "-69.4653"
+        ]
+      },
+      "properties": {
+        "id": "NUK-36",
+        "name": "Hanbit NPP 36",
+        "reactors": 5,
+        "output_mw": 4278,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1036"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-179.1340",
+          "-11.6777"
+        ]
+      },
+      "properties": {
+        "id": "NUK-37",
+        "name": "Fuqing NPP 37",
+        "reactors": 5,
+        "output_mw": 7119,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1037"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "174.3638",
+          "-35.0807"
+        ]
+      },
+      "properties": {
+        "id": "NUK-38",
+        "name": "Tianwan NPP 38",
+        "reactors": 1,
+        "output_mw": 4011,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1038"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "48.1391",
+          "68.0063"
+        ]
+      },
+      "properties": {
+        "id": "NUK-39",
+        "name": "Yangjiang NPP 39",
+        "reactors": 5,
+        "output_mw": 3203,
+        "status": "ONLINE",
+        "pris_ref": "PRIS-1039"
+      }
+    }
+  ]
+}

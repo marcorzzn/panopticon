@@ -126,7 +126,14 @@ export const RSS_FEEDS = [
   { url: 'https://www.enca.com/rss', category: 'geopolitical' as NewsCategory, name: 'eNCA South Africa' },
   { url: 'https://georgiatoday.ge/feed/', category: 'geopolitical' as NewsCategory, name: 'Georgia Today' },
   { url: 'https://civil.ge/feed', category: 'geopolitical' as NewsCategory, name: 'Civil Georgia' },
-  { url: 'https://en.trend.az/rss/', category: 'geopolitical' as NewsCategory, name: 'Trend News Agency' }
+  { url: 'https://en.trend.az/rss/', category: 'geopolitical' as NewsCategory, name: 'Trend News Agency' },
+  
+  // --- PHASE 8 ADDITIONS ---
+  { url: 'https://www.unhcr.org/rss/news.xml', category: 'geopolitical' as NewsCategory, name: 'UNHCR Refugee Briefs' },
+  { url: 'https://promedmail.org/feed/', category: 'health' as NewsCategory, name: 'ProMED Disease Outbreaks' },
+  { url: 'https://www.icc-ccs.org/index.php/piracy-reporting-centre/live-piracy-report?format=feed&type=rss', category: 'maritime' as NewsCategory, name: 'IMB Piracy Reports' },
+  { url: 'https://aviation-safety.net/rss/rss.php', category: 'aviation' as NewsCategory, name: 'ASN Aviation Safety' },
+  { url: 'https://www.start.umd.edu/gtd/rss/', category: 'terrorism' as NewsCategory, name: 'Global Terrorism Database (GTD)' }
 ]
 
 /**
@@ -159,7 +166,7 @@ function findCountryCentroid(title: string, summary: string): [number, number] |
 /**
  * Fetch and parse a single RSS feed via AllOrigins CORS proxy
  */
-async function fetchRssFeed(feed: typeof RSS_FEEDS[0]): Promise<NewsFeedItem[]> {
+export async function fetchRssFeed(feed: typeof RSS_FEEDS[0]): Promise<NewsFeedItem[]> {
   const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feed.url)}`
   
   try {

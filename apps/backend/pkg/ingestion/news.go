@@ -45,57 +45,26 @@ var hotspotCities = []HotspotCity{
 	{"Rotterdam", 51.9244, 4.4777},
 }
 
-// Global simulated wire articles
-var wireSimulations = []struct {
-	Title    string
-	Text     string
-	Category string
-	Source   string
-}{
-	{
-		Title:    "Protests erupt in downtown Taipei over trade policies, maritime lane friction cited",
-		Text:     "Hundreds have gathered outside the legislative office in Taipei expressing concerns about shipping corridor blockades and trade negotiations.",
-		Category: "civil_unrest",
-		Source:   "Reuters",
-	},
-	{
-		Title:    "Seismic activity detected near Okinawa, tsunami warning dismissed by Japan Meteorological Agency",
-		Text:     "A magnitude 5.2 undersea quake occurred off the coast of Okinawa. Local ports reported no damage or swell deviations.",
-		Category: "seismic_activity",
-		Source:   "Associated Press",
-	},
-	{
-		Title:    "Aircraft navigation failure triggers emergency protocols near Manila flight sector",
-		Text:     "A flight route deviation was monitored via ADS-B telemetry, forcing ATC at Manila International to vector flights to secondary lanes.",
-		Category: "aviation_incident",
-		Source:   "AFP",
-	},
-	{
-		Title:    "Sudden extreme cloudburst floods commercial docks in Singapore, cargo delays anticipated",
-		Text:     "Port operations at Singapore Marina are facing minor bottlenecks due to high rate of storm precipitation and flash flooding.",
-		Category: "meteorological_hazard",
-		Source:   "Reuters",
-	},
-	{
-		Title:    "Cyber defense drills successfully conclude in Seoul, critical server grids hardened",
-		Text:     "State communication centers in Seoul reported defensive shield drills wrapped up with zero threat escalations reported.",
-		Category: "reconnaissance_alert",
-		Source:   "Associated Press",
-	},
-	{
-		Title:    "Military aircraft sorties monitored over Okinawa airspace, radar activity intensifies",
-		Text:     "Dozens of air maneuvers were geolocated by signal intelligence arrays, creating increased noise on local air bands.",
-		Category: "military_activity",
-		Source:   "AFP",
-	},
+type RSS struct {
+	Channel Channel `xml:"channel"`
+}
+
+type Channel struct {
+	Title string `xml:"title"`
+	Items []Item `xml:"item"`
+}
+
+type Item struct {
+	Title       string `xml:"title"`
+	Description string `xml:"description"`
+	Link        string `xml:"link"`
+	PubDate     string `xml:"pubDate"`
 }
 
 func (m *Manager) runNewsWirePoller() {
-	// Periodic crawler looking for official wires
-	ticker := time.NewTicker(45 * time.Second)
+	ticker := time.NewTicker(10 * time.Minute)
 	defer ticker.Stop()
 
-	// Initial immediate poll
 	m.pollNewsWires()
 
 	for {
@@ -110,20 +79,65 @@ func (m *Manager) runNewsWirePoller() {
 
 func (m *Manager) pollNewsWires() {
 	ctx := context.Background()
-	log.Println("OSINT News Wire Poller: Ingesting dispatches from AP, Reuters, AFP...")
+	log.Printf("OSINT News Wire Poller: Ingesting dispatches from %d live RSS feeds...", len(RssFeeds))
 
-	// Select a random simulated article
-	sim := wireSimulations[rand.Intn(len(wireSimulations))]
+	client := &http.Client{Timeout: 10 * time.Second}
+	
+	// Select a rotating random subset of 15 feeds per poll to avoid IP blocks
+	maxFeeds := 15
+	selectedFeeds := make([]string, 0, maxFeeds)
+	if len(RssFeeds) > maxFeeds {
+		perm := rand.Perm(len(RssFeeds))
+		for i := 0; i < maxFeeds; i++ {
+			selectedFeeds = append(selectedFeeds, RssFeeds[perm[i]])
+		}
+	} else {
+		selectedFeeds = RssFeeds
+	}
 
-	// NER & Geocoding: Look for city mentions in Title or Text
+	for _, feedURL := range selectedFeeds {
+		go func(url string) {
+			req, err := http.NewRequest("GET", url, nil)
+			if err != nil {
+				return
+			}
+			req.Header.Set("User-Agent", "Panopticon-RSS-Ingestor/1.0")
+			
+			resp, err := client.Do(req)
+			if err != nil {
+				return
+			}
+			defer resp.Body.Close()
+			
+			if resp.StatusCode != 200 {
+				return
+			}
+			
+			var rss RSS
+			import "encoding/xml"
+			if err := xml.NewDecoder(resp.Body).Decode(&rss); err != nil {
+				return
+			}
+			
+			for i, item := range rss.Channel.Items {
+				if i >= 3 {
+					break // Take top 3 articles per feed
+				}
+				processRSSItem(ctx, item.Title, item.Description, url, item.Link, rss.Channel.Title)
+			}
+		}(feedURL)
+	}
+}
+
+func processRSSItem(ctx context.Context, title, desc, feedURL, link, sourceName string) {
 	resolvedLat := 0.0
 	resolvedLon := 0.0
 	matchedLocation := "Global Coordinate Grid"
+	combined := strings.ToLower(title + " " + desc)
 
 	for _, city := range hotspotCities {
-		// Quick NER check using case-insensitive substring search or regex
 		re := regexp.MustCompile("(?i)\\b" + city.Name + "\\b")
-		if re.MatchString(sim.Title) || re.MatchString(sim.Text) {
+		if re.MatchString(title) || re.MatchString(desc) {
 			resolvedLat = city.Lat
 			resolvedLon = city.Lon
 			matchedLocation = city.Name
@@ -131,7 +145,6 @@ func (m *Manager) pollNewsWires() {
 		}
 	}
 
-	// Fallback to random coordinate if no location matches to prevent empty coordinates
 	if resolvedLat == 0.0 && resolvedLon == 0.0 {
 		city := hotspotCities[rand.Intn(len(hotspotCities))]
 		resolvedLat = city.Lat
@@ -139,22 +152,42 @@ func (m *Manager) pollNewsWires() {
 		matchedLocation = city.Name
 	}
 
-	// Threat classification & Severity Tagging
+	category := "Political Crises & Geopolitics"
 	severity := "low"
-	if strings.Contains(sim.Title, "erupt") || strings.Contains(sim.Title, "floods") || strings.Contains(sim.Title, "failure") {
+	
+	if strings.Contains(combined, "terror") || strings.Contains(combined, "bomb") || strings.Contains(combined, "attack") {
+		category = "Terrorism & Internal Security"
+		severity = "critical"
+	} else if strings.Contains(combined, "cyber") || strings.Contains(combined, "hack") || strings.Contains(combined, "ddos") || strings.Contains(combined, "breach") {
+		category = "Cyber & Information Warfare"
+		severity = "high"
+	} else if strings.Contains(combined, "health") || strings.Contains(combined, "virus") || strings.Contains(combined, "disease") || strings.Contains(combined, "outbreak") || strings.Contains(combined, "infection") || strings.Contains(combined, "bio") {
+		category = "Biological, Health & Ecological"
+		severity = "high"
+	} else if strings.Contains(combined, "military") || strings.Contains(combined, "troops") || strings.Contains(combined, "army") || strings.Contains(combined, "war") || strings.Contains(combined, "clash") {
+		category = "Conflict & Hybrid Warfare"
+		severity = "high"
+	} else if strings.Contains(combined, "earthquake") || strings.Contains(combined, "flood") || strings.Contains(combined, "hurricane") || strings.Contains(combined, "storm") || strings.Contains(combined, "fire") || strings.Contains(combined, "climate") {
+		category = "Geophysical & Climate Events"
+		severity = "high"
+	} else if strings.Contains(combined, "economy") || strings.Contains(combined, "market") || strings.Contains(combined, "trade") || strings.Contains(combined, "stock") || strings.Contains(combined, "tariff") {
+		category = "Economic, Financial & Strategic Resources"
 		severity = "moderate"
-	}
-	if strings.Contains(sim.Title, "military") || strings.Contains(sim.Title, "critical") {
+	} else if strings.Contains(combined, "industrial") || strings.Contains(combined, "infrastructure") || strings.Contains(combined, "plant") || strings.Contains(combined, "disaster") {
+		category = "Industrial & Infrastructure Disasters"
 		severity = "high"
 	}
 
-	articleID := fmt.Sprintf("news-ap-%d", time.Now().UnixNano()%1000000)
+	if sourceName == "" {
+		sourceName = feedURL
+	}
 
-	// Consolidate into canonical OsintEvent (Tier -2)
+	articleID := fmt.Sprintf("news-rss-%d", time.Now().UnixNano()%1000000)
+
 	event := OsintEvent{
 		ID:            articleID,
-		Headline:      sim.Title,
-		EventCategory: sim.Category,
+		Headline:      title,
+		EventCategory: category,
 		Severity:      severity,
 		Coordinates:   [2]float64{resolvedLon, resolvedLat},
 		EventTime:     time.Now().UTC(),
@@ -162,20 +195,19 @@ func (m *Manager) pollNewsWires() {
 		AssociatedSources: []AssociatedSource{
 			{
 				SourceID:         articleID,
-				SourceURL:        "https://www.reuters.com/news/archive",
-				Snippet:          sim.Text,
-				CredibilityScore: 0.75,
+				SourceURL:        link,
+				Snippet:          desc,
+				CredibilityScore: 0.85,
 				Timestamp:        time.Now().UTC(),
 			},
 		},
 		AuditLog: map[string]any{
 			"geocoding_match": matchedLocation,
 			"ner_extracted":   true,
-			"wire_publisher":  sim.Source,
+			"wire_publisher":  sourceName,
 		},
 	}
 
-	// Send to zero-redundancy database clustering transaction
 	resolvedID, clustered, err := UpsertOsintEvent(ctx, event)
 	if err != nil {
 		log.Printf("OSINT News Wire: Ingest transaction failed: %v", err)

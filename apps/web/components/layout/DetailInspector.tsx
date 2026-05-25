@@ -1469,12 +1469,12 @@ export default function DetailInspector() {
               </div>
 
               {/* Source verification URL link */}
-              {ne.link && (
+              {ne.url && (
                 <a
-                  href={ne.link}
+                  href={ne.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-accent/10 hover:bg-accent/20 border border-accent/25 hover:border-accent text-accent hover:text-white text-[9px] font-bold rounded tracking-wider uppercase transition-all w-full cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-accent/10 hover:bg-accent/20 border border-accent/25 hover:border-accent text-accent hover:text-white text-[9px] font-bold rounded tracking-wider uppercase transition-all w-full cursor-pointer mt-2"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   <span>DECRYPT & SECURELY TRANSMIT FULL REPORT</span>
@@ -1596,21 +1596,6 @@ export default function DetailInspector() {
                 </div>
               )}
 
-              {/* Dispatch Links */}
-              {ne.url && (
-                <div className="p-3 bg-deepest/45 border border-weak rounded">
-                  <span className="text-[8px] text-secondary uppercase block mb-1">Source dispatch Link</span>
-                  <a
-                    href={ne.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center justify-between text-[10px] text-accent hover:underline p-1.5 bg-deepest/40 border border-weak/50 rounded"
-                  >
-                    <span className="truncate max-w-[170px]">{ne.url}</span>
-                    <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                  </a>
-                </div>
-              )}
 
               {/* OSINT CYBER RECON BLOCK */}
               <div className="border-t border-weak pt-4 space-y-3 font-mono">

@@ -136,14 +136,14 @@ export default function TopBar() {
     <header className="h-12 w-full flex items-center justify-between px-4 bg-surface border-b border-weak z-30 select-none shadow-md">
       {/* LEFT: Branding */}
       <div className="flex items-center gap-3">
-        <div className="relative flex items-center justify-center w-6 h-6 rounded bg-accent bg-opacity-20 border border-accent">
-          <Globe className="w-3.5 h-3.5 text-accent animate-pulse" />
+        <div className="relative flex items-center justify-center w-6 h-6 rounded bg-[var(--pan-btn-active-bg)] border border-[var(--pan-border-accent)] shadow-sm">
+          <Globe className="w-3.5 h-3.5 text-[var(--pan-text-accent)] animate-pulse" />
         </div>
         <div className="flex flex-col">
-          <h1 className="font-display text-sm font-bold tracking-widest text-heading uppercase leading-none">
+          <h1 className="font-display text-sm font-bold tracking-widest text-[var(--pan-text-primary)] uppercase leading-none drop-shadow-sm">
             PANOPTICON
           </h1>
-          <span className="text-[9px] font-mono font-semibold tracking-wider text-secondary leading-none mt-1">
+          <span className="text-[9px] font-mono font-semibold tracking-wider text-[var(--pan-text-secondary)] leading-none mt-1">
             GLOBAL RECON SYSTEM v1.0
           </span>
         </div>
@@ -156,29 +156,6 @@ export default function TopBar() {
 
       {/* RIGHT: Systems Grid & UI Toggles */}
       <div className="flex items-center gap-4">
-        {/* Source Monitors */}
-        <div className="hidden lg:flex items-center gap-3 px-3 py-1 bg-deepest bg-opacity-40 rounded border border-weak font-mono text-[10px]">
-          <div className="flex items-center gap-1.5">
-            <span className="status-dot status-dot--ok" />
-            <span className="text-secondary uppercase">USGS</span>
-          </div>
-          <div className="w-px h-3 bg-border-weak" />
-          <div className="flex items-center gap-1.5">
-            <span className="status-dot status-dot--ok" />
-            <span className="text-secondary uppercase">NOAA</span>
-          </div>
-          <div className="w-px h-3 bg-border-weak" />
-          <div className="flex items-center gap-1.5">
-            <span className="status-dot status-dot--warning animate-pulse" />
-            <span className="text-secondary uppercase">GDELT</span>
-          </div>
-          <div className="w-px h-3 bg-border-weak" />
-          <div className="flex items-center gap-1.5 text-accent">
-            <Radio className="w-3 h-3 animate-pulse" />
-            <span className="uppercase text-accent font-semibold">FEED LIVE</span>
-          </div>
-        </div>
-
         {/* Force Refresh Button */}
         <Tooltip content="Force immediate revalidation of all active OSINT caches">
           <button
@@ -190,22 +167,6 @@ export default function TopBar() {
             }`}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </button>
-        </Tooltip>
-
-        {/* Global Pause Refresh Switch */}
-        <Tooltip content={globalRefreshPaused ? 'Resume live background SWR polling cycles' : 'Pause background data revalidations'}>
-          <button
-            onClick={toggleGlobalRefresh}
-            aria-label={globalRefreshPaused ? 'Resume live background SWR polling cycles' : 'Pause background data revalidations'}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-[10px] font-mono transition-all ${
-              globalRefreshPaused
-                ? 'bg-[var(--pan-sev-critical-bg)] border-[var(--pan-sev-critical-border)] text-[var(--pan-sev-critical-text)]'
-                : 'bg-[var(--pan-sev-moderate-bg)] border-[var(--pan-sev-moderate-border)] text-[var(--pan-sev-moderate-text)]'
-            }`}
-          >
-            <Activity className="w-3 h-3" />
-            <span className="uppercase font-semibold">{globalRefreshPaused ? 'PAUSED' : 'LIVE'}</span>
           </button>
         </Tooltip>
 

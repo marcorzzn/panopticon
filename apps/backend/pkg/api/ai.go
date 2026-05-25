@@ -426,58 +426,79 @@ func EnrichNewsHandler(w http.ResponseWriter, r *http.Request) {
 		category := "Politics"
 		severity := 3
 
-		centroids := map[string][2]float64{
-			"ukraine":        {31.1656, 48.3794},
-			"russia":         {105.3188, 61.5240},
-			"united states":  {-95.7129, 37.0902},
-			"china":          {104.1954, 35.8617},
-			"taiwan":         {120.9605, 23.6978},
-			"israel":         {34.8516, 31.0461},
-			"gaza":           {34.45, 31.43},
-			"iran":           {53.6880, 32.4279},
-			"syria":          {38.9968, 34.8021},
-			"lebanon":        {35.8623, 33.8547},
-			"yemen":          {48.5164, 15.5527},
-			"red sea":        {38.5, 20.0},
-			"somalia":        {46.1996, 5.1521},
-			"sudan":          {30.2186, 12.8628},
-			"united kingdom": {-2.2426, 55.3781},
-			"germany":        {10.4515, 51.1657},
-			"france":         {2.2137, 46.2276},
-			"italy":          {12.5674, 41.8719},
-			"japan":          {138.2529, 36.2048},
-			"south korea":    {127.7669, 35.9078},
-			"north korea":    {127.5101, 40.3399},
-			"venezuela":      {-66.5897, 6.4238},
-			"philippines":    {121.7740, 12.8797},
-			"panama":         {-80.7821, 8.5380},
-			"suez":           {32.54, 29.96},
-		}
-
-		for key, coords := range centroids {
-			if strings.Contains(combined, key) {
-				lng, lat = coords[0], coords[1]
-				locName = strings.Title(key)
-				break
-			}
-		}
-
-		// Quick keyword mapping for category & severity
-		if strings.Contains(combined, "conflict") || strings.Contains(combined, "war") || strings.Contains(combined, "clash") || strings.Contains(combined, "strike") || strings.Contains(combined, "bomb") || strings.Contains(combined, "military") {
-			category = "Conflict"
+		// Keyword mapping for the strict 8-category schema
+		if strings.Contains(combined, "terror") || strings.Contains(combined, "bomb") || strings.Contains(combined, "attack") {
+			category = "Terrorism & Internal Security"
+			severity = 5
+		} else if strings.Contains(combined, "cyber") || strings.Contains(combined, "hack") || strings.Contains(combined, "ddos") || strings.Contains(combined, "breach") {
+			category = "Cyber & Information Warfare"
 			severity = 4
-		} else if strings.Contains(combined, "protest") || strings.Contains(combined, "riot") || strings.Contains(combined, "demonstr") {
-			category = "Protest"
-			severity = 3
-		} else if strings.Contains(combined, "earthquake") || strings.Contains(combined, "flood") || strings.Contains(combined, "hurricane") || strings.Contains(combined, "storm") || strings.Contains(combined, "fire") || strings.Contains(combined, "hazard") {
-			category = "Natural Disaster"
+		} else if strings.Contains(combined, "health") || strings.Contains(combined, "virus") || strings.Contains(combined, "disease") || strings.Contains(combined, "outbreak") || strings.Contains(combined, "infection") || strings.Contains(combined, "bio") {
+			category = "Biological, Health & Ecological"
+			severity = 4
+		} else if strings.Contains(combined, "military") || strings.Contains(combined, "troops") || strings.Contains(combined, "army") || strings.Contains(combined, "war") || strings.Contains(combined, "clash") {
+			category = "Conflict & Hybrid Warfare"
+			severity = 4
+		} else if strings.Contains(combined, "earthquake") || strings.Contains(combined, "flood") || strings.Contains(combined, "hurricane") || strings.Contains(combined, "storm") || strings.Contains(combined, "fire") || strings.Contains(combined, "climate") {
+			category = "Geophysical & Climate Events"
 			severity = 4
 		} else if strings.Contains(combined, "economy") || strings.Contains(combined, "market") || strings.Contains(combined, "trade") || strings.Contains(combined, "stock") || strings.Contains(combined, "tariff") {
-			category = "Economy"
+			category = "Economic, Financial & Strategic Resources"
 			severity = 2
-		} else if strings.Contains(combined, "movie") || strings.Contains(combined, "music") || strings.Contains(combined, "entertainment") || strings.Contains(combined, "celebrity") {
-			category = "Global Entertainment"
-			severity = 1
+		} else if strings.Contains(combined, "industrial") || strings.Contains(combined, "infrastructure") || strings.Contains(combined, "plant") || strings.Contains(combined, "disaster") {
+			category = "Industrial & Infrastructure Disasters"
+			severity = 4
+		} else {
+			category = "Political Crises & Geopolitics"
+			severity = 3
+		}
+
+		// Fallback Geocoding via OSM Nominatim
+		// We'll extract a naive location query by looking at the first 3 capitalized words in the title.
+		extractLoc := func(title string) string {
+			words := strings.Fields(title)
+			var caps []string
+			for _, w := range words {
+				if len(w) > 0 && w[0] >= 'A' && w[0] <= 'Z' {
+					clean := strings.Trim(w, ".,:;'\"()!?")
+					if len(clean) > 2 {
+						caps = append(caps, clean)
+					}
+				}
+			}
+			if len(caps) > 3 {
+				caps = caps[:3]
+			}
+			return strings.Join(caps, " ")
+		}
+
+		queryLoc := extractLoc(req.Title)
+		if queryLoc != "" {
+			nomURL := fmt.Sprintf("https://nominatim.openstreetmap.org/search?q=%s&format=json&limit=1", strings.ReplaceAll(queryLoc, " ", "+"))
+			reqHttp, err := http.NewRequest("GET", nomURL, nil)
+			if err == nil {
+				reqHttp.Header.Set("User-Agent", "Panopticon-Geocoding-Fallback/1.0")
+				client := &http.Client{Timeout: 5 * time.Second}
+				resp, err := client.Do(reqHttp)
+				if err == nil && resp.StatusCode == 200 {
+					var nomRes []struct {
+						Lat         string `json:"lat"`
+						Lon         string `json:"lon"`
+						DisplayName string `json:"display_name"`
+					}
+					if err := json.NewDecoder(resp.Body).Decode(&nomRes); err == nil && len(nomRes) > 0 {
+						var parsedLat, parsedLon float64
+						fmt.Sscanf(nomRes[0].Lat, "%f", &parsedLat)
+						fmt.Sscanf(nomRes[0].Lon, "%f", &parsedLon)
+						if parsedLat != 0 && parsedLon != 0 {
+							lat = parsedLat
+							lng = parsedLon
+							locName = nomRes[0].DisplayName
+						}
+					}
+					resp.Body.Close()
+				}
+			}
 		}
 
 		shortSummary := req.Description
@@ -500,7 +521,17 @@ func EnrichNewsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prompt := fmt.Sprintf(`You are a GIS intelligence analyst. Read the following news dispatch. Extract the exact location (city, region, or country) where the event is taking place. Categorize the event (Conflict, Protest, Natural Disaster, Politics, Global Entertainment, Economy). Assign a severity level from 1 to 5. Provide the GPS coordinates (Latitude, Longitude) of the event's location. Return EXACTLY and ONLY a JSON object using this schema: { "lat": number, "lng": number, "category": string, "severity": number, "short_summary": string, "exact_location_name": string }.
+	prompt := fmt.Sprintf(`You are a GIS intelligence analyst. Read the following news dispatch. Extract the exact location (city, region, or country) where the event is taking place. Categorize the event into exactly one of these 8 categories:
+- Conflict & Hybrid Warfare
+- Terrorism & Internal Security
+- Cyber & Information Warfare
+- Political Crises & Geopolitics
+- Geophysical & Climate Events
+- Biological, Health & Ecological
+- Economic, Financial & Strategic Resources
+- Industrial & Infrastructure Disasters
+
+Assign a severity level from 1 to 5. Provide the GPS coordinates (Latitude, Longitude) of the event's location. Return EXACTLY and ONLY a JSON object using this schema: { "lat": number, "lng": number, "category": string, "severity": number, "short_summary": string, "exact_location_name": string }.
 
 Title: %s
 Description: %s`, req.Title, req.Description)

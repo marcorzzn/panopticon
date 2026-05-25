@@ -14,6 +14,9 @@ import {
   fetchWebcams,
   fetchSatellites,
   fetchRssEvents,
+  fetchPowerGrid,
+  fetchNuclearFacilities,
+  fetchPipelineNetworks,
 } from '@panopticon/data-pipeline'
 import { useMapStore, usePanelStore, useAppStore, useNewsStore } from '@panopticon/core/stores'
 import persistentConflicts from '../../../packages/core/src/config/persistent-conflicts.json'
@@ -23,6 +26,7 @@ import { X, HelpCircle } from 'lucide-react'
 import DashboardLayout from '@/components/layout/DashboardLayout'
 import EarthquakePanel from '@/components/panels/EarthquakePanel'
 import SpaceWeatherPanel from '@/components/panels/SpaceWeatherPanel'
+import SystemStatusWidget from '@/components/layout/SystemStatusWidget'
 
 // Dynamically import MapView to disable SSR (MapLibre Gl relies on browser APIs)
 const MapView = dynamic(
@@ -39,6 +43,7 @@ const MapView = dynamic(
 )
 
 const EMPTY_ARRAY: any[] = []
+const EMPTY_GEOJSON: any = { type: 'FeatureCollection', features: [] }
 
 export default function Home() {
   const viewState = useMapStore((s) => s.viewState)
@@ -203,6 +208,34 @@ export default function Home() {
     setLayerEntityCount('news-events', rssEvents.length)
   }, [rssEvents, setNewsEvents, setLayerEntityCount])
 
+  // Infrastructure & Energy (Phase 8 Additions)
+  const { data: powerGrid = EMPTY_GEOJSON } = useSWR(
+    'power-grid-core',
+    fetchPowerGrid,
+    {
+      refreshInterval: globalRefreshPaused ? 0 : 300000,
+      revalidateOnFocus: false,
+    }
+  )
+
+  const { data: nuclearFacilities = EMPTY_GEOJSON } = useSWR(
+    'nuclear-facilities-core',
+    fetchNuclearFacilities,
+    {
+      refreshInterval: globalRefreshPaused ? 0 : 300000,
+      revalidateOnFocus: false,
+    }
+  )
+
+  const { data: pipelineNetworks = EMPTY_GEOJSON } = useSWR(
+    'pipeline-networks-core',
+    fetchPipelineNetworks,
+    {
+      refreshInterval: globalRefreshPaused ? 0 : 300000,
+      revalidateOnFocus: false,
+    }
+  )
+
   // Sync layer entity counts for map-markers on load
   React.useEffect(() => {
     setLayerEntityCount('earthquakes', earthquakes.length)
@@ -239,6 +272,18 @@ export default function Home() {
   React.useEffect(() => {
     setLayerEntityCount('active-conflicts', persistentConflicts.length)
   }, [setLayerEntityCount])
+
+  React.useEffect(() => {
+    setLayerEntityCount('power-grid', powerGrid.features.length)
+  }, [powerGrid, setLayerEntityCount])
+
+  React.useEffect(() => {
+    setLayerEntityCount('nuclear-facilities', nuclearFacilities.features.length)
+  }, [nuclearFacilities, setLayerEntityCount])
+
+  React.useEffect(() => {
+    setLayerEntityCount('pipeline-networks', pipelineNetworks.features.length)
+  }, [pipelineNetworks, setLayerEntityCount])
 
   // ── 2. GEOPOLITICAL C2 KEYBOARD SHORTCUTS SYSTEM ─────────────────────────
 
@@ -366,20 +411,7 @@ export default function Home() {
 
   return (
     <>
-      {/* Global Pipeline Sync HUD Indicator */}
-      <div className="absolute left-16 top-16 z-20 flex flex-col font-mono text-[9px] px-2.5 py-1.5 rounded border border-weak bg-[#0b0f1a]/85 backdrop-blur-sm pointer-events-none select-none text-secondary">
-        <div className="flex items-center gap-1.5 font-bold">
-          <span className={`w-1.5 h-1.5 rounded-full ${globalRefreshPaused ? 'bg-status-critical-text animate-pulse' : 'bg-accent animate-ping'}`} />
-          <span className="uppercase text-primary font-semibold">PIPELINE SYNC</span>
-          <span className="text-secondary">•</span>
-          <span className={`uppercase font-bold ${globalRefreshPaused ? 'text-status-critical-text' : 'text-[#34c759]'}`}>
-            {globalRefreshPaused ? 'PAUSED' : 'ACTIVE'}
-          </span>
-        </div>
-        <span className="mt-1 text-[8px] text-secondary">
-          LAST SWEEP: {secondsSinceUpdate === 0 ? 'JUST NOW' : `${secondsSinceUpdate}s AGO`}
-        </span>
-      </div>
+      <SystemStatusWidget secondsSinceUpdate={secondsSinceUpdate} />
 
       <DashboardLayout
         earthquakePanel={<EarthquakePanel />}
@@ -395,6 +427,9 @@ export default function Home() {
           acledEvents={acledEvents}
           webcams={webcams}
           satellites={satellites}
+          powerGrid={powerGrid}
+          nuclearFacilities={nuclearFacilities}
+          pipelineNetworks={pipelineNetworks}
         />
       </DashboardLayout>
 

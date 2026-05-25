@@ -1,0 +1,775 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-7.3402",
+            "30.5178"
+          ],
+          [
+            "-9.4061",
+            "38.4790"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-0",
+        "name": "Nord Stream Segment 0",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "61.8786",
+            "1.8595"
+          ],
+          [
+            "57.4995",
+            "10.4877"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-1",
+        "name": "Druzhba Segment 1",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-68.7668",
+            "40.4946"
+          ],
+          [
+            "-69.7182",
+            "32.3729"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-2",
+        "name": "Keystone Segment 2",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "119.0450",
+            "56.8886"
+          ],
+          [
+            "109.3507",
+            "56.0649"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-3",
+        "name": "Baku-Tbilisi-Ceyhan Segment 3",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-166.1762",
+            "7.3777"
+          ],
+          [
+            "-168.5265",
+            "1.9219"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-4",
+        "name": "Power of Siberia Segment 4",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-7.8875",
+            "13.4705"
+          ],
+          [
+            "-8.0187",
+            "19.6051"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-5",
+        "name": "Yamal-Europe Segment 5",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "168.0789",
+            "2.9297"
+          ],
+          [
+            "174.5336",
+            "3.3243"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-6",
+        "name": "Trans-Saharan Segment 6",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-13.0980",
+            "-18.0694"
+          ],
+          [
+            "-14.4797",
+            "-19.5907"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-7",
+        "name": "East-West Segment 7",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "2.1021",
+            "-5.8583"
+          ],
+          [
+            "-4.9405",
+            "1.3757"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-8",
+        "name": "Colonial Segment 8",
+        "type": "GAS",
+        "status": "MAINTENANCE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-91.2270",
+            "20.6385"
+          ],
+          [
+            "-87.8113",
+            "19.3532"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-9",
+        "name": "Dolphin Segment 9",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-9.5757",
+            "-44.6029"
+          ],
+          [
+            "-10.6966",
+            "-41.4036"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-10",
+        "name": "Nord Stream Segment 10",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "96.5630",
+            "-7.0595"
+          ],
+          [
+            "99.3495",
+            "-4.6739"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-11",
+        "name": "Druzhba Segment 11",
+        "type": "OIL",
+        "status": "MAINTENANCE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "53.2414",
+            "49.3550"
+          ],
+          [
+            "48.3420",
+            "48.5509"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-12",
+        "name": "Keystone Segment 12",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "38.9918",
+            "46.2608"
+          ],
+          [
+            "31.0372",
+            "38.4732"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-13",
+        "name": "Baku-Tbilisi-Ceyhan Segment 13",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "71.0494",
+            "-9.5029"
+          ],
+          [
+            "77.2587",
+            "0.4403"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-14",
+        "name": "Power of Siberia Segment 14",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-143.1529",
+            "-9.4560"
+          ],
+          [
+            "-142.9229",
+            "-2.9889"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-15",
+        "name": "Yamal-Europe Segment 15",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-4.9425",
+            "35.7792"
+          ],
+          [
+            "-0.8992",
+            "35.0233"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-16",
+        "name": "Trans-Saharan Segment 16",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "109.7664",
+            "-64.6544"
+          ],
+          [
+            "107.9666",
+            "-70.7202"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-17",
+        "name": "East-West Segment 17",
+        "type": "GAS",
+        "status": "MAINTENANCE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-179.8602",
+            "-26.4106"
+          ],
+          [
+            "-170.9583",
+            "-28.8735"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-18",
+        "name": "Colonial Segment 18",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-173.5863",
+            "15.4085"
+          ],
+          [
+            "-177.7572",
+            "23.5339"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-19",
+        "name": "Dolphin Segment 19",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "50.6211",
+            "51.2103"
+          ],
+          [
+            "49.5088",
+            "50.2579"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-20",
+        "name": "Nord Stream Segment 20",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-11.1958",
+            "5.3077"
+          ],
+          [
+            "-20.3452",
+            "10.1383"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-21",
+        "name": "Druzhba Segment 21",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "69.7729",
+            "23.2976"
+          ],
+          [
+            "68.0095",
+            "20.2005"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-22",
+        "name": "Keystone Segment 22",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-131.8757",
+            "60.0870"
+          ],
+          [
+            "-134.5939",
+            "60.7824"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-23",
+        "name": "Baku-Tbilisi-Ceyhan Segment 23",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-58.2921",
+            "0.5707"
+          ],
+          [
+            "-67.4404",
+            "-6.2769"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-24",
+        "name": "Power of Siberia Segment 24",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-94.0389",
+            "64.3399"
+          ],
+          [
+            "-100.8988",
+            "73.3920"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-25",
+        "name": "Yamal-Europe Segment 25",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "102.0415",
+            "-37.2219"
+          ],
+          [
+            "108.3178",
+            "-34.9781"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-26",
+        "name": "Trans-Saharan Segment 26",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "136.6617",
+            "67.1957"
+          ],
+          [
+            "140.4588",
+            "75.1511"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-27",
+        "name": "East-West Segment 27",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-34.6840",
+            "-25.5910"
+          ],
+          [
+            "-38.9894",
+            "-27.1399"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-28",
+        "name": "Colonial Segment 28",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "141.5944",
+            "55.8862"
+          ],
+          [
+            "139.1454",
+            "51.3519"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-29",
+        "name": "Dolphin Segment 29",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "53.0138",
+            "-34.6415"
+          ],
+          [
+            "55.0353",
+            "-38.9918"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-30",
+        "name": "Nord Stream Segment 30",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "150.9234",
+            "28.8664"
+          ],
+          [
+            "158.9539",
+            "19.9014"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-31",
+        "name": "Druzhba Segment 31",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-51.5291",
+            "56.5413"
+          ],
+          [
+            "-54.8164",
+            "61.7827"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-32",
+        "name": "Keystone Segment 32",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "49.8106",
+            "15.1407"
+          ],
+          [
+            "59.6347",
+            "10.2968"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-33",
+        "name": "Baku-Tbilisi-Ceyhan Segment 33",
+        "type": "OIL",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            "-36.3917",
+            "3.0563"
+          ],
+          [
+            "-35.6841",
+            "1.5521"
+          ]
+        ]
+      },
+      "properties": {
+        "id": "PIPE-34",
+        "name": "Power of Siberia Segment 34",
+        "type": "GAS",
+        "status": "ACTIVE"
+      }
+    }
+  ]
+}

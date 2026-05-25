@@ -89,29 +89,74 @@ func UpsertOsintEvent(ctx context.Context, input OsintEvent) (string, bool, erro
 	}
 	defer tx.Rollback(ctx)
 
-	// Spatial-Temporal Clustering check:
-	// Query for an existing event with the same category, within 15 km (ST_DWithin on 4326 using geography cast)
-	// and a 45-minute temporal window.
+	// Spatial-Temporal Clustering check (4 Criteria):
+	// 1. Category Match
+	// 2. Geographic Proximity: 50km (ST_DWithin 50000 meters)
+	// 3. Temporal Window: ±24 hours
+	// 4. Semantic Similarity: pg_trgm similarity(headline, input.Headline) > 0.25 OR basic substring overlap
 	var matchedID string
 	var currentSourcesJSON []byte
 	var currentRedundancy int
 	var currentTier int
+	var existingHeadline string
 
-	err = tx.QueryRow(ctx, `
-		SELECT id, associated_sources, redundancy_count, source_tier
+	// Since we don't know if pg_trgm is enabled, we'll select all candidates matching criteria 1-3,
+	// and apply criteria 4 (Semantic Similarity) in Go to guarantee it works.
+	rows, err := tx.Query(ctx, `
+		SELECT id, headline, associated_sources, redundancy_count, source_tier
 		FROM osint_events
 		WHERE event_category = $1
-		  AND ST_DWithin(geom::geography, ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography, 15000)
-		  AND event_time >= $4::timestamptz - interval '45 minutes'
-		  AND event_time <= $4::timestamptz + interval '45 minutes'
+		  AND ST_DWithin(geom::geography, ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography, 50000)
+		  AND event_time >= $4::timestamptz - interval '24 hours'
+		  AND event_time <= $4::timestamptz + interval '24 hours'
 		ORDER BY event_time DESC
-		LIMIT 1;
-	`, input.EventCategory, input.Coordinates[0], input.Coordinates[1], input.EventTime).Scan(
-		&matchedID, &currentSourcesJSON, &currentRedundancy, &currentTier,
-	)
+		LIMIT 20;
+	`, input.EventCategory, input.Coordinates[0], input.Coordinates[1], input.EventTime)
+
+	if err != nil {
+		return "", false, fmt.Errorf("failed to query clusters: %w", err)
+	}
+	defer rows.Close()
+
+	// Semantic similarity helper using basic Jaccard index on words
+	isSemanticallySimilar := func(s1, s2 string) bool {
+		words1 := strings.Fields(strings.ToLower(s1))
+		words2 := strings.Fields(strings.ToLower(s2))
+		
+		set1 := make(map[string]bool)
+		for _, w := range words1 {
+			if len(w) > 3 { // skip stop words
+				set1[w] = true
+			}
+		}
+		
+		intersection := 0
+		for _, w := range words2 {
+			if len(w) > 3 && set1[w] {
+				intersection++
+			}
+		}
+		
+		// If they share at least 2 significant words, consider them semantically similar for deduplication
+		return intersection >= 2 || strings.Contains(strings.ToLower(s1), strings.ToLower(s2)) || strings.Contains(strings.ToLower(s2), strings.ToLower(s1))
+	}
+
+	foundMatch := false
+	for rows.Next() {
+		if err := rows.Scan(&matchedID, &existingHeadline, &currentSourcesJSON, &currentRedundancy, &currentTier); err != nil {
+			continue
+		}
+		
+		// Criterion 4: Semantic Similarity
+		if isSemanticallySimilar(input.Headline, existingHeadline) {
+			foundMatch = true
+			break
+		}
+	}
+	rows.Close()
 
 	// If a matching cluster is found, consolidate the event
-	if err == nil {
+	if foundMatch {
 		var sources []AssociatedSource
 		if len(currentSourcesJSON) > 0 {
 			_ = json.Unmarshal(currentSourcesJSON, &sources)

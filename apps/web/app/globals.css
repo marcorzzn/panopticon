@@ -41,20 +41,20 @@
 :root, [data-theme="dark"] {
   /* Background layers */
   --pan-bg-base:        #06080b;   /* Map canvas background */
-  --pan-bg-surface:     #0d1117;   /* Sidebars, sliding drawers */
+  --pan-bg-surface:     rgba(10, 14, 20, 0.92);   /* Sidebars, sliding drawers */
   --pan-bg-raised:      #161b22;   /* Cards, selectors, interactive layers */
   --pan-bg-overlay:     #1f242c;   /* Tooltips, context modals */
   --pan-bg-interactive: #212830;   /* Active row hover, list clicks */
 
   /* Border styling */
-  --pan-border-subtle:  rgba(255, 255, 255, 0.05);
-  --pan-border-default: rgba(255, 255, 255, 0.12);
-  --pan-border-strong:  rgba(255, 255, 255, 0.25);
+  --pan-border-subtle:  rgba(255, 255, 255, 0.20);
+  --pan-border-default: rgba(255, 255, 255, 0.25);
+  --pan-border-strong:  rgba(255, 255, 255, 0.30);
   --pan-border-accent:  rgba(0, 200, 140, 0.35);
 
   /* Typography color hierarchy */
-  --pan-text-primary:   #f0f3f6;   /* Active headlines, tabular values */
-  --pan-text-secondary: #8b949e;   /* General description, metadata labels */
+  --pan-text-primary:   rgba(255, 255, 255, 0.96);   /* Active headlines, tabular values */
+  --pan-text-secondary: rgba(255, 255, 255, 0.78);   /* General description, metadata labels */
   --pan-text-muted:     #58a6ff;   /* Secondary tags, informational labels */
   --pan-text-accent:    #00c88c;   /* Verified active green status */
   --pan-text-warning:   #f0a000;   /* Degraded status alerts */
@@ -100,20 +100,20 @@
 [data-theme="light"] {
   /* Background layers */
   --pan-bg-base:        #f0f2f5;   /* Map canvas background */
-  --pan-bg-surface:     #ffffff;   /* Sidebars, sliding drawers */
+  --pan-bg-surface:     rgba(240, 245, 255, 0.94);   /* Sidebars, sliding drawers */
   --pan-bg-raised:      #f7f9fa;   /* Cards, selectors, interactive layers */
   --pan-bg-overlay:     #ffffff;   /* Tooltips, context modals */
   --pan-bg-interactive: #e4e6eb;   /* Active row hover, list clicks */
 
   /* Border styling */
-  --pan-border-subtle:  rgba(0, 0, 0, 0.04);
-  --pan-border-default: rgba(0, 0, 0, 0.10);
-  --pan-border-strong:  rgba(0, 0, 0, 0.22);
+  --pan-border-subtle:  rgba(0, 0, 0, 0.20);
+  --pan-border-default: rgba(0, 0, 0, 0.25);
+  --pan-border-strong:  rgba(0, 0, 0, 0.30);
   --pan-border-accent:  rgba(0, 150, 100, 0.35);
 
   /* Typography color hierarchy */
-  --pan-text-primary:   #1c1e21;   /* Active headlines, tabular values */
-  --pan-text-secondary: #606770;   /* General description, metadata labels */
+  --pan-text-primary:   rgba(0, 0, 0, 0.92);   /* Active headlines, tabular values */
+  --pan-text-secondary: rgba(0, 0, 0, 0.68);   /* General description, metadata labels */
   --pan-text-muted:     #0066cc;   /* Secondary tags, informational labels */
   --pan-text-accent:    #00a875;   /* Verified active green status */
   --pan-text-warning:   #b86d00;   /* Degraded status alerts */
@@ -161,27 +161,29 @@ body {
   color: var(--pan-text-primary, #f0f3f6);
   font-family: var(--font-sans), system-ui, sans-serif;
   overflow: hidden;
+  font-size: 11px;
+  line-height: 1.45;
 }
 
 /* Specific text readability overrides to resolve dark text on dark background issues */
 .text-secondary {
-  color: var(--color-text-secondary, #8899aa) !important;
+  color: var(--pan-text-secondary) !important;
 }
 
 .text-primary {
-  color: var(--color-text-primary, #c8d3e0) !important;
+  color: var(--pan-text-primary) !important;
 }
 
 .text-heading {
-  color: var(--color-text-heading, #dce3ed) !important;
+  color: var(--pan-text-primary) !important;
 }
 
 .text-weak {
-  color: var(--color-text-tertiary, #6b7d8f) !important;
+  color: var(--pan-text-muted) !important;
 }
 
 .border-weak {
-  border-color: var(--color-border-weak, #1e3050) !important;
+  border-color: var(--pan-border-default) !important;
 }
 
 /* Ensure smooth, highly-readable controls */

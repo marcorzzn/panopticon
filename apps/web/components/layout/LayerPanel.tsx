@@ -134,7 +134,7 @@ export default function LayerPanel() {
   const [aviationOpen, setAviationOpen] = React.useState(true)
   const [osintOpen, setOsintOpen] = React.useState(true)
   const [spaceOpen, setSpaceOpen] = React.useState(true)
-  const [infraOpen, setInfraOpen] = React.useState(false)
+  const [infraOpen, setInfraOpen] = React.useState(true)
 
   const activeLayerIds = [
     'earthquakes',
@@ -162,7 +162,10 @@ export default function LayerPanel() {
     'maritime-incidents',
     'undersea-cables',
     'aviation-incidents',
-    'no-fly-zones'
+    'no-fly-zones',
+    'power-grid',
+    'nuclear-facilities',
+    'pipeline-networks'
   ]
 
   const handleActivateAll = () => {
@@ -304,6 +307,12 @@ export default function LayerPanel() {
                 label="Geocoded News Wire"
                 icon={<Rss className="w-3.5 h-3.5" />}
                 description="Geolocated real-time media and threat wire events"
+              />
+              <LayerRow
+                id="health-outbreaks"
+                label="Disease Outbreaks"
+                icon={<Activity className="w-3.5 h-3.5" />}
+                description="ProMED and WHO DON real-time health alerts"
               />
             </div>
           )}
@@ -455,6 +464,12 @@ export default function LayerPanel() {
                 icon={<Radio className="w-3.5 h-3.5" />}
                 description="Tactical network hops and port traceback scanners"
               />
+              <LayerRow
+                id="cyber-threats"
+                label="Cyber Threats"
+                icon={<Lock className="w-3.5 h-3.5" />}
+                description="CISA alerts and global cybersecurity incidents"
+              />
             </div>
           )}
         </div>
@@ -495,14 +510,14 @@ export default function LayerPanel() {
           )}
         </div>
 
-        {/* GROUP 8: INFRASTRUCTURE (COMING SOON / LOCKED) */}
+        {/* GROUP 8: INFRASTRUCTURE & ENERGY */}
         <div className="flex flex-col border-t border-[var(--pan-border-default)] border-b border-[var(--pan-border-default)]">
           <div
             onClick={() => setInfraOpen(!infraOpen)}
             className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
           >
-            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-secondary)] block uppercase font-mono">
-              Infrastructure [LOCKED]
+            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
+              Infrastructure & Energy
             </span>
             {infraOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
           </div>
@@ -513,22 +528,22 @@ export default function LayerPanel() {
                 id="power-grid"
                 label="Power Grid Status"
                 icon={<Database className="w-3.5 h-3.5" />}
-                description="National electrical infrastructure maps [Free Real-Time Feeds Pending]"
-                locked={true}
+                description="Global high-voltage transmission lines and active load nodes"
+                locked={false}
               />
               <LayerRow
                 id="nuclear-facilities"
                 label="Nuclear Facilities"
-                icon={<LockKeyhole className="w-3.5 h-3.5" />}
-                description="IAEA geocoded nuclear power reactor maps [Undergoing Review]"
-                locked={true}
+                icon={<Activity className="w-3.5 h-3.5" />}
+                description="Strategic nuclear reactors and enrichment facilities (PRIS)"
+                locked={false}
               />
               <LayerRow
                 id="pipeline-networks"
                 label="Pipeline Networks"
                 icon={<Network className="w-3.5 h-3.5" />}
-                description="Transnational oil and gas pipeline routes [Cites Required]"
-                locked={true}
+                description="Transnational strategic gas and oil pipeline routes"
+                locked={false}
               />
             </div>
           )}

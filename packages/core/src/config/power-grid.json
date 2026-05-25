@@ -1,0 +1,905 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-66.3612",
+          "-16.7199"
+        ]
+      },
+      "properties": {
+        "id": "PG-0",
+        "name": "Three Gorges Dam Substation 0",
+        "type": "generation",
+        "load_mw": 3769,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-78.9879",
+          "-36.4303"
+        ]
+      },
+      "properties": {
+        "id": "PG-1",
+        "name": "Itaipu Dam Substation 1",
+        "type": "generation",
+        "load_mw": 617,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "167.1830",
+          "60.1886"
+        ]
+      },
+      "properties": {
+        "id": "PG-2",
+        "name": "Grand Coulee Substation 2",
+        "type": "generation",
+        "load_mw": 4452,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-15.7523",
+          "-3.7867"
+        ]
+      },
+      "properties": {
+        "id": "PG-3",
+        "name": "Sayano-Shushenskaya Substation 3",
+        "type": "generation",
+        "load_mw": 1499,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-46.4774",
+          "-0.3482"
+        ]
+      },
+      "properties": {
+        "id": "PG-4",
+        "name": "Belo Monte Substation 4",
+        "type": "generation",
+        "load_mw": 2806,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-115.6959",
+          "53.9791"
+        ]
+      },
+      "properties": {
+        "id": "PG-5",
+        "name": "Tucuruí Substation 5",
+        "type": "generation",
+        "load_mw": 3374,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-110.8272",
+          "39.6278"
+        ]
+      },
+      "properties": {
+        "id": "PG-6",
+        "name": "Guri Substation 6",
+        "type": "generation",
+        "load_mw": 1983,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "28.9392",
+          "-17.5299"
+        ]
+      },
+      "properties": {
+        "id": "PG-7",
+        "name": "Kashiwazaki-Kariwa Substation 7",
+        "type": "generation",
+        "load_mw": 4583,
+        "operator": "National Grid",
+        "status": "DEGRADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-93.3628",
+          "-59.9912"
+        ]
+      },
+      "properties": {
+        "id": "PG-8",
+        "name": "Bruce County Substation 8",
+        "type": "generation",
+        "load_mw": 1920,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "120.6744",
+          "-19.9625"
+        ]
+      },
+      "properties": {
+        "id": "PG-9",
+        "name": "Gravelines Substation 9",
+        "type": "generation",
+        "load_mw": 1827,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "76.4796",
+          "-19.0984"
+        ]
+      },
+      "properties": {
+        "id": "PG-10",
+        "name": "Three Gorges Dam Substation 10",
+        "type": "generation",
+        "load_mw": 917,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-158.8768",
+          "-54.3903"
+        ]
+      },
+      "properties": {
+        "id": "PG-11",
+        "name": "Itaipu Dam Substation 11",
+        "type": "generation",
+        "load_mw": 2140,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-143.2535",
+          "-12.5573"
+        ]
+      },
+      "properties": {
+        "id": "PG-12",
+        "name": "Grand Coulee Substation 12",
+        "type": "generation",
+        "load_mw": 1070,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "19.2051",
+          "45.3616"
+        ]
+      },
+      "properties": {
+        "id": "PG-13",
+        "name": "Sayano-Shushenskaya Substation 13",
+        "type": "generation",
+        "load_mw": 784,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-166.8991",
+          "-29.9037"
+        ]
+      },
+      "properties": {
+        "id": "PG-14",
+        "name": "Belo Monte Substation 14",
+        "type": "generation",
+        "load_mw": 4764,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "173.4617",
+          "-56.5718"
+        ]
+      },
+      "properties": {
+        "id": "PG-15",
+        "name": "Tucuruí Substation 15",
+        "type": "generation",
+        "load_mw": 4706,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-60.8167",
+          "-47.9781"
+        ]
+      },
+      "properties": {
+        "id": "PG-16",
+        "name": "Guri Substation 16",
+        "type": "generation",
+        "load_mw": 3349,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-104.4631",
+          "-35.1446"
+        ]
+      },
+      "properties": {
+        "id": "PG-17",
+        "name": "Kashiwazaki-Kariwa Substation 17",
+        "type": "generation",
+        "load_mw": 3080,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "158.8464",
+          "-26.3246"
+        ]
+      },
+      "properties": {
+        "id": "PG-18",
+        "name": "Bruce County Substation 18",
+        "type": "generation",
+        "load_mw": 4327,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-150.6005",
+          "-48.0761"
+        ]
+      },
+      "properties": {
+        "id": "PG-19",
+        "name": "Gravelines Substation 19",
+        "type": "generation",
+        "load_mw": 5078,
+        "operator": "National Grid",
+        "status": "DEGRADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-11.8216",
+          "-7.7804"
+        ]
+      },
+      "properties": {
+        "id": "PG-20",
+        "name": "Three Gorges Dam Substation 20",
+        "type": "generation",
+        "load_mw": 4155,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-3.4072",
+          "13.0434"
+        ]
+      },
+      "properties": {
+        "id": "PG-21",
+        "name": "Itaipu Dam Substation 21",
+        "type": "generation",
+        "load_mw": 2385,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "112.8516",
+          "49.8304"
+        ]
+      },
+      "properties": {
+        "id": "PG-22",
+        "name": "Grand Coulee Substation 22",
+        "type": "generation",
+        "load_mw": 3477,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-23.0772",
+          "-23.5147"
+        ]
+      },
+      "properties": {
+        "id": "PG-23",
+        "name": "Sayano-Shushenskaya Substation 23",
+        "type": "generation",
+        "load_mw": 3923,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "28.1396",
+          "-39.0405"
+        ]
+      },
+      "properties": {
+        "id": "PG-24",
+        "name": "Belo Monte Substation 24",
+        "type": "generation",
+        "load_mw": 3638,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "164.5143",
+          "-34.7094"
+        ]
+      },
+      "properties": {
+        "id": "PG-25",
+        "name": "Tucuruí Substation 25",
+        "type": "generation",
+        "load_mw": 2664,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "34.6078",
+          "-62.2697"
+        ]
+      },
+      "properties": {
+        "id": "PG-26",
+        "name": "Guri Substation 26",
+        "type": "generation",
+        "load_mw": 1042,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "78.0353",
+          "-11.6941"
+        ]
+      },
+      "properties": {
+        "id": "PG-27",
+        "name": "Kashiwazaki-Kariwa Substation 27",
+        "type": "generation",
+        "load_mw": 1575,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "164.9286",
+          "-7.6882"
+        ]
+      },
+      "properties": {
+        "id": "PG-28",
+        "name": "Bruce County Substation 28",
+        "type": "generation",
+        "load_mw": 2008,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-157.0056",
+          "9.7643"
+        ]
+      },
+      "properties": {
+        "id": "PG-29",
+        "name": "Gravelines Substation 29",
+        "type": "generation",
+        "load_mw": 1307,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-100.1755",
+          "-32.3130"
+        ]
+      },
+      "properties": {
+        "id": "PG-30",
+        "name": "Three Gorges Dam Substation 30",
+        "type": "generation",
+        "load_mw": 4372,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "154.7251",
+          "-24.7222"
+        ]
+      },
+      "properties": {
+        "id": "PG-31",
+        "name": "Itaipu Dam Substation 31",
+        "type": "generation",
+        "load_mw": 2775,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-44.4431",
+          "8.0235"
+        ]
+      },
+      "properties": {
+        "id": "PG-32",
+        "name": "Grand Coulee Substation 32",
+        "type": "generation",
+        "load_mw": 3286,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-164.4512",
+          "-0.4153"
+        ]
+      },
+      "properties": {
+        "id": "PG-33",
+        "name": "Sayano-Shushenskaya Substation 33",
+        "type": "generation",
+        "load_mw": 3877,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "47.2223",
+          "52.3844"
+        ]
+      },
+      "properties": {
+        "id": "PG-34",
+        "name": "Belo Monte Substation 34",
+        "type": "generation",
+        "load_mw": 3599,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "133.1999",
+          "1.5907"
+        ]
+      },
+      "properties": {
+        "id": "PG-35",
+        "name": "Tucuruí Substation 35",
+        "type": "generation",
+        "load_mw": 2155,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "3.7550",
+          "-10.5684"
+        ]
+      },
+      "properties": {
+        "id": "PG-36",
+        "name": "Guri Substation 36",
+        "type": "generation",
+        "load_mw": 5131,
+        "operator": "National Grid",
+        "status": "DEGRADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-75.3767",
+          "-34.0942"
+        ]
+      },
+      "properties": {
+        "id": "PG-37",
+        "name": "Kashiwazaki-Kariwa Substation 37",
+        "type": "generation",
+        "load_mw": 1447,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-165.2499",
+          "14.6103"
+        ]
+      },
+      "properties": {
+        "id": "PG-38",
+        "name": "Bruce County Substation 38",
+        "type": "generation",
+        "load_mw": 1997,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-79.7267",
+          "29.3884"
+        ]
+      },
+      "properties": {
+        "id": "PG-39",
+        "name": "Gravelines Substation 39",
+        "type": "generation",
+        "load_mw": 1244,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "122.4359",
+          "-24.4462"
+        ]
+      },
+      "properties": {
+        "id": "PG-40",
+        "name": "Three Gorges Dam Substation 40",
+        "type": "generation",
+        "load_mw": 1209,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-104.5859",
+          "-53.9273"
+        ]
+      },
+      "properties": {
+        "id": "PG-41",
+        "name": "Itaipu Dam Substation 41",
+        "type": "generation",
+        "load_mw": 3355,
+        "operator": "National Grid",
+        "status": "DEGRADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-131.7155",
+          "-34.0388"
+        ]
+      },
+      "properties": {
+        "id": "PG-42",
+        "name": "Grand Coulee Substation 42",
+        "type": "generation",
+        "load_mw": 1906,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-142.7285",
+          "-28.1642"
+        ]
+      },
+      "properties": {
+        "id": "PG-43",
+        "name": "Sayano-Shushenskaya Substation 43",
+        "type": "generation",
+        "load_mw": 3156,
+        "operator": "National Grid",
+        "status": "DEGRADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "61.8165",
+          "-15.7957"
+        ]
+      },
+      "properties": {
+        "id": "PG-44",
+        "name": "Belo Monte Substation 44",
+        "type": "generation",
+        "load_mw": 925,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-11.2717",
+          "2.9965"
+        ]
+      },
+      "properties": {
+        "id": "PG-45",
+        "name": "Tucuruí Substation 45",
+        "type": "generation",
+        "load_mw": 2430,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-4.7741",
+          "54.2961"
+        ]
+      },
+      "properties": {
+        "id": "PG-46",
+        "name": "Guri Substation 46",
+        "type": "generation",
+        "load_mw": 2044,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "64.3773",
+          "-39.6166"
+        ]
+      },
+      "properties": {
+        "id": "PG-47",
+        "name": "Kashiwazaki-Kariwa Substation 47",
+        "type": "generation",
+        "load_mw": 517,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "-158.5761",
+          "37.4207"
+        ]
+      },
+      "properties": {
+        "id": "PG-48",
+        "name": "Bruce County Substation 48",
+        "type": "generation",
+        "load_mw": 1236,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          "159.2900",
+          "18.4721"
+        ]
+      },
+      "properties": {
+        "id": "PG-49",
+        "name": "Gravelines Substation 49",
+        "type": "generation",
+        "load_mw": 5124,
+        "operator": "National Grid",
+        "status": "NOMINAL"
+      }
+    }
+  ]
+}

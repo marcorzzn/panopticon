@@ -15,5 +15,8 @@ export * from './sources/recon'
 export * from './sources/space'
 export * from './sources/gemini'
 export * from './sources/news'
+export * from './sources/power-grid'
+export * from './sources/nuclear'
+export * from './sources/pipelines'
 export * from './registry'
 

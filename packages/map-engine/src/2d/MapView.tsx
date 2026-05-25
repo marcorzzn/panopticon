@@ -21,6 +21,9 @@ interface MapViewProps {
   acledEvents?: AcledEventEntity[]
   webcams?: WebcamEntity[]
   satellites?: SatelliteEntity[]
+  powerGrid?: any
+  nuclearFacilities?: any
+  pipelineNetworks?: any
 }
 
 const transformRequest = (url: string, resourceType?: string) => {
@@ -42,6 +45,9 @@ export default function MapView({
   acledEvents = [],
   webcams = [],
   satellites = [],
+  powerGrid,
+  nuclearFacilities,
+  pipelineNetworks,
 }: MapViewProps) {
   const mapRef = React.useRef<MapRef>(null)
   
@@ -63,6 +69,14 @@ export default function MapView({
 
   const { theme } = useAppStore()
   const { newsEvents } = useNewsStore()
+
+  const activeLayers = React.useMemo(() => {
+    const set = new Set<string>()
+    for (const [key, state] of Object.entries(layerStates)) {
+      if (state.visible) set.add(key)
+    }
+    return set
+  }, [layerStates])
 
   // Instantiate and load spatial index for webcams
   const spatialIndex = React.useMemo(() => {
@@ -304,6 +318,23 @@ export default function MapView({
     // News RSS
     const newsMarkers = getMapMarkers(newsEvents)
     newsMarkers.forEach((ev) => {
+      let assignedLayer = 'news-events';
+      const cat = (ev.category || '').toLowerCase();
+      const rawSource = ev.timeline ? (ev.timeline[0]?.source || 'Consolidated Wire') : (ev as any).source || '';
+      const src = rawSource.toLowerCase();
+
+      if (src.includes('acled')) assignedLayer = 'acled';
+      else if (cat === 'terrorism' || src.includes('terrorism') || src.includes('gtd')) assignedLayer = 'terrorism';
+      else if (cat === 'cyber' || src.includes('cisa')) assignedLayer = 'cyber-threats';
+      else if (cat === 'maritime' || src.includes('imb')) assignedLayer = 'maritime-incidents';
+      else if (cat === 'aviation' || src.includes('asn')) assignedLayer = 'aviation-incidents';
+      else if (cat === 'health' || src.includes('who') || src.includes('promed')) assignedLayer = 'health-outbreaks';
+      else if (src.includes('unhcr') || src.includes('refugee')) assignedLayer = 'refugee-movements';
+      else if (cat === 'hazard' || src.includes('gdacs') || src.includes('copernicus')) assignedLayer = 'humanitarian-crises';
+      else if (cat === 'space' || src.includes('donki')) assignedLayer = 'space-weather';
+      else if (src.includes('protest') || src.includes('riot')) assignedLayer = 'protest-unrest';
+      else if (src.includes('crime') || src.includes('cartel')) assignedLayer = 'organized-crime';
+
       features.push({
         type: 'Feature',
         id: ev.id,
@@ -313,12 +344,13 @@ export default function MapView({
         },
         properties: {
           id: ev.id,
-          layerId: 'news-events',
+          layerId: assignedLayer,
+          isNews: true,
           type: ev.type,
           category: ev.category,
           title: ev.title,
           label: ev.title,
-          source: ev.timeline ? (ev.timeline[0]?.source || 'Consolidated Wire') : (ev as any).source,
+          source: rawSource,
           severity: ev.severity,
           summary: ev.summary,
           timestamp: ev.timestamp,
@@ -1401,10 +1433,19 @@ export default function MapView({
             id="news-spoke-lines-layer"
             type="line"
             layout={{
-              visibility: isLayerVisible('news-events'),
+              visibility: 'visible',
               'line-join': 'round',
               'line-cap': 'round',
             }}
+            filter={[
+              'all',
+              ['==', ['get', 'isNews'], true],
+              [
+                'any',
+                ['literal', activeLayers.has('news-events')],
+                ['in', ['get', 'layerId'], ['literal', Array.from(activeLayers)]]
+              ]
+            ]}
             paint={{
               'line-color': '#af52de',
               'line-width': 1.2,
@@ -1420,8 +1461,16 @@ export default function MapView({
           id="news-events-glow-layer"
           type="circle"
           source="panopticon-events-source"
-          filter={['==', ['get', 'layerId'], 'news-events']}
-          layout={{ visibility: isLayerVisible('news-events') }}
+          filter={[
+            'all',
+            ['==', ['get', 'isNews'], true],
+            [
+              'any',
+              ['literal', activeLayers.has('news-events')],
+              ['in', ['get', 'layerId'], ['literal', Array.from(activeLayers)]]
+            ]
+          ]}
+          layout={{ visibility: 'visible' }}
           paint={{
             'circle-radius': [
               'interpolate',
@@ -1442,6 +1491,14 @@ export default function MapView({
               [
                 'match',
                 ['get', 'category'],
+                'Conflict & Hybrid Warfare', '#ff3b30',
+                'Terrorism & Internal Security', '#ff4500',
+                'Cyber & Information Warfare', '#00f0ff',
+                'Political Crises & Geopolitics', '#af52de',
+                'Geophysical & Climate Events', '#ff9500',
+                'Biological, Health & Ecological', '#34c759',
+                'Economic, Financial & Strategic Resources', '#007aff',
+                'Industrial & Infrastructure Disasters', '#e0a0ff',
                 'Conflict', '#ff3b30',
                 'conflict', '#ff3b30',
                 'geopolitical', '#ff3b30',
@@ -1471,8 +1528,16 @@ export default function MapView({
           id="news-events-layer"
           type="circle"
           source="panopticon-events-source"
-          filter={['==', ['get', 'layerId'], 'news-events']}
-          layout={{ visibility: isLayerVisible('news-events') }}
+          filter={[
+            'all',
+            ['==', ['get', 'isNews'], true],
+            [
+              'any',
+              ['literal', activeLayers.has('news-events')],
+              ['in', ['get', 'layerId'], ['literal', Array.from(activeLayers)]]
+            ]
+          ]}
+          layout={{ visibility: 'visible' }}
           paint={{
             'circle-radius': [
               'interpolate',
@@ -1493,6 +1558,14 @@ export default function MapView({
               [
                 'match',
                 ['get', 'category'],
+                'Conflict & Hybrid Warfare', '#ff3b30',
+                'Terrorism & Internal Security', '#ff4500',
+                'Cyber & Information Warfare', '#00f0ff',
+                'Political Crises & Geopolitics', '#af52de',
+                'Geophysical & Climate Events', '#ff9500',
+                'Biological, Health & Ecological', '#34c759',
+                'Economic, Financial & Strategic Resources', '#007aff',
+                'Industrial & Infrastructure Disasters', '#e0a0ff',
                 'Conflict', '#ff3b30',
                 'conflict', '#ff3b30',
                 'geopolitical', '#ff3b30',
@@ -1534,9 +1607,18 @@ export default function MapView({
           id="news-events-label-layer"
           type="symbol"
           source="panopticon-events-source"
-          filter={['==', ['get', 'layerId'], 'news-events']}
+          filter={[
+            'all',
+            ['==', ['get', 'isNews'], true],
+            ['!=', ['get', 'type'], 'context'],
+            [
+              'any',
+              ['literal', activeLayers.has('news-events')],
+              ['in', ['get', 'layerId'], ['literal', Array.from(activeLayers)]]
+            ]
+          ]}
           layout={{
-            visibility: isLayerVisible('news-events'),
+            visibility: 'visible',
             'text-field': [
               'case',
               ['==', ['get', 'type'], 'hub'], '📚',
@@ -1725,6 +1807,48 @@ export default function MapView({
                 'line-opacity': 0.25,
                 'line-blur': 1.5,
               }}
+            />
+          </Source>
+        )}
+
+        {/* ── 12. ENERGY & INFRASTRUCTURE LAYERS ───────────────────────── */}
+        {powerGrid && (
+          <Source id="power-grid-source" type="geojson" data={powerGrid}>
+            <Layer
+              id="power-grid-layer"
+              type="line"
+              layout={{ visibility: isLayerVisible('power-grid') }}
+              paint={{ 'line-color': '#ffcc00', 'line-width': 1.5, 'line-opacity': 0.7 }}
+            />
+          </Source>
+        )}
+        {nuclearFacilities && (
+          <Source id="nuclear-facilities-source" type="geojson" data={nuclearFacilities}>
+            <Layer
+              id="nuclear-facilities-layer"
+              type="circle"
+              layout={{ visibility: isLayerVisible('nuclear') }}
+              paint={{ 'circle-color': '#39ff14', 'circle-radius': 4, 'circle-opacity': 0.8 }}
+            />
+            <Layer
+              id="nuclear-facilities-label-layer"
+              type="symbol"
+              layout={{
+                visibility: isLayerVisible('nuclear'),
+                'text-field': '☢️',
+                'text-size': 12,
+                'text-allow-overlap': false,
+              }}
+            />
+          </Source>
+        )}
+        {pipelineNetworks && (
+          <Source id="pipelines-source" type="geojson" data={pipelineNetworks}>
+            <Layer
+              id="pipelines-layer"
+              type="line"
+              layout={{ visibility: isLayerVisible('pipelines') }}
+              paint={{ 'line-color': '#00ffff', 'line-width': 2, 'line-dasharray': [2, 2], 'line-opacity': 0.7 }}
             />
           </Source>
         )}

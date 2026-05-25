@@ -142,7 +142,7 @@ export const DOMAIN_CONFIGS: Record<IntelligenceDomain, DomainConfig> = {
     color: '--domain-energy',
     description:
       'Global energy production, grid stability, oil/gas flows, renewable output, and infrastructure status.',
-    enabled: false,
+    enabled: true,
     phase: 2,
   },
   [IntelligenceDomain.TRANSPORT]: {
