@@ -144,7 +144,6 @@ export default function LayerPanel() {
     'terminator',
     'gdelt',
     'acled',
-    'news-events',
     'aircraft',
     'webcams',
     'recon',
@@ -152,16 +151,17 @@ export default function LayerPanel() {
     'iss-position',
     'space-weather',
     'active-conflicts',
-    'protest-unrest',
-    'organized-crime',
-    'drug-corridors',
-    'terrorism',
-    'humanitarian-crises',
+    'conflict-hybrid-warfare',
+    'terrorism-internal-security',
+    'cyber-information-warfare',
+    'political-crises-geopolitics',
+    'geophysical-climate-events',
+    'biological-health-ecological',
+    'economic-financial-strategic-resources',
+    'industrial-infrastructure-disasters',
     'refugee-movements',
     'ais-vessels',
-    'maritime-incidents',
     'undersea-cables',
-    'aviation-incidents',
     'no-fly-zones',
     'power-grid',
     'nuclear-facilities',
@@ -249,28 +249,52 @@ export default function LayerPanel() {
                 description="Tactical armed engagement and violent confrontation telemetry"
               />
               <LayerRow
-                id="protest-unrest"
-                label="Protest & Civil Unrest"
-                icon={<AlertTriangle className="w-3.5 h-3.5" />}
-                description="Geocoded rallies, strikes, and regional riots"
-              />
-              <LayerRow
-                id="organized-crime"
-                label="Organized Crime Zones"
+                id="conflict-hybrid-warfare"
+                label="Conflict & Hybrid Warfare"
                 icon={<ShieldAlert className="w-3.5 h-3.5" />}
-                description="Major transnational organized crime syndicates"
+                description="AI-categorized geopolitical conflict events"
               />
               <LayerRow
-                id="drug-corridors"
-                label="Drug Corridors"
+                id="terrorism-internal-security"
+                label="Terrorism & Internal Security"
+                icon={<AlertTriangle className="w-3.5 h-3.5" />}
+                description="AI-categorized internal security and terror events"
+              />
+              <LayerRow
+                id="cyber-information-warfare"
+                label="Cyber & Information Warfare"
                 icon={<Network className="w-3.5 h-3.5" />}
-                description="Documented drug trafficking channels and territories"
+                description="AI-categorized cyberattacks and data breaches"
               />
               <LayerRow
-                id="terrorism"
-                label="Terrorism Incidents"
-                icon={<Shield className="w-3.5 h-3.5" />}
-                description="Active attacks and designated extremist cell dispatches"
+                id="political-crises-geopolitics"
+                label="Political Crises & Geopolitics"
+                icon={<Globe className="w-3.5 h-3.5" />}
+                description="AI-categorized political unrest and crises"
+              />
+              <LayerRow
+                id="geophysical-climate-events"
+                label="Geophysical & Climate Events"
+                icon={<Activity className="w-3.5 h-3.5" />}
+                description="AI-categorized natural disasters and climate anomalies"
+              />
+              <LayerRow
+                id="biological-health-ecological"
+                label="Biological, Health & Ecological"
+                icon={<Activity className="w-3.5 h-3.5" />}
+                description="AI-categorized disease outbreaks and health emergencies"
+              />
+              <LayerRow
+                id="economic-financial-strategic-resources"
+                label="Economic & Financial"
+                icon={<Activity className="w-3.5 h-3.5" />}
+                description="AI-categorized economic crises and market events"
+              />
+              <LayerRow
+                id="industrial-infrastructure-disasters"
+                label="Industrial Disasters"
+                icon={<AlertTriangle className="w-3.5 h-3.5" />}
+                description="AI-categorized industrial accidents and infrastructure failures"
               />
             </div>
           )}
@@ -301,18 +325,6 @@ export default function LayerPanel() {
                 label="Refugee Movements"
                 icon={<MapPin className="w-3.5 h-3.5" />}
                 description="Authoritative UNHCR geolocated displacement points"
-              />
-              <LayerRow
-                id="news-events"
-                label="Geocoded News Wire"
-                icon={<Rss className="w-3.5 h-3.5" />}
-                description="Geolocated real-time media and threat wire events"
-              />
-              <LayerRow
-                id="health-outbreaks"
-                label="Disease Outbreaks"
-                icon={<Activity className="w-3.5 h-3.5" />}
-                description="ProMED and WHO DON real-time health alerts"
               />
             </div>
           )}
@@ -463,12 +475,6 @@ export default function LayerPanel() {
                 label="OSINT Cyber Recon"
                 icon={<Radio className="w-3.5 h-3.5" />}
                 description="Tactical network hops and port traceback scanners"
-              />
-              <LayerRow
-                id="cyber-threats"
-                label="Cyber Threats"
-                icon={<Lock className="w-3.5 h-3.5" />}
-                description="CISA alerts and global cybersecurity incidents"
               />
             </div>
           )}

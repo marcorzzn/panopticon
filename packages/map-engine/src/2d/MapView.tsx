@@ -324,16 +324,16 @@ export default function MapView({
       const src = rawSource.toLowerCase();
 
       if (src.includes('acled')) assignedLayer = 'acled';
-      else if (cat === 'terrorism' || src.includes('terrorism') || src.includes('gtd')) assignedLayer = 'terrorism';
-      else if (cat === 'cyber' || src.includes('cisa')) assignedLayer = 'cyber-threats';
-      else if (cat === 'maritime' || src.includes('imb')) assignedLayer = 'maritime-incidents';
-      else if (cat === 'aviation' || src.includes('asn')) assignedLayer = 'aviation-incidents';
-      else if (cat === 'health' || src.includes('who') || src.includes('promed')) assignedLayer = 'health-outbreaks';
-      else if (src.includes('unhcr') || src.includes('refugee')) assignedLayer = 'refugee-movements';
-      else if (cat === 'hazard' || src.includes('gdacs') || src.includes('copernicus')) assignedLayer = 'humanitarian-crises';
+      else if (cat === 'conflict & hybrid warfare') assignedLayer = 'conflict-hybrid-warfare';
+      else if (cat === 'terrorism & internal security') assignedLayer = 'terrorism-internal-security';
+      else if (cat === 'cyber & information warfare') assignedLayer = 'cyber-information-warfare';
+      else if (cat === 'political crises & geopolitics') assignedLayer = 'political-crises-geopolitics';
+      else if (cat === 'geophysical & climate events') assignedLayer = 'geophysical-climate-events';
+      else if (cat === 'biological, health & ecological') assignedLayer = 'biological-health-ecological';
+      else if (cat === 'economic, financial & strategic resources') assignedLayer = 'economic-financial-strategic-resources';
+      else if (cat === 'industrial & infrastructure disasters') assignedLayer = 'industrial-infrastructure-disasters';
       else if (cat === 'space' || src.includes('donki')) assignedLayer = 'space-weather';
-      else if (src.includes('protest') || src.includes('riot')) assignedLayer = 'protest-unrest';
-      else if (src.includes('crime') || src.includes('cartel')) assignedLayer = 'organized-crime';
+      else if (src.includes('unhcr') || src.includes('refugee')) assignedLayer = 'refugee-movements';
 
       features.push({
         type: 'Feature',
@@ -1499,23 +1499,6 @@ export default function MapView({
                 'Biological, Health & Ecological', '#34c759',
                 'Economic, Financial & Strategic Resources', '#007aff',
                 'Industrial & Infrastructure Disasters', '#e0a0ff',
-                'Conflict', '#ff3b30',
-                'conflict', '#ff3b30',
-                'geopolitical', '#ff3b30',
-                'Protest', '#ff9500',
-                'protest', '#ff9500',
-                'Natural Disaster', '#ff4500',
-                'natural disaster', '#ff4500',
-                'Politics', '#af52de',
-                'politics', '#af52de',
-                'Global Entertainment', '#34c759',
-                'global entertainment', '#34c759',
-                'Economy', '#007aff',
-                'economy', '#007aff',
-                'cyber', '#00f0ff',
-                'maritime', '#007aff',
-                'hazard', '#ff9500',
-                'markets', '#34c759',
                 '#ffffff'
               ]
             ],
@@ -1566,23 +1549,6 @@ export default function MapView({
                 'Biological, Health & Ecological', '#34c759',
                 'Economic, Financial & Strategic Resources', '#007aff',
                 'Industrial & Infrastructure Disasters', '#e0a0ff',
-                'Conflict', '#ff3b30',
-                'conflict', '#ff3b30',
-                'geopolitical', '#ff3b30',
-                'Protest', '#ff9500',
-                'protest', '#ff9500',
-                'Natural Disaster', '#ff4500',
-                'natural disaster', '#ff4500',
-                'Politics', '#af52de',
-                'politics', '#af52de',
-                'Global Entertainment', '#34c759',
-                'global entertainment', '#34c759',
-                'Economy', '#007aff',
-                'economy', '#007aff',
-                'cyber', '#00f0ff',
-                'maritime', '#007aff',
-                'hazard', '#ff9500',
-                'markets', '#34c759',
                 '#ffffff'
               ]
             ],
