@@ -190,3 +190,45 @@ body {
 button {
   cursor: pointer;
 }
+
+/* Glass panel dark theme accessibility and high-contrast styling adjustments */
+.glass-panel {
+  background: rgba(10, 14, 20, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+[data-theme='light'] .glass-panel {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Native MapLibre Popup Styling Overrides for Cyberpunk Dark Theme */
+.maplibregl-popup-content {
+  background: rgba(8, 12, 18, 0.96) !important;
+  border: 1px solid rgba(0, 240, 255, 0.3) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-radius: 6px !important;
+  padding: 10px !important;
+  color: var(--pan-text-primary, rgba(255, 255, 255, 0.96)) !important;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: rgba(8, 12, 18, 0.96) !important;
+  border-bottom-color: rgba(8, 12, 18, 0.96) !important;
+}
+
+[data-theme='light'] .maplibregl-popup-content {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(0, 102, 204, 0.3) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15) !important;
+  color: rgba(0, 0, 0, 0.92) !important;
+}
+
+[data-theme='light'] .maplibregl-popup-tip {
+  border-top-color: rgba(255, 255, 255, 0.96) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.96) !important;
+}

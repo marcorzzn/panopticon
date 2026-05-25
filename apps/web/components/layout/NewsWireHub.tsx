@@ -6,7 +6,7 @@ import { useSWRConfig } from 'swr'
 import { useMapStore, useAppStore, useNewsStore } from '@panopticon/core/stores'
 
 // 5 tactical domains for filtering
-type Category = 'geopolitical' | 'cyber' | 'maritime' | 'hazard' | 'markets'
+type Category = 'geopolitical' | 'cyber' | 'maritime' | 'hazard' | 'markets' | 'military' | 'health' | 'aviation' | 'infrastructure'
 
 interface FeedItem {
   id: string
@@ -101,6 +101,10 @@ export default function NewsWireHub() {
       case 'maritime': return 'text-blue-400'
       case 'hazard': return 'text-status-warning-text'
       case 'markets': return 'text-emerald-400'
+      case 'military': return 'text-red-400'
+      case 'health': return 'text-rose-400 animate-pulse'
+      case 'aviation': return 'text-cyan-400'
+      case 'infrastructure': return 'text-yellow-400'
     }
   }
 
@@ -143,7 +147,11 @@ export default function NewsWireHub() {
           { id: 'cyber', label: 'CYBER' },
           { id: 'maritime', label: 'MARITIME' },
           { id: 'hazard', label: 'HAZARDS' },
-          { id: 'markets', label: 'MARKETS' }
+          { id: 'markets', label: 'MARKETS' },
+          { id: 'military', label: 'MILITARY' },
+          { id: 'health', label: 'HEALTH' },
+          { id: 'aviation', label: 'AVIATION' },
+          { id: 'infrastructure', label: 'INFRA' }
         ].map((tab) => (
           <button
             key={tab.id}

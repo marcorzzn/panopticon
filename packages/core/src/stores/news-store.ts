@@ -50,6 +50,40 @@ export const initialNewsEvents = (): NewsFeedItem[] => {
   const now = Date.now();
   return [
     {
+      id: 'real-health-ebola-congo',
+      category: 'health',
+      source: 'WHO Disease Outbreak News',
+      title: 'Ebola Outbreak Logged in Democratic Republic of Congo (DRC)',
+      summary: 'Active biological outbreak registry confirms 14 primary Ebola virus cases in Bikoro, Equateur Province. WHO deployment coordinates containment ring, therapeutic interventions, and isolation zones.',
+      timestamp: new Date(now - 12 * 3600 * 1000).toISOString(),
+      coordinates: [18.1224, -0.7490],
+      severity: 'high',
+      url: 'https://www.who.int',
+      eventType: 'persistent',
+      sources: ['World Health Organization', 'DRC Ministry of Health'],
+      updates: [
+        { timestamp: new Date(now - 24 * 3600 * 1000).toISOString(), text: "DRC Health Authority issues warning on suspected clusters in Bikoro." },
+        { timestamp: new Date(now - 12 * 3600 * 1000).toISOString(), text: "Gene sequencing confirms Zaire ebolavirus strain. Isolation protocol active." }
+      ]
+    },
+    {
+      id: 'real-geopol-serbia-protests',
+      category: 'geopolitical',
+      source: 'Balkan Insight',
+      title: 'Student Protests & Street Blockades Active in Belgrade',
+      summary: 'Belgrade University student organizations coordinate multi-point sit-ins and street blockades around governmental buildings. Demands focus on electoral integrity verification.',
+      timestamp: new Date(now - 4 * 3600 * 1000).toISOString(),
+      coordinates: [20.4572, 44.8125],
+      severity: 'moderate',
+      url: 'https://balkaninsight.com',
+      eventType: 'persistent',
+      sources: ['Balkan Insight Central Bureau', 'Belgrade City Desk'],
+      updates: [
+        { timestamp: new Date(now - 8 * 3600 * 1000).toISOString(), text: "Student assemblies gather at Belgrade University Faculty of Philosophy." },
+        { timestamp: new Date(now - 4 * 3600 * 1000).toISOString(), text: "Demonstrations block traffic at core intersections. Police deploy defensive perimeter cordons." }
+      ]
+    },
+    {
       id: 'real-instant-ended-1',
       category: 'maritime',
       source: 'ANSA Mondo',

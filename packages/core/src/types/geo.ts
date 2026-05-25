@@ -105,6 +105,13 @@ export interface WeatherPoint {
   weatherCode: number
   /** Observation timestamp (Unix epoch ms) */
   timestamp: number
+  /** Optional station/phenomenon name */
+  name?: string
+  /** Optional extreme weather indicators */
+  isExtreme?: boolean
+  extremeType?: 'cyclone' | 'anticyclone' | 'tornado' | ''
+  description?: string
+  sources?: string[]
 }
 
 /** GDELT event entity */

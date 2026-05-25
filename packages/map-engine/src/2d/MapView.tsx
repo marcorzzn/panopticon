@@ -423,10 +423,19 @@ export default function MapView({
           coordinates: wp.coordinates,
         },
         properties: {
+          id: `wp-${idx}`,
+          name: wp.name || `Weather Station ${idx}`,
           temperature: wp.temperature,
           humidity: wp.humidity,
           windSpeed: wp.windSpeed,
+          windDirection: wp.windDirection ?? 0,
+          precipitation: wp.precipitation ?? 0,
           weatherCode: wp.weatherCode,
+          timestamp: wp.timestamp,
+          isExtreme: (wp as any).isExtreme || false,
+          extremeType: (wp as any).extremeType || '',
+          description: (wp as any).description || '',
+          sources: (wp as any).sources || ['Open-Meteo Global Grid'],
         },
       })),
     }
@@ -624,6 +633,8 @@ export default function MapView({
       'recon-hops-layer',
       'satellites-layer',
       'news-events-layer',
+      'weather-layer',
+      'nuclear-facilities-layer',
     ]
   }, [])
 
@@ -1792,43 +1803,105 @@ export default function MapView({
         )}
 
         {/* ── 13. HOVER TOOLTIP POPUP ───────────────────────── */}
-        {hoverInfo && hoverInfo.feature.properties.isNews && (
+        {hoverInfo && (
           <Popup
             longitude={hoverInfo.lngLat.lng}
             latitude={hoverInfo.lngLat.lat}
             closeButton={false}
             closeOnClick={false}
             anchor="bottom"
-            maxWidth="300px"
+            maxWidth="320px"
             className="z-50 pointer-events-none"
           >
-            <div className="bg-deepest/95 backdrop-blur-md border border-weak rounded p-2.5 text-xs font-mono shadow-2xl flex flex-col gap-2 pointer-events-none min-w-[250px]">
-              {/* Category / Type Header */}
-              <div className="flex justify-between items-center pb-1.5 border-b border-weak">
-                <span className="text-accent font-bold uppercase text-[9px] tracking-widest">{hoverInfo.feature.properties.category || 'OSINT EVENT'}</span>
-                <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wider ${hoverInfo.feature.properties.type === 'hub' ? 'bg-[#af52de]/20 text-[#af52de] border border-[#af52de]/30' : hoverInfo.feature.properties.type === 'persistent' ? 'bg-[#ff9500]/20 text-[#ff9500] border border-[#ff9500]/30' : 'bg-secondary/20 text-secondary border border-weak'}`}>
-                  {hoverInfo.feature.properties.type ? hoverInfo.feature.properties.type.toUpperCase() : 'UNKNOWN'}
-                </span>
-              </div>
-              
-              {/* Title / English Translation */}
-              <div className="text-primary font-semibold text-[11px] leading-tight break-words">
-                {hoverInfo.feature.properties.label}
-              </div>
-
-              {/* Source & Reliability Warning */}
-              {hoverInfo.feature.properties.source && (
-                <div className="flex items-center gap-1.5 pt-1 border-t border-weak/50">
-                  <span className="text-secondary text-[9px] uppercase tracking-wider">SRC:</span>
-                  <span className="text-accent text-[9px] truncate max-w-[160px]">
-                    {hoverInfo.feature.properties.sources || hoverInfo.feature.properties.source}
-                  </span>
-                  <span className="ml-auto px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wider bg-[#e8b00f]/20 text-[#e8b00f] border border-[#e8b00f]/30 flex items-center gap-1">
-                    {hoverInfo.feature.properties.sourceTier === 0 ? 'TIER 0' : 'WIRE'}
+            {/* 13.1. NUCLEAR FACILITIES LAYER POPUP */}
+            {hoverInfo.feature.layer?.id === 'nuclear-facilities-layer' && (
+              <div className="bg-deepest/95 backdrop-blur-md border border-weak rounded p-2.5 text-xs font-mono shadow-2xl flex flex-col gap-1.5 pointer-events-none min-w-[240px]">
+                <div className="flex justify-between items-center pb-1 border-b border-weak">
+                  <span className="text-[#39ff14] font-bold uppercase text-[9px] tracking-widest">☢️ NUCLEAR FACILITY</span>
+                  <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-[#39ff14]/10 text-[#39ff14] border border-[#39ff14]/30">
+                    {hoverInfo.feature.properties.status || 'ACTIVE'}
                   </span>
                 </div>
-              )}
-            </div>
+                <div className="text-primary font-bold text-[11px] leading-tight pt-0.5">
+                  {hoverInfo.feature.properties.name}
+                </div>
+                <div className="flex flex-col gap-0.5 text-[9px] text-secondary mt-1">
+                  <div><span className="font-bold text-accent">OPERATOR:</span> {hoverInfo.feature.properties.operator || 'State Grid Command'}</div>
+                  <div><span className="font-bold text-accent">GENERATION CAPACITY:</span> {hoverInfo.feature.properties.capacity_mw || 1200} MW</div>
+                </div>
+                <div className="flex items-center gap-1.5 pt-1 border-t border-weak/50 text-[8px] text-secondary">
+                  <span>SOURCES:</span>
+                  <span className="text-accent truncate">OSM Overpass API • IAEA PRIS</span>
+                </div>
+              </div>
+            )}
+
+            {/* 13.2. METEOROLOGICAL / WEATHER LAYER POPUP */}
+            {hoverInfo.feature.layer?.id === 'weather-layer' && (
+              <div className="bg-deepest/95 backdrop-blur-md border border-weak rounded p-2.5 text-xs font-mono shadow-2xl flex flex-col gap-1.5 pointer-events-none min-w-[240px]">
+                <div className="flex justify-between items-center pb-1 border-b border-weak">
+                  <span className={`${hoverInfo.feature.properties.isExtreme ? 'text-status-critical-text animate-pulse' : 'text-accent'} font-bold uppercase text-[9px] tracking-widest`}>
+                    {hoverInfo.feature.properties.isExtreme ? `⚠️ EXTREME WEATHER: ${hoverInfo.feature.properties.extremeType?.toUpperCase()}` : '🌤️ WEATHER TELEMETRY'}
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-secondary/15 text-secondary border border-weak">
+                    {hoverInfo.feature.properties.temperature?.toFixed(1)}°C
+                  </span>
+                </div>
+                <div className="text-primary font-bold text-[11px] leading-tight pt-0.5">
+                  {hoverInfo.feature.properties.name}
+                </div>
+                
+                {hoverInfo.feature.properties.isExtreme && (
+                  <p className="text-[9.5px] text-secondary leading-relaxed font-semibold italic border-l-2 border-status-critical pl-1.5 my-1.5">
+                    {hoverInfo.feature.properties.description}
+                  </p>
+                )}
+
+                <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-secondary mt-1">
+                  <div><span className="font-semibold text-accent">HUMIDITY:</span> {hoverInfo.feature.properties.humidity}%</div>
+                  <div><span className="font-semibold text-accent">WIND:</span> {hoverInfo.feature.properties.windSpeed?.toFixed(1)} km/h</div>
+                  <div><span className="font-semibold text-accent">PRECIP:</span> {hoverInfo.feature.properties.precipitation} mm</div>
+                  <div><span className="font-semibold text-accent">CONDITIONS:</span> {hoverInfo.feature.properties.weatherCode === 0 ? 'Clear Sky' : hoverInfo.feature.properties.weatherCode === 3 ? 'Overcast' : hoverInfo.feature.properties.weatherCode === 61 ? 'Rainy' : 'Nominal'}</div>
+                </div>
+                <div className="flex items-center gap-1.5 pt-1 border-t border-weak/50 text-[8px] text-secondary mt-1">
+                  <span>SOURCES:</span>
+                  <span className="text-accent truncate">
+                    {hoverInfo.feature.properties.sources ? (Array.isArray(hoverInfo.feature.properties.sources) ? hoverInfo.feature.properties.sources.join(' • ') : hoverInfo.feature.properties.sources) : 'Open-Meteo API'}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* 13.3. DEFAULT NEWS / WIRE DISPATCHES POPUP */}
+            {hoverInfo.feature.layer?.id !== 'nuclear-facilities-layer' && hoverInfo.feature.layer?.id !== 'weather-layer' && hoverInfo.feature.properties.isNews && (
+              <div className="bg-deepest/95 backdrop-blur-md border border-weak rounded p-2.5 text-xs font-mono shadow-2xl flex flex-col gap-2 pointer-events-none min-w-[250px]">
+                {/* Category / Type Header */}
+                <div className="flex justify-between items-center pb-1.5 border-b border-weak">
+                  <span className="text-accent font-bold uppercase text-[9px] tracking-widest">{hoverInfo.feature.properties.category || 'OSINT EVENT'}</span>
+                  <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wider ${hoverInfo.feature.properties.type === 'hub' ? 'bg-[#af52de]/20 text-[#af52de] border border-[#af52de]/30' : hoverInfo.feature.properties.type === 'persistent' ? 'bg-[#ff9500]/20 text-[#ff9500] border border-[#ff9500]/30' : 'bg-secondary/20 text-secondary border border-weak'}`}>
+                    {hoverInfo.feature.properties.type ? hoverInfo.feature.properties.type.toUpperCase() : 'UNKNOWN'}
+                  </span>
+                </div>
+                
+                {/* Title / English Translation */}
+                <div className="text-primary font-semibold text-[11px] leading-tight break-words">
+                  {hoverInfo.feature.properties.label}
+                </div>
+
+                {/* Source & Reliability Warning */}
+                {hoverInfo.feature.properties.source && (
+                  <div className="flex items-center gap-1.5 pt-1 border-t border-weak/50">
+                    <span className="text-secondary text-[9px] uppercase tracking-wider">SRC:</span>
+                    <span className="text-accent text-[9px] truncate max-w-[160px]">
+                      {hoverInfo.feature.properties.sources || hoverInfo.feature.properties.source}
+                    </span>
+                    <span className="ml-auto px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wider bg-[#e8b00f]/20 text-[#e8b00f] border border-[#e8b00f]/30 flex items-center gap-1">
+                      {hoverInfo.feature.properties.sourceTier === 0 ? 'TIER 0' : 'WIRE'}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </Popup>
         )}
       </Map>

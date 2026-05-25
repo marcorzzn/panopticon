@@ -141,6 +141,36 @@ export async function fetchRssFeed(_feed?: any): Promise<NewsFeedItem[]> {
 /**
  * Fetch Gemini-processed OSINT events from the Panopticon backend
  */
+function normalizeCategory(backendCategory: string): string {
+  if (!backendCategory) return 'geopolitical'
+  const bc = backendCategory.toLowerCase()
+  if (bc.includes('conflict') || bc.includes('warfare') || bc.includes('military') || bc.includes('terrorism') || bc.includes('security')) {
+    return 'military'
+  }
+  if (bc.includes('cyber') || bc.includes('information')) {
+    return 'cyber'
+  }
+  if (bc.includes('maritime') || bc.includes('naval') || bc.includes('ship')) {
+    return 'maritime'
+  }
+  if (bc.includes('climate') || bc.includes('geophysical') || bc.includes('hazard') || bc.includes('weather') || bc.includes('disaster')) {
+    return 'hazard'
+  }
+  if (bc.includes('economic') || bc.includes('financial') || bc.includes('market') || bc.includes('commerce') || bc.includes('strategic resources')) {
+    return 'markets'
+  }
+  if (bc.includes('biological') || bc.includes('health') || bc.includes('ecological') || bc.includes('ebola') || bc.includes('outbreak') || bc.includes('epidemic')) {
+    return 'health'
+  }
+  if (bc.includes('aviation') || bc.includes('airspace') || bc.includes('flight')) {
+    return 'aviation'
+  }
+  if (bc.includes('industrial') || bc.includes('infrastructure') || bc.includes('power') || bc.includes('grid') || bc.includes('nuclear')) {
+    return 'infrastructure'
+  }
+  return 'geopolitical'
+}
+
 export async function fetchRssEvents(): Promise<NewsFeedItem[]> {
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'
   try {
@@ -169,7 +199,7 @@ export async function fetchRssEvents(): Promise<NewsFeedItem[]> {
 
       return {
         id: item.id,
-        category: item.category as NewsCategory,
+        category: normalizeCategory(item.category) as NewsCategory,
         source: item.source || 'Intelligence Wire',
         title: item.title || 'OSINT Dispatch',
         summary: item.summary || '',

@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { Activity, ShieldAlert, AlertTriangle, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
 import { useMapStore } from '@panopticon/core/stores'
+import persistentConflicts from '../../../../packages/core/src/config/persistent-conflicts.json'
 
 // Pre-populated registry of geolocated threat zones with their proxy baseline parameters
 interface CountryProfile {
@@ -16,9 +17,11 @@ interface CountryProfile {
   velocity: number // Info velocity index (20% weight)
   boosters: { label: string; offset: number }[]
   trend: number[]  // 7-day risk trend sparkline
+  description?: string
+  sourceUrl?: string
 }
 
-const REGISTRY: CountryProfile[] = [
+const BASE_REGISTRY: CountryProfile[] = [
   {
     code: 'TWN',
     name: 'Taiwan Strait Region',
@@ -116,22 +119,64 @@ export default function CiiPanel() {
   const [activeCode, setActiveCode] = React.useState<string>('TWN')
   const [loading, setLoading] = React.useState(false)
 
+  // Dynamically merge base registry regions and persistent conflicts list
+  const REGISTRY = React.useMemo(() => {
+    const list = [...BASE_REGISTRY]
+    
+    persistentConflicts.forEach((conflict) => {
+      if (list.some((r) => r.code === conflict.id)) return
+      
+      const isHigh = conflict.intensity === 'HIGH'
+      const isMedium = conflict.intensity === 'MEDIUM'
+      
+      list.push({
+        code: conflict.id,
+        name: `Conflict: ${conflict.name}`,
+        lat: conflict.lat,
+        lon: conflict.lon,
+        baseline: isHigh ? 88 : isMedium ? 70 : 48,
+        unrest: isHigh ? 65 : isMedium ? 45 : 25,
+        security: isHigh ? 92 : isMedium ? 70 : 45,
+        velocity: isHigh ? 85 : isMedium ? 60 : 35,
+        boosters: isHigh ? [
+          { label: 'Active Kinetic Clashes', offset: 12 },
+          { label: 'Heavy Artillery Fire', offset: 8 }
+        ] : isMedium ? [
+          { label: 'Sporadic Insurgent Raids', offset: 8 }
+        ] : [
+          { label: 'Border Patrol Stand-off', offset: 4 }
+        ],
+        trend: isHigh ? [82, 85, 84, 88, 91, 93, 95] : isMedium ? [65, 67, 66, 70, 71, 73, 75] : [42, 44, 43, 46, 45, 48, 49],
+        description: conflict.description,
+        sourceUrl: conflict.sourceUrl
+      })
+    })
+    
+    return list
+  }, [])
+
   // Map clicked entities to focus the CII panel dynamically
   React.useEffect(() => {
     if (selectedEntityId) {
-      // Find coordinates from standard coordinates mapping or guess based on selected entity content
-      // Since entity IDs are hashed strings, we simulate focusing the closest geolocated threat zone
+      // 1. Direct code/conflict ID match
+      const directMatch = REGISTRY.find((r) => r.code === selectedEntityId)
+      if (directMatch) {
+        setActiveCode(directMatch.code)
+        return
+      }
+
+      // 2. Procedural seed fallback
       const seedVal = selectedEntityId.charCodeAt(0) % REGISTRY.length
       const focusedZone = REGISTRY[seedVal]
       if (focusedZone) {
         setActiveCode(focusedZone.code)
       }
     }
-  }, [selectedEntityId])
+  }, [selectedEntityId, REGISTRY])
 
   const profile = React.useMemo(() => {
     return REGISTRY.find((r) => r.code === activeCode) || REGISTRY[0]
-  }, [activeCode])
+  }, [activeCode, REGISTRY])
 
   // NOTE 3 — CII Formula [PROPOSED_PROXY]:
   // The weights and variables mapped below represent a proxy scoring approximation (PROPOSED_PROXY)
@@ -307,6 +352,28 @@ export default function CiiPanel() {
             )}
           </div>
         </div>
+
+        {/* Dynamic Geopolitical Description Card */}
+        {profile.description && (
+          <div className="p-3 bg-deepest bg-opacity-30 rounded border border-weak flex flex-col gap-1.5 mt-2">
+            <span className="text-[8px] font-mono font-bold text-accent uppercase tracking-wider">
+              GEOPOLITICAL SITREP BACKGROUND:
+            </span>
+            <p className="text-[10px] text-secondary leading-relaxed bg-deepest bg-opacity-20 p-2 border border-weak/50 rounded italic">
+              {profile.description}
+            </p>
+            {profile.sourceUrl && (
+              <a
+                href={profile.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[9px] text-accent hover:text-accent-hover font-mono font-semibold flex items-center gap-1 mt-1 uppercase"
+              >
+                Visit Ingestion Reference ➜
+              </a>
+            )}
+          </div>
+        )}
 
         {/* PROPOSED PROXY Tag Annotation Disclaimer */}
         <div className="p-2.5 rounded bg-deepest bg-opacity-40 border border-weak flex gap-2">
