@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"sync"
 	"time"
 
 	"backend/pkg/config"
@@ -31,10 +32,23 @@ func NewManager(cfg *config.Config) *Manager {
 
 func (m *Manager) TriggerManualRefresh() {
 	log.Println("[REFRESH] Triggering manual, non-cached situational updates refresh...")
-	// Execute deterministic APIs and news wires concurrent ingestion sweeps
-	go m.fetchAndStoreEarthquakes()
-	go m.fetchAndStoreWildfires()
-	go m.pollNewsWires()
+	var wg sync.WaitGroup
+	refreshJobs := []func(){
+		m.fetchAndStoreEarthquakes,
+		m.fetchAndStoreWildfires,
+		m.fetchAndStoreAviation,
+		m.fetchAndStoreAirQuality,
+		m.fetchAndStoreAcled,
+		m.pollNewsWires,
+	}
+	for _, job := range refreshJobs {
+		wg.Add(1)
+		go func(run func()) {
+			defer wg.Done()
+			run()
+		}(job)
+	}
+	wg.Wait()
 }
 
 func (m *Manager) Start() {
@@ -42,6 +56,7 @@ func (m *Manager) Start() {
 
 	// 1. Register base sources in DB
 	m.initializeSourceMetadata()
+	m.removeMockSeedData()
 
 	// 1b. Initialize and start Cold Storage Telemetry Archiver
 	StartArchiver()
@@ -53,10 +68,7 @@ func (m *Manager) Start() {
 	go m.runWildfirePoller()
 	go m.runAirQualityPoller()
 	go m.runAcledPoller()
-	go m.runWebcamPoller()
-	go m.runSpacePoller()
 	go m.runNewsWirePoller()
-	go m.runTelemetryIngestion()
 
 	// 3. Start stale telemetry pruning daemon
 	go m.runPruningDaemon()
@@ -66,6 +78,26 @@ func (m *Manager) Stop() {
 	log.Println("Stopping Ingestion Manager...")
 	StopArchiver()
 	m.cancel()
+}
+
+func (m *Manager) removeMockSeedData() {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	cleanupStatements := []string{
+		"DELETE FROM aircraft WHERE origin_country = 'Simulated Sector' OR icao24 LIKE 'A-%';",
+		"DELETE FROM wildfires WHERE satellite = 'SIMULATED' OR id LIKE 'sf-%';",
+		"DELETE FROM acled_events WHERE id LIKE 'acled-0%';",
+		"DELETE FROM air_quality WHERE id LIKE 'aq-%';",
+		"DELETE FROM webcams WHERE id LIKE 'cam-%';",
+		"DELETE FROM satellites WHERE id IN ('iss','usa-224','usa-245','hubble','starlink-3045','starlink-3046','noaa-20','sentinel-1a','envisat','sl-12-rb','cosmos-2251-deb','iridium-33-deb');",
+	}
+
+	for _, stmt := range cleanupStatements {
+		if _, err := db.Pool.Exec(ctx, stmt); err != nil {
+			log.Printf("Mock-data cleanup skipped for statement %q: %v", stmt, err)
+		}
+	}
 }
 
 // Ensure database has status metrics entries for all channels
@@ -80,6 +112,12 @@ func (m *Manager) initializeSourceMetadata() {
 		"webcams":           "Global CCTV / Webcams Network Feed",
 		"space-satellites":  "NOAA SWPC Space & Orbital Satellites Grid",
 		"ap-news-wire":      "OSINT AP/Reuters/AFP News Wire Service",
+		"gdacs-disasters":   "GDACS Global Disaster Alerts",
+		"noaa-alerts":       "NOAA/NWS Weather Alerts",
+		"eonet-events":      "NASA EONET Natural Events",
+		"celestrak-gp":      "CelesTrak GP Orbital Elements",
+		"who-don":           "WHO Disease Outbreak News",
+		"reliefweb":         "UN OCHA ReliefWeb Disasters API",
 	}
 
 	for id, name := range sources {

@@ -16,6 +16,7 @@ import (
 // AssociatedSource represents a source validation report attached to an event
 type AssociatedSource struct {
 	SourceID         string    `json:"source_id"`
+	SourceName       string    `json:"source_name"`
 	SourceURL        string    `json:"source_url"`
 	Snippet          string    `json:"snippet"`
 	CredibilityScore float64   `json:"credibility_score"`
@@ -173,6 +174,7 @@ func UpsertOsintEvent(ctx context.Context, input OsintEvent) (string, bool, erro
 		// Check if this source is already present to prevent duplicate logging
 		newSource := AssociatedSource{
 			SourceID:         input.ID,
+			SourceName:       sourceNameFromAudit(input.AuditLog),
 			SourceURL:        "",
 			Snippet:          input.Headline,
 			CredibilityScore: CalculateBaseCredibility(input.SourceTier),
@@ -204,10 +206,7 @@ func UpsertOsintEvent(ctx context.Context, input OsintEvent) (string, bool, erro
 		}
 
 		// Recalculate integrity score based on the new aggregated sources
-		resolvedTier := currentTier
-		if input.SourceTier < resolvedTier { // Lower index (closest to Tier 0 / positive) means higher priority
-			resolvedTier = input.SourceTier
-		}
+		resolvedTier := strongerSourceTier(currentTier, input.SourceTier)
 
 		var updateGeom bool
 		var resolvedLon, resolvedLat float64
@@ -222,6 +221,7 @@ func UpsertOsintEvent(ctx context.Context, input OsintEvent) (string, bool, erro
 			resolvedHeadline = input.Headline
 			resolvedTier = 0
 			auditLog["detailed_description"] = "Fused via Deterministic API validation: " + input.Headline
+			auditLog["fusion_rule"] = "news_first_api_later"
 		}
 
 		// Fusion Rule A: API First (currentTier == 0), News Later (input.SourceTier < 0)
@@ -247,6 +247,7 @@ func UpsertOsintEvent(ctx context.Context, input OsintEvent) (string, bool, erro
 			}
 			updates = append(updates, newUpdate)
 			auditLog["updates"] = updates
+			auditLog["fusion_rule"] = "api_first_news_later"
 		}
 
 		integrity := CalculateIntegrityScore(sources, resolvedTier)
@@ -320,6 +321,7 @@ func UpsertOsintEvent(ctx context.Context, input OsintEvent) (string, bool, erro
 	if len(sources) == 0 {
 		sources = append(sources, AssociatedSource{
 			SourceID:         input.ID,
+			SourceName:       sourceNameFromAudit(input.AuditLog),
 			SourceURL:        "",
 			Snippet:          input.Headline,
 			CredibilityScore: CalculateBaseCredibility(input.SourceTier),
@@ -380,6 +382,35 @@ func CalculateBaseCredibility(tier int) float64 {
 	default:
 		return 0.50
 	}
+}
+
+func sourceNameFromAudit(auditLog map[string]any) string {
+	if auditLog == nil {
+		return ""
+	}
+	if name, ok := auditLog["wire_publisher"].(string); ok {
+		return name
+	}
+	return ""
+}
+
+func strongerSourceTier(current, incoming int) int {
+	rank := func(tier int) int {
+		switch tier {
+		case 0:
+			return 3
+		case -1:
+			return 2
+		case -2:
+			return 1
+		default:
+			return 0
+		}
+	}
+	if rank(incoming) > rank(current) {
+		return incoming
+	}
+	return current
 }
 
 // PerformDailyMaintenanceSweep runs the deep 24-hour database maintenance tasks

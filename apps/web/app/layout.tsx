@@ -1,26 +1,10 @@
 import type { Metadata } from 'next'
-import { Inter, JetBrains_Mono, Outfit } from 'next/font/google'
 import { Suspense } from 'react'
 import '@panopticon/ui/styles'
 import '@panopticon/ui/themes/dark'
 import '@panopticon/ui/themes/light'
 import './globals.css'
 import ErrorBoundary from '@/components/ErrorBoundary'
-
-const sansFont = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
-})
-
-const monoFont = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-})
-
-const displayFont = Outfit({
-  subsets: ['latin'],
-  variable: '--font-display',
-})
 
 export const metadata: Metadata = {
   title: 'Panopticon — Global Situational Awareness Platform',
@@ -35,7 +19,6 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sansFont.variable} ${monoFont.variable} ${displayFont.variable}`}
       data-theme="dark"
     >
       <head>
@@ -67,5 +50,4 @@ export default function RootLayout({
     </html>
   )
 }
-
 

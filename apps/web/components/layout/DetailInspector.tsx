@@ -271,6 +271,7 @@ function EntityReconPanel({ entity }: { entity: { type: string; data: any } }) {
   const [logs, setLogs] = React.useState<string[]>([])
   const [isScanning, setIsScanning] = React.useState(false)
   const [result, setResult] = React.useState<any>(null)
+  const [copied, setCopied] = React.useState(false)
   
   const addLog = (msg: string) => {
     setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`])
@@ -364,7 +365,6 @@ function EntityReconPanel({ entity }: { entity: { type: string; data: any } }) {
   }
 
   // ACLED / GDELT / NEWS-EVENT copy action
-  const [copied, setCopied] = React.useState(false)
   const handleCopy = () => {
     const url = entity.data.url || entity.data.sourceUrl || (entity.type === 'acled' ? 'https://acleddata.com' : 'https://www.gdeltproject.org')
     navigator.clipboard.writeText(url)

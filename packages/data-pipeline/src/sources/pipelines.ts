@@ -33,7 +33,7 @@ export async function fetchPipelineNetworks(): Promise<any> {
       features
     };
   } catch (error) {
-    console.error("Failed to fetch live pipeline data from Overpass, falling back to static", error);
-    return require('../../../core/src/config/pipeline-networks.json');
+    console.error("Failed to fetch live pipeline data from Overpass", error);
+    return { type: "FeatureCollection", features: [] };
   }
 }

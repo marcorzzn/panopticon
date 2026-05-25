@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"log"
@@ -118,7 +119,6 @@ func (m *Manager) pollNewsWires() {
 			}
 			
 			var rss RSS
-			import "encoding/xml"
 			if err := xml.NewDecoder(resp.Body).Decode(&rss); err != nil {
 				return
 			}
@@ -293,6 +293,7 @@ Source: %s`, title, desc, sourceName)
 		AssociatedSources: []AssociatedSource{
 			{
 				SourceID:         articleID,
+				SourceName:       sourceName,
 				SourceURL:        link,
 				Snippet:          res.ShortSummary,
 				CredibilityScore: 0.85,

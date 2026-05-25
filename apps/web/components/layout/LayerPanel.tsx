@@ -194,9 +194,8 @@ export default function LayerPanel() {
           <span>Operational Domains</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--pan-text-accent)] animate-ping" />
           <span className="text-[8px] font-mono font-semibold uppercase px-1.5 py-0.5 rounded border border-[var(--pan-text-accent)] border-opacity-35 text-[var(--pan-text-accent)] bg-[var(--pan-text-accent)] bg-opacity-[0.03] shadow-[0_0_8px_rgba(0,200,140,0.3)]">
-            STATUS: NOMINAL
+            LIVE COUNTS
           </span>
         </div>
       </div>

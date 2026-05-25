@@ -3,6 +3,7 @@ package api
 import (
 	"compress/gzip"
 	"context"
+	"database/sql"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -137,7 +138,7 @@ func GetOsintEventsHandler(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	rows, err := db.Pool.Query(ctx, `
-		SELECT id, headline, event_category, severity, ST_X(geom::geometry), ST_Y(geom::geometry), event_time, associated_sources, audit_log, parent_hub_id, lifecycle_status
+		SELECT id, headline, event_category, severity, ST_X(geom::geometry), ST_Y(geom::geometry), event_time, associated_sources, audit_log, parent_hub_id, lifecycle_status, source_tier, integrity_score
 		FROM osint_events
 		ORDER BY event_time DESC
 		LIMIT 100;
@@ -157,8 +158,10 @@ func GetOsintEventsHandler(w http.ResponseWriter, r *http.Request) {
 		var auditJSON []byte
 		var parentHubID sql.NullString
 		var lifecycleStatus sql.NullString
+		var sourceTier int
+		var integrityScore float64
 
-		err := rows.Scan(&id, &headline, &category, &severity, &lng, &lat, &eventTime, &sourcesJSON, &auditJSON, &parentHubID, &lifecycleStatus)
+		err := rows.Scan(&id, &headline, &category, &severity, &lng, &lat, &eventTime, &sourcesJSON, &auditJSON, &parentHubID, &lifecycleStatus, &sourceTier, &integrityScore)
 		if err != nil {
 			http.Error(w, "Error scanning database row", http.StatusInternalServerError)
 			return
@@ -180,12 +183,27 @@ func GetOsintEventsHandler(w http.ResponseWriter, r *http.Request) {
 		sourceName := "Unknown"
 		sourceURL := ""
 		shortSummary := ""
+		sourceNames := make([]string, 0, len(sources))
+		seenSources := make(map[string]bool)
 		if len(sources) > 0 {
 			sourceURL = sources[0].SourceURL
 			shortSummary = sources[0].Snippet
+			for _, src := range sources {
+				name := src.SourceName
+				if name == "" {
+					name = src.SourceID
+				}
+				if name != "" && !seenSources[name] {
+					sourceNames = append(sourceNames, name)
+					seenSources[name] = true
+				}
+			}
 		}
 		if publisher, ok := auditLog["wire_publisher"].(string); ok {
 			sourceName = publisher
+			if publisher != "" && !seenSources[publisher] {
+				sourceNames = append(sourceNames, publisher)
+			}
 		}
 
 		eventType := "instant"
@@ -206,9 +224,12 @@ func GetOsintEventsHandler(w http.ResponseWriter, r *http.Request) {
 			"coordinates": coords,
 			"timestamp":   eventTime.Format(time.RFC3339),
 			"source":      sourceName,
+			"sources":     sourceNames,
 			"url":         sourceURL,
 			"summary":     shortSummary,
 			"eventType":   eventType,
+			"sourceTier":  sourceTier,
+			"integrity":   integrityScore,
 		}
 
 		if parentHubID.Valid && parentHubID.String != "" {
@@ -1033,6 +1054,4 @@ func ManualRefreshHandler(w http.ResponseWriter, r *http.Request) {
 		"message": "Manual non-cached situation room refresh triggered successfully",
 	})
 }
-
-
 

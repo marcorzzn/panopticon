@@ -7,11 +7,8 @@ import {
   Table,
   Maximize2,
   Minimize2,
-  Activity,
   Globe,
-  Radio,
   Cpu,
-  Tv,
   SunMoon,
   Terminal,
   RefreshCw,
@@ -71,6 +68,7 @@ export default function TopBar() {
 
   const handleForceRefresh = async () => {
     setIsRefreshing(true)
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'
     const keys = [
       'usgs-earthquakes-core',
       'opensky-aircraft-core',
@@ -81,11 +79,16 @@ export default function TopBar() {
       'space-satellites-core',
       'rss-news-wire-core'
     ]
+    try {
+      await fetch(`${backendUrl}/api/v1/refresh?since=${Date.now()}`, { method: 'POST' })
+    } catch (err) {
+      console.warn('[REFRESH] Backend refresh endpoint unavailable:', err)
+    }
     await Promise.all([
       ...keys.map(k => mutate(k)),
       mutate(['gdelt-events-core', 'protest'])
     ])
-    setTimeout(() => {
+    window.setTimeout(() => {
       setIsRefreshing(false)
     }, 600)
   }
@@ -105,12 +108,7 @@ export default function TopBar() {
     toggleAiBrief,
   } = usePanelStore()
 
-  const {
-    theme,
-    setTheme,
-    globalRefreshPaused,
-    toggleGlobalRefresh,
-  } = useAppStore()
+  const { theme, setTheme } = useAppStore()
 
   const handleFullscreenClick = () => {
     toggleMapFullscreen()
@@ -188,6 +186,16 @@ export default function TopBar() {
 
         {/* Layout Control Switches */}
         <div className="flex items-center gap-0.5 bg-[var(--pan-bg-raised)] p-0.5 rounded border border-[var(--pan-border-default)]">
+          <Tooltip content="Refresh live feeds and apply backend fusion">
+            <button
+              onClick={handleForceRefresh}
+              disabled={isRefreshing}
+              aria-label="Refresh live feeds"
+              className="p-1.5 rounded text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] hover:bg-[var(--pan-btn-secondary-hover)] disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
+          </Tooltip>
           <Tooltip content="Toggle left map layer toggles panel">
             <button
               onClick={toggleLayerPanel}

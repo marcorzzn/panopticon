@@ -177,8 +177,12 @@ export async function fetchRssEvents(): Promise<NewsFeedItem[]> {
         coordinates: item.coordinates,
         url: item.url,
         severity,
+        sources: Array.isArray(item.sources) ? item.sources : undefined,
+        sourceTier: typeof item.sourceTier === 'number' ? item.sourceTier : undefined,
+        integrity: typeof item.integrity === 'number' ? item.integrity : undefined,
         eventType: item.eventType || 'instant',
         parentHubId: item.parentHubId,
+        updates: Array.isArray(item.updates) ? item.updates : undefined,
         raw_english_translation: item.raw_english_translation,
         source_reliability: item.source_reliability,
       } as NewsFeedItem

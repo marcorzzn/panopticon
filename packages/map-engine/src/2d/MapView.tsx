@@ -352,6 +352,9 @@ export default function MapView({
           title: ev.title,
           label: ev.title,
           source: rawSource,
+          sources: (ev.sources || []).join(', '),
+          sourceTier: ev.sourceTier ?? null,
+          integrity: ev.integrity ?? null,
           severity: ev.severity,
           summary: ev.summary,
           timestamp: ev.timestamp,
@@ -511,13 +514,8 @@ export default function MapView({
   // 11. Transform Webcams to GeoJSON (Phase 4 Additions)
   const webcamsGeoJson = React.useMemo(() => {
     const features: any[] = []
-    
-    // Check if we should apply dynamic high-density viewport-bound micro-sensor expansion
-    const isDeepZoom = viewState.zoom >= 10
-    const hasBounds = bounds && bounds.length === 4
-    
+
     activeWebcams.forEach((cam) => {
-      // 1. Add the baseline verified camera
       features.push({
         type: 'Feature',
         id: cam.id,
@@ -534,51 +532,13 @@ export default function MapView({
           provider: cam.provider || 'AMOS',
         },
       })
-      
-      // 2. If deep zoomed and inside active viewport bounds, synthesize 12 localized micro-sector feeds
-      if (isDeepZoom && hasBounds) {
-        const [lng, lat] = cam.coordinates
-        const inViewport = lng >= bounds[0] && lng <= bounds[2] && lat >= bounds[1] && lat <= bounds[3]
-        
-        if (inViewport) {
-          // Generate 12 deterministic localized surveillance feeds surrounding the core node
-          for (let i = 1; i <= 12; i++) {
-            const angle = (i / 12) * 2 * Math.PI
-            // Micro-offsets in WGS84 coordinates (~50m - 300m radius)
-            const radius = 0.0003 + (i % 3) * 0.0004
-            const offsetLat = Math.sin(angle) * radius
-            const offsetLng = Math.cos(angle) * radius
-            
-            const subId = `${cam.id}-micro-${i}`
-            const subLat = Number((lat + offsetLat).toFixed(6))
-            const subLng = Number((lng + offsetLng).toFixed(6))
-            
-            features.push({
-              type: 'Feature',
-              id: subId,
-              geometry: {
-                type: 'Point',
-                coordinates: [subLng, subLat],
-              },
-              properties: {
-                id: subId,
-                name: `${cam.label} Sector ${i} Feed`,
-                streamUrl: cam.streamUrl,
-                status: (i % 12 === 0) ? 'offline' : (i % 19 === 0) ? 'degraded' : 'healthy',
-                label: `${cam.label} Sector ${i} Feed`,
-                provider: cam.provider || 'AMOS',
-              },
-            })
-          }
-        }
-      }
     })
     
     return {
       type: 'FeatureCollection',
       features,
     }
-  }, [activeWebcams, viewState.zoom, bounds])
+  }, [activeWebcams])
 
   // 12. Transform Recon scan hops to GeoJSON points & line paths (Phase 4 Additions)
   const reconHopsGeoJson = React.useMemo(() => {
@@ -1855,9 +1815,11 @@ export default function MapView({
               {hoverInfo.feature.properties.source && (
                 <div className="flex items-center gap-1.5 pt-1 border-t border-weak/50">
                   <span className="text-secondary text-[9px] uppercase tracking-wider">SRC:</span>
-                  <span className="text-accent text-[9px] truncate max-w-[120px]">{hoverInfo.feature.properties.source}</span>
+                  <span className="text-accent text-[9px] truncate max-w-[160px]">
+                    {hoverInfo.feature.properties.sources || hoverInfo.feature.properties.source}
+                  </span>
                   <span className="ml-auto px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wider bg-[#e8b00f]/20 text-[#e8b00f] border border-[#e8b00f]/30 flex items-center gap-1">
-                    ⚠️ UNVERIFIED
+                    {hoverInfo.feature.properties.sourceTier === 0 ? 'TIER 0' : 'WIRE'}
                   </span>
                 </div>
               )}

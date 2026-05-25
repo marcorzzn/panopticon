@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type NewsCategory = 'geopolitical' | 'cyber' | 'maritime' | 'hazard' | 'markets'
+export type NewsCategory = string
 
 export interface NewsFeedItem {
   id: string
@@ -12,6 +12,9 @@ export interface NewsFeedItem {
   coordinates?: [number, number] // [lng, lat]
   severity: 'low' | 'moderate' | 'high' | 'critical'
   url?: string
+  sources?: string[]
+  sourceTier?: number
+  integrity?: number
   
   // Dot Display Rules Logic:
   eventType?: 'instant' | 'persistent' | 'hub' | 'spoke'
@@ -31,6 +34,9 @@ export interface MapMarker {
   coordinates: [number, number]
   severity: 'low' | 'moderate' | 'high' | 'critical'
   url?: string
+  sources?: string[]
+  sourceTier?: number
+  integrity?: number
   timeline?: NewsFeedItem[] // Chronological dispatches inside Context/Hub/Persistent Marker
   
   // Display rules mappings:
@@ -419,134 +425,33 @@ export const initialNewsEvents = (): NewsFeedItem[] => {
 
 export function getMapMarkers(events: NewsFeedItem[]): MapMarker[] {
   const now = Date.now();
-  
-  // Filter out events that lack coordinates, or ended instant events older than 24h (Daily Reset Rule)
-  const activeEvents = events.filter((e) => {
+
+  return events.filter((e) => {
     if (!e.coordinates) return false;
     if (e.eventType === 'instant' && e.isEnded && e.endedAt) {
       const age = now - new Date(e.endedAt).getTime();
-      if (age > 24 * 3600 * 1000) {
-        return false;
-      }
+      return age <= 24 * 3600 * 1000;
     }
     return true;
-  });
-  
-  // Sort events chronologically descending (newest first)
-  const sorted = [...activeEvents].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-  );
-
-  const markers: MapMarker[] = [];
-  const processed = new Set<string>();
-
-  for (let i = 0; i < sorted.length; i++) {
-    const primary = sorted[i]!;
-    if (processed.has(primary.id)) continue;
-
-    // Hub, Spoke, and Persistent events are rendered independently with specific styling/visuals per display rules
-    if (primary.eventType === 'hub' || primary.eventType === 'spoke' || primary.eventType === 'persistent') {
-      processed.add(primary.id);
-      markers.push({
-        id: primary.id,
-        type: primary.eventType as 'hub' | 'spoke' | 'persistent',
-        category: primary.category,
-        title: primary.title,
-        summary: primary.summary,
-        timestamp: primary.timestamp,
-        coordinates: primary.coordinates!,
-        severity: primary.severity,
-        url: primary.url,
-        eventType: primary.eventType,
-        parentHubId: primary.parentHubId,
-        updates: primary.updates,
-      });
-      continue;
-    }
-
-    // Critical events retain independent daily pins per requirement
-    if (primary.severity === 'critical') {
-      processed.add(primary.id);
-      markers.push({
-        id: primary.id,
-        type: 'daily',
-        category: primary.category,
-        title: primary.title,
-        summary: primary.summary,
-        timestamp: primary.timestamp,
-        coordinates: primary.coordinates!,
-        severity: primary.severity,
-        url: primary.url,
-        eventType: primary.eventType,
-      });
-      continue;
-    }
-
-    // Geofenced clustering: look for matching close nodes within 48h and 50km (~0.5 degrees)
-    const clusterEvents: NewsFeedItem[] = [primary];
-    const primaryTime = new Date(primary.timestamp).getTime();
-    const [primLng, primLat] = primary.coordinates!;
-
-    for (let j = i + 1; j < sorted.length; j++) {
-      const candidate = sorted[j]!;
-      if (
-        processed.has(candidate.id) || 
-        candidate.severity === 'critical' ||
-        candidate.eventType === 'hub' ||
-        candidate.eventType === 'spoke' ||
-        candidate.eventType === 'persistent'
-      ) continue;
-
-      const candidateTime = new Date(candidate.timestamp).getTime();
-      const timeDiff = Math.abs(primaryTime - candidateTime);
-      
-      // Time check: 48 hours (172,800,000 ms)
-      if (timeDiff <= 48 * 3600 * 1000) {
-        const [candLng, candLat] = candidate.coordinates!;
-        // Geofence check: Euclidean distance in coordinates (0.5 degree roughly 50-55km)
-        const dist = Math.sqrt(Math.pow(primLng - candLng, 2) + Math.pow(primLat - candLat, 2));
-        
-        if (dist <= 0.5) {
-          clusterEvents.push(candidate);
-          processed.add(candidate.id);
-        }
-      }
-    }
-
-    processed.add(primary.id);
-
-    if (clusterEvents.length >= 2) {
-      // Create Context Marker
-      markers.push({
-        id: `context-hub-${primary.id}`,
-        type: 'context',
-        category: primary.category,
-        title: `CONTEXT TIMELINE: ${clusterEvents.length} Events Consolidated`,
-        summary: `Consolidated tactical geofence hub for ${primary.source} and other adjacent dispatches near coordinates. Inspect timeline for details.`,
-        timestamp: primary.timestamp, // Show the latest timestamp as context update time
-        coordinates: primary.coordinates!,
-        severity: 'high', // Group context markers upgrade to high visibility
-        timeline: clusterEvents, // Retain the chronological feed inside the cluster
-        eventType: primary.eventType,
-      });
-    } else {
-      // Keep as individual Daily Marker
-      markers.push({
-        id: primary.id,
-        type: 'daily',
-        category: primary.category,
-        title: primary.title,
-        summary: primary.summary,
-        timestamp: primary.timestamp,
-        coordinates: primary.coordinates!,
-        severity: primary.severity,
-        url: primary.url,
-        eventType: primary.eventType,
-      });
-    }
-  }
-
-  return markers;
+  }).map((event) => ({
+    id: event.id,
+    type: event.eventType === 'hub' || event.eventType === 'spoke' || event.eventType === 'persistent'
+      ? event.eventType
+      : 'daily',
+    category: event.category,
+    title: event.title,
+    summary: event.summary,
+    timestamp: event.timestamp,
+    coordinates: event.coordinates!,
+    severity: event.severity,
+    url: event.url,
+    sources: event.sources,
+    sourceTier: event.sourceTier,
+    integrity: event.integrity,
+    eventType: event.eventType,
+    parentHubId: event.parentHubId,
+    updates: event.updates,
+  }));
 }
 
 export interface NewsStore {
@@ -556,7 +461,7 @@ export interface NewsStore {
 }
 
 export const useNewsStore = create<NewsStore>((set) => ({
-  newsEvents: initialNewsEvents(),
+  newsEvents: [],
   setNewsEvents: (events) => set({ newsEvents: events }),
   
   // 72-Hour Drift Expiration Sweep

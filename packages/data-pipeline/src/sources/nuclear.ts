@@ -33,7 +33,7 @@ export async function fetchNuclearFacilities(): Promise<any> {
       features
     };
   } catch (error) {
-    console.error("Failed to fetch live nuclear data from Overpass, falling back to static", error);
-    return require('../../../core/src/config/nuclear-facilities.json');
+    console.error("Failed to fetch live nuclear data from Overpass", error);
+    return { type: "FeatureCollection", features: [] };
   }
 }

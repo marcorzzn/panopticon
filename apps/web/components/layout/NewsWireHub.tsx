@@ -35,7 +35,7 @@ export default function NewsWireHub() {
     setLoading(true)
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'
     try {
-      const resp = await fetch(`${backendUrl}/api/v1/refresh`, {
+      const resp = await fetch(`${backendUrl}/api/v1/refresh?since=${Date.now()}`, {
         method: 'POST',
       })
       if (!resp.ok) {
