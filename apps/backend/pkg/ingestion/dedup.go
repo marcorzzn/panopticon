@@ -2,9 +2,12 @@ package ingestion
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
+	"strings"
 	"time"
 
 	"backend/pkg/db"
@@ -32,6 +35,8 @@ type OsintEvent struct {
 	IntegrityScore    float64            `json:"integrity_score"`
 	SourceTier        int                `json:"source_tier"` // Tier 0, -1, -2
 	AuditLog          map[string]any     `json:"audit_log"`
+	ParentHubID       string             `json:"parent_hub_id"`
+	LifecycleStatus   string             `json:"lifecycle_status"`
 	CreatedAt         time.Time          `json:"created_at"`
 }
 
@@ -99,11 +104,14 @@ func UpsertOsintEvent(ctx context.Context, input OsintEvent) (string, bool, erro
 	var currentRedundancy int
 	var currentTier int
 	var existingHeadline string
+	var currentParentHubID sql.NullString
+	var currentLifecycleStatus sql.NullString
+	var currentAuditJSON []byte
 
 	// Since we don't know if pg_trgm is enabled, we'll select all candidates matching criteria 1-3,
 	// and apply criteria 4 (Semantic Similarity) in Go to guarantee it works.
 	rows, err := tx.Query(ctx, `
-		SELECT id, headline, associated_sources, redundancy_count, source_tier
+		SELECT id, headline, associated_sources, redundancy_count, source_tier, parent_hub_id, lifecycle_status, audit_log
 		FROM osint_events
 		WHERE event_category = $1
 		  AND ST_DWithin(geom::geography, ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography, 50000)
@@ -143,7 +151,7 @@ func UpsertOsintEvent(ctx context.Context, input OsintEvent) (string, bool, erro
 
 	foundMatch := false
 	for rows.Next() {
-		if err := rows.Scan(&matchedID, &existingHeadline, &currentSourcesJSON, &currentRedundancy, &currentTier); err != nil {
+		if err := rows.Scan(&matchedID, &existingHeadline, &currentSourcesJSON, &currentRedundancy, &currentTier, &currentParentHubID, &currentLifecycleStatus, &currentAuditJSON); err != nil {
 			continue
 		}
 		
@@ -155,7 +163,7 @@ func UpsertOsintEvent(ctx context.Context, input OsintEvent) (string, bool, erro
 	}
 	rows.Close()
 
-	// If a matching cluster is found, consolidate the event
+	// If a matching cluster is found, consolidate the event (Data Fusion Subsystem)
 	if foundMatch {
 		var sources []AssociatedSource
 		if len(currentSourcesJSON) > 0 {
@@ -186,33 +194,114 @@ func UpsertOsintEvent(ctx context.Context, input OsintEvent) (string, bool, erro
 			sources = append(sources, newSource)
 		}
 
+		// Parse existing audit log
+		var auditLog map[string]any
+		if len(currentAuditJSON) > 0 {
+			_ = json.Unmarshal(currentAuditJSON, &auditLog)
+		}
+		if auditLog == nil {
+			auditLog = make(map[string]any)
+		}
+
 		// Recalculate integrity score based on the new aggregated sources
 		resolvedTier := currentTier
-		if input.SourceTier > currentTier { // Tier 0 is "higher priority" numerically than -1, -2, but let's take the min tier index (closest to Tier 0)
-			// Wait, Section 1 mentions: Tier 0 satellite/raw telemetry, Tier -1 state-level verified feeds, Tier -2 media wire reports.
-			// So lower number means higher tier: 0 > -1 > -2. Let's resolve the tier as the minimum number (Tier 0 / Tier -1).
-		}
-		if input.SourceTier < resolvedTier {
+		if input.SourceTier < resolvedTier { // Lower index (closest to Tier 0 / positive) means higher priority
 			resolvedTier = input.SourceTier
+		}
+
+		var updateGeom bool
+		var resolvedLon, resolvedLat float64
+		var resolvedHeadline string = existingHeadline
+
+		// Fusion Rule B: News First (currentTier < 0), API Later (input.SourceTier == 0)
+		// Upgrade coordinates to high-precision API coordinates and upgrade title/severity
+		if input.SourceTier == 0 && currentTier < 0 {
+			updateGeom = true
+			resolvedLon = input.Coordinates[0]
+			resolvedLat = input.Coordinates[1]
+			resolvedHeadline = input.Headline
+			resolvedTier = 0
+			auditLog["detailed_description"] = "Fused via Deterministic API validation: " + input.Headline
+		}
+
+		// Fusion Rule A: API First (currentTier == 0), News Later (input.SourceTier < 0)
+		// Append semantic details to description and compound chronological updates timeline log
+		if input.SourceTier < 0 && currentTier == 0 {
+			desc, _ := auditLog["detailed_description"].(string)
+			if desc != "" {
+				desc += "\n\n" + input.Headline
+			} else {
+				desc = input.Headline
+			}
+			auditLog["detailed_description"] = desc
+
+			// Compound timeline updates log inside audit_log["updates"]
+			var updates []any
+			if u, ok := auditLog["updates"].([]any); ok {
+				updates = u
+			}
+			newUpdate := map[string]any{
+				"timestamp": input.EventTime.Format(time.RFC3339),
+				"text":      input.Headline,
+				"source":    newSource.SourceID,
+			}
+			updates = append(updates, newUpdate)
+			auditLog["updates"] = updates
 		}
 
 		integrity := CalculateIntegrityScore(sources, resolvedTier)
 		sourcesJSON, _ := json.Marshal(sources)
+		auditJSON, _ := json.Marshal(auditLog)
 
 		redundancy := currentRedundancy
 		if !duplicate {
 			redundancy++
 		}
 
-		// Update the existing event
-		_, err = tx.Exec(ctx, `
-			UPDATE osint_events
-			SET associated_sources = $1,
-				redundancy_count = $2,
-				integrity_score = $3,
-				source_tier = $4
-			WHERE id = $5;
-		`, sourcesJSON, redundancy, integrity, resolvedTier, matchedID)
+		resolvedParentHubID := currentParentHubID.String
+		if input.ParentHubID != "" {
+			resolvedParentHubID = input.ParentHubID
+		}
+
+		resolvedLifecycleStatus := currentLifecycleStatus.String
+		if input.LifecycleStatus != "" {
+			resolvedLifecycleStatus = input.LifecycleStatus
+		}
+
+		// Update the existing event (Optionally re-syncing PostGIS spatial geometry)
+		if updateGeom {
+			_, err = tx.Exec(ctx, `
+				UPDATE osint_events
+				SET headline = $1,
+					associated_sources = $2,
+					redundancy_count = $3,
+					integrity_score = $4,
+					source_tier = $5,
+					audit_log = $6,
+					parent_hub_id = $7,
+					lifecycle_status = $8,
+					geom = ST_SetSRID(ST_MakePoint($9, $10), 4326)
+				WHERE id = $11;
+			`, resolvedHeadline, sourcesJSON, redundancy, integrity, resolvedTier, auditJSON,
+				sql.NullString{String: resolvedParentHubID, Valid: resolvedParentHubID != ""},
+				sql.NullString{String: resolvedLifecycleStatus, Valid: resolvedLifecycleStatus != ""},
+				resolvedLon, resolvedLat, matchedID)
+		} else {
+			_, err = tx.Exec(ctx, `
+				UPDATE osint_events
+				SET associated_sources = $1,
+					redundancy_count = $2,
+					integrity_score = $3,
+					source_tier = $4,
+					audit_log = $5,
+					parent_hub_id = $6,
+					lifecycle_status = $7
+				WHERE id = $8;
+			`, sourcesJSON, redundancy, integrity, resolvedTier, auditJSON,
+				sql.NullString{String: resolvedParentHubID, Valid: resolvedParentHubID != ""},
+				sql.NullString{String: resolvedLifecycleStatus, Valid: resolvedLifecycleStatus != ""},
+				matchedID)
+		}
 
 		if err != nil {
 			return "", false, fmt.Errorf("failed to update consolidated event: %w", err)
@@ -235,7 +324,7 @@ func UpsertOsintEvent(ctx context.Context, input OsintEvent) (string, bool, erro
 			Snippet:          input.Headline,
 			CredibilityScore: CalculateBaseCredibility(input.SourceTier),
 			Timestamp:        input.EventTime,
-		}...)
+		})
 	}
 
 	integrity := CalculateIntegrityScore(sources, input.SourceTier)
@@ -248,15 +337,24 @@ func UpsertOsintEvent(ctx context.Context, input OsintEvent) (string, bool, erro
 	auditLog["origin_timestamp"] = input.EventTime.Format(time.RFC3339)
 	auditLog["ingestion_timestamp"] = time.Now().Format(time.RFC3339)
 	auditLog["processing_pipeline"] = "osint_dedup_engine"
+	
+	// Set default lifecycle status to concluded for instant event types if ended
+	if input.LifecycleStatus != "" {
+		auditLog["lifecycle_status"] = input.LifecycleStatus
+	}
+	
 	auditJSON, _ := json.Marshal(auditLog)
+
+	parentHubVal := sql.NullString{String: input.ParentHubID, Valid: input.ParentHubID != ""}
+	lifecycleVal := sql.NullString{String: input.LifecycleStatus, Valid: input.LifecycleStatus != ""}
 
 	_, err = tx.Exec(ctx, `
 		INSERT INTO osint_events (
 			id, headline, event_category, severity, geom, event_time, 
-			associated_sources, redundancy_count, integrity_score, source_tier, audit_log
-		) VALUES ($1, $2, $3, $4, ST_SetSRID(ST_MakePoint($5, $6), 4326), $7, $8, $9, $10, $11, $12)
+			associated_sources, redundancy_count, integrity_score, source_tier, audit_log, parent_hub_id, lifecycle_status
+		) VALUES ($1, $2, $3, $4, ST_SetSRID(ST_MakePoint($5, $6), 4326), $7, $8, $9, $10, $11, $12, $13, $14)
 	`, input.ID, input.Headline, input.EventCategory, input.Severity, input.Coordinates[0], input.Coordinates[1],
-		input.EventTime, sourcesJSON, 0, integrity, input.SourceTier, auditJSON)
+		input.EventTime, sourcesJSON, 0, integrity, input.SourceTier, auditJSON, parentHubVal, lifecycleVal)
 
 	if err != nil {
 		return "", false, fmt.Errorf("failed to insert new event: %w", err)
@@ -282,4 +380,115 @@ func CalculateBaseCredibility(tier int) float64 {
 	default:
 		return 0.50
 	}
+}
+
+// PerformDailyMaintenanceSweep runs the deep 24-hour database maintenance tasks
+func PerformDailyMaintenanceSweep(ctx context.Context) error {
+	log.Println("[MAINTENANCE] Initiating deep database maintenance sweep...")
+
+	// 1. Drop dead ephemeral instant entries that have transitioned to 'concluded' or are ended
+	resPurged, err := db.Pool.Exec(ctx, `
+		DELETE FROM osint_events
+		WHERE (lifecycle_status = 'concluded' OR (audit_log->>'is_ended')::boolean = true)
+		  AND event_time < NOW() - interval '24 hours';
+	`)
+	if err != nil {
+		log.Printf("[MAINTENANCE ERROR] Failed to purge dead ephemeral entries: %v", err)
+	} else {
+		log.Printf("[MAINTENANCE] Ephemeral sweep complete: purged %d dead entries", resPurged.RowsAffected())
+	}
+
+	// 2. Query persistent continuous events to compile chronological logs
+	rows, err := db.Pool.Query(ctx, `
+		SELECT id, associated_sources, audit_log, source_tier
+		FROM osint_events
+		WHERE lifecycle_status = 'active' OR audit_log->>'event_type' = 'persistent';
+	`)
+	if err != nil {
+		return fmt.Errorf("failed to query persistent events for chronology: %w", err)
+	}
+	defer rows.Close()
+
+	type sweepItem struct {
+		id       string
+		sources  []AssociatedSource
+		auditLog map[string]any
+		tier     int
+	}
+	var items []sweepItem
+
+	for rows.Next() {
+		var id string
+		var sourcesJSON []byte
+		var auditJSON []byte
+		var tier int
+		if err := rows.Scan(&id, &sourcesJSON, &auditJSON, &tier); err != nil {
+			continue
+		}
+		var sources []AssociatedSource
+		if len(sourcesJSON) > 0 {
+			_ = json.Unmarshal(sourcesJSON, &sources)
+		}
+		var auditLog map[string]any
+		if len(auditJSON) > 0 {
+			_ = json.Unmarshal(auditJSON, &auditLog)
+		}
+		if auditLog == nil {
+			auditLog = make(map[string]any)
+		}
+		items = append(items, sweepItem{id: id, sources: sources, auditLog: auditLog, tier: tier})
+	}
+	rows.Close()
+
+	for _, item := range items {
+		// Compile chronological updates log
+		// Map sources into compiled audit_log updates if not already done
+		var updates []any
+		for _, src := range item.sources {
+			newUpdate := map[string]any{
+				"timestamp": src.Timestamp.Format(time.RFC3339),
+				"text":      "Intel update: " + src.Snippet,
+				"source":    src.SourceID,
+			}
+			updates = append(updates, newUpdate)
+		}
+		item.auditLog["updates"] = updates
+
+		// 3. Update Bayesian source integrity score
+		newIntegrity := CalculateIntegrityScore(item.sources, item.tier)
+
+		auditJSON, _ := json.Marshal(item.auditLog)
+		_, err = db.Pool.Exec(ctx, `
+			UPDATE osint_events
+			SET audit_log = $1,
+				integrity_score = $2
+			WHERE id = $3;
+		`, auditJSON, newIntegrity, item.id)
+		if err != nil {
+			log.Printf("[MAINTENANCE ERROR] Failed to update persistent log for %s: %v", item.id, err)
+		}
+	}
+
+	// 4. Re-allocate long-term conflict statuses
+	// If a conflict hub has seen zero active tactical spokes/events in 30 days, we mark it as concluded
+	resConflict, err := db.Pool.Exec(ctx, `
+		UPDATE osint_events
+		SET lifecycle_status = 'concluded'
+		WHERE lifecycle_status = 'active'
+		  AND id NOT IN (
+			  SELECT DISTINCT parent_hub_id 
+			  FROM osint_events 
+			  WHERE parent_hub_id IS NOT NULL 
+			    AND event_time >= NOW() - interval '30 days'
+		  )
+		  AND event_time < NOW() - interval '30 days';
+	`)
+	if err != nil {
+		log.Printf("[MAINTENANCE ERROR] Failed to re-allocate conflict statuses: %v", err)
+	} else {
+		log.Printf("[MAINTENANCE] Long-term conflict re-allocation: resolved %d inactive conflicts", resConflict.RowsAffected())
+	}
+
+	log.Println("[MAINTENANCE] Deep database sweep completed successfully.")
+	return nil
 }

@@ -16,13 +16,25 @@ type Manager struct {
 	cancel context.CancelFunc
 }
 
+var GlobalManager *Manager
+
 func NewManager(cfg *config.Config) *Manager {
 	ctx, cancel := context.WithCancel(context.Background())
-	return &Manager{
+	mgr := &Manager{
 		cfg:    cfg,
 		ctx:    ctx,
 		cancel: cancel,
 	}
+	GlobalManager = mgr
+	return mgr
+}
+
+func (m *Manager) TriggerManualRefresh() {
+	log.Println("[REFRESH] Triggering manual, non-cached situational updates refresh...")
+	// Execute deterministic APIs and news wires concurrent ingestion sweeps
+	go m.fetchAndStoreEarthquakes()
+	go m.fetchAndStoreWildfires()
+	go m.pollNewsWires()
 }
 
 func (m *Manager) Start() {

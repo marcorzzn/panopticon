@@ -140,10 +140,19 @@ export default function LayerPanel() {
   
   // Group layers based on the central configuration
   const groupedLayers = React.useMemo(() => {
-    const groups: Record<string, typeof layersConfig> = {}
-    layersConfig.forEach(layer => {
-      if (!groups[layer.group]) groups[layer.group] = []
-      groups[layer.group].push(layer)
+    const groups: Record<string, any[]> = {}
+    layersConfig.forEach((layer: any) => {
+      const slug = layer.slug || layer.id
+      const displayName = layer.displayName || layer.name
+      const group = layer.group
+
+      if (!groups[group]) groups[group] = []
+      groups[group].push({
+        id: slug,
+        name: displayName,
+        icon: layer.icon,
+        description: layer.description
+      })
     })
     return groups
   }, [])
@@ -161,7 +170,7 @@ export default function LayerPanel() {
     setOpenGroups(prev => ({ ...prev, [group]: !prev[group] }))
   }
 
-  const activeLayerIds = layersConfig.map(l => l.id)
+  const activeLayerIds = layersConfig.map((l: any) => l.slug || l.id)
 
   const handleActivateAll = () => {
     activeLayerIds.forEach(id => {

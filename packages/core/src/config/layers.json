@@ -1,308 +1,182 @@
 [
   {
-    "id": "earthquakes",
-    "name": "USGS Earthquakes",
+    "slug": "earthquakes",
+    "displayName": "USGS Earthquakes",
     "group": "Natural Hazards",
     "icon": "Activity",
     "description": "Real-time global seismic epicenters",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 6,
-      "circle-color": "#e74c3c",
-      "circle-stroke-width": 1.5,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.95, "tier": 0,
-    "legend": { "type": "circle", "label": "Seismic Epicenter", "color": "#e74c3c" }
+    "color": "#e74c3c",
+    "defaultPinType": "instant",
+    "sources": ["usgs-earthquakes", "reuters", "ap"]
   },
   {
-    "id": "weather",
-    "name": "Extreme Weather",
+    "slug": "weather",
+    "displayName": "Extreme Weather",
     "group": "Natural Hazards",
     "icon": "Thermometer",
     "description": "NOAA and global storm tracking alerts",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 8,
-      "circle-color": "#3498db",
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.75, "tier": 1,
-    "legend": { "type": "circle", "label": "Atmospheric Grid Node", "color": "#3498db" }
+    "color": "#3498db",
+    "defaultPinType": "persistent",
+    "sources": ["noaa-weather", "reuters", "ap"]
   },
   {
-    "id": "wildfires",
-    "name": "NASA FIRMS Wildfires",
+    "slug": "wildfires",
+    "displayName": "NASA FIRMS Wildfires",
     "group": "Natural Hazards",
     "icon": "Flame",
     "description": "Active thermal hotspot anomaly vectors",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 6,
-      "circle-color": "#e67e22",
-      "circle-stroke-width": 1.5,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.9, "tier": 0,
-    "legend": { "type": "circle", "label": "Active Thermal Anomaly", "color": "#e67e22" }
+    "color": "#e67e22",
+    "defaultPinType": "persistent",
+    "sources": ["nasa-firms", "reuters", "ap"]
   },
   {
-    "id": "airquality",
-    "name": "OpenAQ Air Quality",
+    "slug": "airquality",
+    "displayName": "OpenAQ Air Quality",
     "group": "Natural Hazards",
     "icon": "Wind",
     "description": "Real-time global particulate matter readings",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 5,
-      "circle-color": "#9b59b6",
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 3, "maxZoom": 20, "opacity": 0.8, "tier": 0,
-    "legend": { "type": "circle", "label": "IoT Particulate Monitor", "color": "#9b59b6" }
+    "color": "#9b59b6",
+    "defaultPinType": "instant",
+    "sources": ["openaq-airquality", "reuters", "ap"]
   },
   {
-    "id": "gdelt",
-    "name": "GDELT Geopol Events",
+    "slug": "gdelt",
+    "displayName": "GDELT Geopol Events",
     "group": "Conflict & Security",
     "icon": "Globe",
     "description": "Real-time geo-located conflict and cooperative dispatches",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 7,
-      "circle-color": "#3498db",
-      "circle-stroke-width": 1.5,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.9, "tier": -2,
-    "legend": { "type": "circle", "label": "C2 Verified News Event", "color": "#3498db" }
+    "color": "#3498db",
+    "defaultPinType": "instant",
+    "sources": ["gdelt", "reuters", "ap"]
   },
   {
-    "id": "acled",
-    "name": "ACLED Conflict Reports",
+    "slug": "acled",
+    "displayName": "ACLED Conflict Reports",
     "group": "Conflict & Security",
     "icon": "ShieldAlert",
     "description": "Tactical armed engagement and violent confrontation telemetry",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 7,
-      "circle-color": "#e74c3c",
-      "circle-stroke-width": 1.5,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.95, "tier": -1,
-    "legend": { "type": "circle", "label": "Armed Engagement / Protest", "color": "#e74c3c" }
+    "color": "#e74c3c",
+    "defaultPinType": "instant",
+    "sources": ["acled", "reuters", "ap"]
   },
   {
-    "id": "active-conflicts",
-    "name": "Active Conflicts",
+    "slug": "active-conflicts",
+    "displayName": "Active Conflicts",
     "group": "Conflict & Security",
     "icon": "Shield",
     "description": "Semi-permanent active wars and strategic occupation maps",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 8,
-      "circle-color": "#ff1a1a",
-      "circle-stroke-width": 1.5,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.9, "tier": -3,
-    "legend": { "type": "circle", "label": "Active Conflict Zone", "color": "#ff1a1a" }
+    "color": "#ff1a1a",
+    "defaultPinType": "hub-spoke",
+    "sources": ["reuters", "ap", "ukraine-hydra-feed"]
   },
   {
-    "id": "humanitarian-displacement",
-    "name": "Refugee & Displacement",
+    "slug": "humanitarian-displacement",
+    "displayName": "Refugee & Displacement",
     "group": "Humanitarian & Crisis",
     "icon": "MapPin",
     "description": "Authoritative UNHCR geolocated displacement points",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 6,
-      "circle-color": "#34c759",
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.85, "tier": 0,
-    "legend": { "type": "circle", "label": "Displacement Node", "color": "#34c759" }
+    "color": "#34c759",
+    "defaultPinType": "persistent",
+    "sources": ["unhcr", "reuters", "ap"]
   },
   {
-    "id": "mass-gatherings-entertainment",
-    "name": "Mass Gatherings & Ent",
+    "slug": "mass-gatherings-entertainment",
+    "displayName": "Mass Gatherings & Ent",
     "group": "Events & Gatherings",
     "icon": "Users",
     "description": "Concerts, festivals, and large entertainment gatherings",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 5,
-      "circle-color": "#ff2d55",
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.8, "tier": 0,
-    "legend": { "type": "circle", "label": "Mass Gathering", "color": "#ff2d55" }
+    "color": "#ff2d55",
+    "defaultPinType": "instant",
+    "sources": ["reuters", "ap"]
   },
   {
-    "id": "sports-major-events",
-    "name": "Sports & Major Events",
+    "slug": "sports-major-events",
+    "displayName": "Sports & Major Events",
     "group": "Events & Gatherings",
     "icon": "Trophy",
     "description": "Olympics, World Cups, and international sports events",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 5,
-      "circle-color": "#ffcc00",
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.8, "tier": 0,
-    "legend": { "type": "circle", "label": "Sports Event", "color": "#ffcc00" }
+    "color": "#ffcc00",
+    "defaultPinType": "instant",
+    "sources": ["reuters", "ap"]
   },
   {
-    "id": "religious-pilgrimage-gatherings",
-    "name": "Religious Pilgrimages",
+    "slug": "religious-pilgrimage-gatherings",
+    "displayName": "Religious Pilgrimages",
     "group": "Events & Gatherings",
     "icon": "Book",
     "description": "Hajj, Kumbh Mela, and other major religious gatherings",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 5,
-      "circle-color": "#5ac8fa",
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.8, "tier": 0,
-    "legend": { "type": "circle", "label": "Religious Gathering", "color": "#5ac8fa" }
+    "color": "#5ac8fa",
+    "defaultPinType": "instant",
+    "sources": ["reuters", "ap"]
   },
   {
-    "id": "labor-social-movements",
-    "name": "Labor & Social Movements",
+    "slug": "labor-social-movements",
+    "displayName": "Labor & Social Movements",
     "group": "Events & Gatherings",
     "icon": "Megaphone",
     "description": "Strikes, widespread union protests, and social movements",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 5,
-      "circle-color": "#ff9500",
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.8, "tier": 0,
-    "legend": { "type": "circle", "label": "Social Movement", "color": "#ff9500" }
+    "color": "#ff9500",
+    "defaultPinType": "instant",
+    "sources": ["reuters", "ap"]
   },
   {
-    "id": "science-space-exploration",
-    "name": "Science & Space",
+    "slug": "science-space-exploration",
+    "displayName": "Science & Space",
     "group": "Space & Orbital",
     "icon": "Rocket",
     "description": "Rocket launches, astronomical events, and scientific milestones",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 5,
-      "circle-color": "#af52de",
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.8, "tier": 0,
-    "legend": { "type": "circle", "label": "Science Event", "color": "#af52de" }
+    "color": "#af52de",
+    "defaultPinType": "instant",
+    "sources": ["reuters", "ap"]
   },
   {
-    "id": "aircraft",
-    "name": "OpenSky ADS-B Feeds",
+    "slug": "aircraft",
+    "displayName": "OpenSky ADS-B Feeds",
     "group": "Airspace & Aviation",
     "icon": "Plane",
     "description": "Real-time aircraft tracking transponder beacons",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 5,
-      "circle-color": "#f1c40f",
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#000000"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.9, "tier": 0,
-    "legend": { "type": "circle", "label": "Active Transponder Beacon", "color": "#f1c40f" }
+    "color": "#f1c40f",
+    "defaultPinType": "instant",
+    "sources": ["opensky-aviation"]
   },
   {
-    "id": "space",
-    "name": "Satellite Tracking",
+    "slug": "space",
+    "displayName": "Satellite Tracking",
     "group": "Space & Orbital",
     "icon": "Satellite",
     "description": "Active NORAD satellite sweeps and ground propagations",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 5,
-      "circle-color": "#00f0ff",
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.9, "tier": 2,
-    "legend": { "type": "circle", "label": "Orbit Ground Propagation", "color": "#00f0ff" }
+    "color": "#00f0ff",
+    "defaultPinType": "instant",
+    "sources": ["noaa-satellites"]
   },
   {
-    "id": "ais-vessels",
-    "name": "AIS Vessel Tracking",
+    "slug": "ais-vessels",
+    "displayName": "AIS Vessel Tracking",
     "group": "Maritime & Logistics",
     "icon": "Shield",
     "description": "Real-time commercial and military vessel positions",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 5,
-      "circle-color": "#1565c0",
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 1, "maxZoom": 20, "opacity": 0.9, "tier": 0,
-    "legend": { "type": "circle", "label": "AIS Vessel Position", "color": "#1565c0" }
+    "color": "#1565c0",
+    "defaultPinType": "instant",
+    "sources": ["ais-vessels"]
   },
   {
-    "id": "webcams",
-    "name": "Global CCTV Network",
+    "slug": "webcams",
+    "displayName": "Global CCTV Network",
     "group": "Surveillance & OSINT",
     "icon": "Eye",
     "description": "AMOS webcams and verified public EarthCam live feeds",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 6,
-      "circle-color": "#1abc9c",
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 2, "maxZoom": 20, "opacity": 0.85, "tier": 0,
-    "legend": { "type": "circle", "label": "Surveillance Stream Terminal", "color": "#1abc9c" }
+    "color": "#1abc9c",
+    "defaultPinType": "instant",
+    "sources": ["webcams"]
   },
   {
-    "id": "recon",
-    "name": "OSINT Cyber Recon",
+    "slug": "recon",
+    "displayName": "OSINT Cyber Recon",
     "group": "Surveillance & OSINT",
     "icon": "Radio",
     "description": "Tactical network hops and port traceback scanners",
-    "source_type": "GeoJSON",
-    "paint": {
-      "circle-radius": 6,
-      "circle-color": "#9b59b6",
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#ffffff"
-    },
-    "layout": { "visibility": "none" },
-    "minZoom": 2, "maxZoom": 20, "opacity": 0.8, "tier": -1,
-    "legend": { "type": "circle", "label": "Network Port Traceback", "color": "#9b59b6" }
+    "color": "#9b59b6",
+    "defaultPinType": "instant",
+    "sources": ["recon"]
   }
 ]

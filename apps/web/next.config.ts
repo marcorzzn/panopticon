@@ -8,8 +8,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true, // Disables Next.js dynamic image resizing dependency
   },
-  // Transpile workspace packages for clean monorepo bundling
-  transpilePackages: ["@panopticon/core", "@panopticon/ui", "@panopticon/map-engine", "@panopticon/data-pipeline"]
+  transpilePackages: ['@panopticon/core', '@panopticon/data-pipeline', '@panopticon/map-engine', '@panopticon/ui']
 };
 
 export default nextConfig;

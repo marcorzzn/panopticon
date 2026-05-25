@@ -118,6 +118,28 @@ func (m *Manager) fetchAndStoreEarthquakes() {
 			log.Printf("Failed to insert earthquake %s: %v", feat.ID, err)
 			continue
 		}
+
+		// Route to unified OsintEvents deduplication/data-fusion pipeline
+		osintEvent := OsintEvent{
+			ID:            "usgs-" + feat.ID,
+			Headline:      label,
+			EventCategory: "Geophysical & Climate Events",
+			Severity:      severity,
+			Coordinates:   [2]float64{lng, lat},
+			EventTime:     t,
+			SourceTier:    0,
+			LifecycleStatus: "concluded",
+			AuditLog: map[string]any{
+				"depth": depth,
+				"magnitude": mag,
+				"event_type": "instant",
+				"wire_publisher": "USGS Seismology",
+			},
+		}
+		if _, _, err := UpsertOsintEvent(ctx, osintEvent); err != nil {
+			log.Printf("Failed to route earthquake %s to unified ingestion: %v", feat.ID, err)
+		}
+
 		insertedCount++
 	}
 

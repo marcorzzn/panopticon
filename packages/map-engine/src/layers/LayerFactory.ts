@@ -1,6 +1,17 @@
 import { Map as MapLibreMap, LayerSpecification, SourceSpecification } from 'maplibre-gl'
 import layersConfig from '@panopticon/core/src/config/layers.json'
 
+export interface UniversalLayerConfig {
+  slug: string
+  displayName: string
+  group: string
+  icon: string
+  description: string
+  color: string
+  defaultPinType: 'instant' | 'persistent' | 'hub-spoke'
+  sources: string[]
+}
+
 export interface LayerConfig {
   id: string
   name: string
@@ -18,79 +29,86 @@ export interface LayerConfig {
   }
 }
 
+// Convert universal configuration schemas into LayerConfigs dynamically (zero hardcoding)
+export const getMappedLayersConfig = (): LayerConfig[] => {
+  return (layersConfig as any[]).map((cfg) => {
+    const slug = cfg.slug || cfg.id
+    const displayName = cfg.displayName || cfg.name
+    const color = cfg.color || (cfg.paint && cfg.paint['circle-color']) || '#3498db'
+    const defaultPinType = cfg.defaultPinType || 'instant'
+
+    const paint: any = {
+      'circle-radius': slug === 'webcams' ? 6 : slug === 'aircraft' ? 5 : 6,
+      'circle-color': color,
+      'circle-stroke-width': 1.5,
+      'circle-stroke-color': slug === 'aircraft' ? '#000000' : '#ffffff'
+    }
+
+    const layout = {
+      'visibility': 'none' as const
+    }
+
+    return {
+      id: slug,
+      name: displayName,
+      source_type: 'GeoJSON',
+      paint,
+      layout,
+      minZoom: slug === 'airquality' ? 3 : slug === 'webcams' || slug === 'recon' ? 2 : 1,
+      maxZoom: 20,
+      opacity: 0.9,
+      tier: defaultPinType === 'hub-spoke' ? -3 : defaultPinType === 'persistent' ? -1 : 0,
+      legend: {
+        type: 'circle',
+        label: displayName,
+        color: color
+      }
+    }
+  })
+}
+
 // ── 1. LAYER FACTORY ENGINE ─────────────────────────────────────────────────
 // Parses JSON config schemas into production-ready MapLibre GL layer pipelines.
 export const LayerFactory = {
   buildSource(config: LayerConfig, data?: any): SourceSpecification {
-    switch (config.source_type) {
-      case 'GeoJSON':
-        return {
-          type: 'geojson',
-          data: data || { type: 'FeatureCollection', features: [] },
-          cluster: config.id === 'news-pins', // Enable clustering for high density points
-          clusterMaxZoom: 12,
-          clusterRadius: 50,
-        }
-      case 'heatmap':
-        return {
-          type: 'geojson',
-          data: data || { type: 'FeatureCollection', features: [] },
-        }
-      default:
-        return {
-          type: 'geojson',
-          data: { type: 'FeatureCollection', features: [] },
-        }
+    return {
+      type: 'geojson',
+      data: data || { type: 'FeatureCollection', features: [] },
+      cluster: config.id === 'news-pins' || config.id === 'news-events', // Enable clustering for high density points
+      clusterMaxZoom: 12,
+      clusterRadius: 50,
     }
   },
 
   buildLayers(config: LayerConfig): LayerSpecification[] {
     const layers: LayerSpecification[] = []
 
-    if (config.source_type === 'heatmap') {
-      layers.push({
-        id: config.id,
-        type: 'heatmap',
-        source: config.id,
-        minzoom: config.minZoom || 0,
-        maxzoom: config.maxZoom || 24,
-        paint: config.paint,
-        layout: config.layout,
-      } as LayerSpecification)
-    } else {
-      // Standard circle/fill layer factory
-      let type: 'circle' | 'fill' | 'line' | 'symbol' = 'circle'
-      if (config.paint && 'fill-color' in config.paint) {
-        type = 'fill'
-      }
+    layers.push({
+      id: config.id,
+      type: 'circle',
+      source: config.id,
+      minzoom: config.minZoom || 0,
+      maxzoom: config.maxZoom || 24,
+      paint: config.paint,
+      layout: config.layout,
+    } as LayerSpecification)
 
+    // Add a cluster count label layer if clustering is enabled
+    if (config.id === 'news-pins' || config.id === 'news-events') {
       layers.push({
-        id: config.id,
-        type: type,
+        id: `${config.id}-cluster-count`,
+        type: 'symbol',
         source: config.id,
-        minzoom: config.minZoom || 0,
-        maxzoom: config.maxZoom || 24,
-        paint: config.paint,
-        layout: config.layout,
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-field': '{point_count_abbreviated}',
+          'text-font': ['Open Sans Bold', 'Arial Unicode MS Regular'],
+          'text-size': 11,
+        },
+        paint: {
+          'text-color': '#ffffff',
+        },
       } as LayerSpecification)
-
-      // Add a cluster count label layer if clustering is enabled
-      if (config.id === 'news-pins') {
-        layers.push({
-          id: `${config.id}-cluster-count`,
-          type: 'symbol',
-          source: config.id,
-          filter: ['has', 'point_count'],
-          layout: {
-            'text-field': '{point_count_abbreviated}',
-            'text-font': ['Open Sans Bold', 'Arial Unicode MS Regular'],
-            'text-size': 11,
-          },
-          paint: {
-            'text-color': '#ffffff',
-          },
-        } as LayerSpecification)
-      }
     }
 
     return layers
@@ -106,7 +124,7 @@ export class LayerManager {
 
   constructor(map: MapLibreMap) {
     this.map = map
-    this.configs = layersConfig as LayerConfig[]
+    this.configs = getMappedLayersConfig()
   }
 
   // Orchestrates high-frequency layer updates matching viewport state

@@ -137,13 +137,13 @@ func GetOsintEventsHandler(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	rows, err := db.Pool.Query(ctx, `
-		SELECT id, headline, event_category, severity, ST_X(geom::geometry), ST_Y(geom::geometry), event_time, associated_sources, audit_log
+		SELECT id, headline, event_category, severity, ST_X(geom::geometry), ST_Y(geom::geometry), event_time, associated_sources, audit_log, parent_hub_id, lifecycle_status
 		FROM osint_events
 		ORDER BY event_time DESC
 		LIMIT 100;
 	`)
 	if err != nil {
-		http.Error(w, "Database query failed", http.StatusInternalServerError)
+		http.Error(w, "Database query failed: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -155,8 +155,10 @@ func GetOsintEventsHandler(w http.ResponseWriter, r *http.Request) {
 		var eventTime time.Time
 		var sourcesJSON []byte
 		var auditJSON []byte
+		var parentHubID sql.NullString
+		var lifecycleStatus sql.NullString
 
-		err := rows.Scan(&id, &headline, &category, &severity, &lng, &lat, &eventTime, &sourcesJSON, &auditJSON)
+		err := rows.Scan(&id, &headline, &category, &severity, &lng, &lat, &eventTime, &sourcesJSON, &auditJSON, &parentHubID, &lifecycleStatus)
 		if err != nil {
 			http.Error(w, "Error scanning database row", http.StatusInternalServerError)
 			return
@@ -165,6 +167,9 @@ func GetOsintEventsHandler(w http.ResponseWriter, r *http.Request) {
 		var auditLog map[string]interface{}
 		if len(auditJSON) > 0 {
 			_ = json.Unmarshal(auditJSON, &auditLog)
+		}
+		if auditLog == nil {
+			auditLog = make(map[string]any)
 		}
 
 		var sources []ingestion.AssociatedSource
@@ -206,8 +211,28 @@ func GetOsintEventsHandler(w http.ResponseWriter, r *http.Request) {
 			"eventType":   eventType,
 		}
 
-		if parentHubId, ok := auditLog["parent_hub_id"].(string); ok && parentHubId != "" {
+		if parentHubID.Valid && parentHubID.String != "" {
+			event["parentHubId"] = parentHubID.String
+		} else if parentHubId, ok := auditLog["parent_hub_id"].(string); ok && parentHubId != "" {
 			event["parentHubId"] = parentHubId
+		}
+
+		if lifecycleStatus.Valid && lifecycleStatus.String != "" {
+			event["lifecycleStatus"] = lifecycleStatus.String
+		}
+
+		if updates, ok := auditLog["updates"]; ok {
+			event["updates"] = updates
+		}
+
+		if isEnded, ok := auditLog["is_ended"].(bool); ok {
+			event["isEnded"] = isEnded
+		} else if lifecycleStatus.Valid && lifecycleStatus.String == "concluded" {
+			event["isEnded"] = true
+		}
+		
+		if endedAt, ok := auditLog["ended_at"].(string); ok {
+			event["endedAt"] = endedAt
 		}
 
 		if rawEng, ok := auditLog["raw_english_translation"].(string); ok && rawEng != "" {
@@ -979,6 +1004,34 @@ func GetLiveTelemetryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	data := ingestion.GetLiveTelemetry(t)
 	writeJSON(w, http.StatusOK, data)
+}
+
+func MaintenanceSweepHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	err := ingestion.PerformDailyMaintenanceSweep(ctx)
+	if err != nil {
+		http.Error(w, "Maintenance sweep failed: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{
+		"status":  "success",
+		"message": "Deep database maintenance sweep completed successfully",
+	})
+}
+
+func ManualRefreshHandler(w http.ResponseWriter, r *http.Request) {
+	if ingestion.GlobalManager == nil {
+		http.Error(w, "Ingestion manager is not initialized", http.StatusInternalServerError)
+		return
+	}
+
+	// Trigger manual concurrent refresh sweeps
+	ingestion.GlobalManager.TriggerManualRefresh()
+
+	writeJSON(w, http.StatusOK, map[string]string{
+		"status":  "success",
+		"message": "Manual non-cached situation room refresh triggered successfully",
+	})
 }
 
 

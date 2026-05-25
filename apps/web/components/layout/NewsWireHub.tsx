@@ -33,8 +33,28 @@ export default function NewsWireHub() {
 
   const handleManualRefresh = async () => {
     setLoading(true)
-    await mutate(['gdelt-events-core', 'protest'])
-    setTimeout(() => setLoading(false), 500)
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'
+    try {
+      const resp = await fetch(`${backendUrl}/api/v1/refresh`, {
+        method: 'POST',
+      })
+      if (!resp.ok) {
+        console.warn('[REFRESH ERROR] Manual refresh endpoint returned error')
+      }
+    } catch (e) {
+      console.error('[REFRESH ERROR] Failed to connect to manual refresh endpoint:', e)
+    }
+
+    // Direct unconditional SWR cache mutation to pull fresh fused delta points
+    await Promise.all([
+      mutate('rss-news-wire-core'),
+      mutate('usgs-earthquakes-core'),
+      mutate('nasa-wildfires-core'),
+      mutate('acled-conflicts-core'),
+      mutate(['gdelt-events-core', 'protest'])
+    ])
+    
+    setTimeout(() => setLoading(false), 800)
   }
 
   // Filter feeds locally

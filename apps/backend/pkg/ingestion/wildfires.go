@@ -156,6 +156,31 @@ func (m *Manager) fetchAndStoreWildfires() {
 			continue
 		}
 
+		// Route to unified OsintEvents deduplication/data-fusion pipeline
+		severity := "moderate"
+		if frp > 100 {
+			severity = "high"
+		}
+		osintEvent := OsintEvent{
+			ID:            "wildfire-" + fireID,
+			Headline:      fmt.Sprintf("NASA FIRMS: Active Wildfire Spot detected by %s satellite", satellite),
+			EventCategory: "Geophysical & Climate Events",
+			Severity:      severity,
+			Coordinates:   [2]float64{lon, lat},
+			EventTime:     acqTime,
+			SourceTier:    0,
+			LifecycleStatus: "active",
+			AuditLog: map[string]any{
+				"brightness": bright,
+				"frp":        frp,
+				"event_type": "persistent",
+				"wire_publisher": "NASA FIRMS Sensor",
+			},
+		}
+		if _, _, err := UpsertOsintEvent(ctx, osintEvent); err != nil {
+			log.Printf("Failed to route wildfire %s to unified ingestion: %v", fireID, err)
+		}
+
 		// Dispatch to Cold Storage Archive channel (non-blocking)
 		select {
 		case FireArchiveChan <- &models.WildfireState{
@@ -233,6 +258,31 @@ func (m *Manager) generateSimulatedWildfires() {
 			`, fireID, lon, lat, brightness, confidence, frp, "SIMULATED", now)
 			if err != nil {
 				continue
+			}
+
+			// Route to unified OsintEvents deduplication/data-fusion pipeline for simulation
+			severity := "moderate"
+			if frp > 100 {
+				severity = "high"
+			}
+			osintEvent := OsintEvent{
+				ID:            "wildfire-" + fireID,
+				Headline:      fmt.Sprintf("NASA FIRMS: Active Wildfire Spot detected at %s", hs.regionName),
+				EventCategory: "Geophysical & Climate Events",
+				Severity:      severity,
+				Coordinates:   [2]float64{lon, lat},
+				EventTime:     now,
+				SourceTier:    0,
+				LifecycleStatus: "active",
+				AuditLog: map[string]any{
+					"brightness": brightness,
+					"frp":        frp,
+					"event_type": "persistent",
+					"wire_publisher": "NASA FIRMS Sensor",
+				},
+			}
+			if _, _, err := UpsertOsintEvent(ctx, osintEvent); err != nil {
+				log.Printf("Failed to route simulated wildfire %s to unified ingestion: %v", fireID, err)
 			}
 
 			// Dispatch to Cold Storage Archive channel (non-blocking)

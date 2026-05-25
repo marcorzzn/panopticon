@@ -31,6 +31,8 @@ func SetupRouter() *chi.Mux {
 		
 		// New OSINT endpoints
 		r.Post("/ingest/bulk", BulkIngestHandler)
+		r.Post("/maintenance/sweep", MaintenanceSweepHandler)
+		r.Post("/refresh", ManualRefreshHandler)
 		r.Get("/events/correlation", GetEventCorrelationHandler)
 		r.Get("/webcams/proxy", WebcamProxyHandler)
 		r.Get("/telemetry/live", GetLiveTelemetryHandler)

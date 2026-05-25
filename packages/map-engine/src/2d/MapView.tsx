@@ -401,6 +401,8 @@ export default function MapView({
             properties: {
               id: `spoke-line-${marker.id}`,
               parentHubId: marker.parentHubId,
+              isNews: true,
+              layerId: 'news-events',
             }
           })
         }

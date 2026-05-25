@@ -1,6 +1,4 @@
 import type { NewsFeedItem, NewsCategory } from '@panopticon/core/stores'
-import countryCentroids from '../../../core/src/data/country-centroids.json'
-import persistentConflicts from '../../../core/src/config/persistent-conflicts.json'
 
 // 101 verified CORS-accessible feeds representing the structural backbone of global OSINT
 export const RSS_FEEDS = [
@@ -136,34 +134,7 @@ export const RSS_FEEDS = [
   { url: 'https://www.start.umd.edu/gtd/rss/', category: 'terrorism' as NewsCategory, name: 'Global Terrorism Database (GTD)' }
 ]
 
-/**
- * Centroid match helper
- * Loop through our country database and scan for country names/codes in title or summary
- */
-function findCountryCentroid(title: string, summary: string): [number, number] | undefined {
-  const t = title.toLowerCase()
-  const s = summary.toLowerCase()
-  
-  const entries = Object.entries(countryCentroids) as [string, { name: string; lat: number; lon: number; code3: string }][]
-  for (const [_, info] of entries) {
-    const cName = info.name.toLowerCase()
-    const c3 = info.code3.toLowerCase()
-    
-    // Check full name matches first (highest accuracy)
-    if (t.includes(cName) || s.includes(cName)) {
-      return [info.lon, info.lat]
-    }
-    
-    // Check ISO3 code matches as whole words
-    const codeRegex = new RegExp(`\\b${c3}\\b`, 'i')
-    if (codeRegex.test(title) || codeRegex.test(summary)) {
-      return [info.lon, info.lat]
-    }
-  }
-  return undefined
-}
-
-export async function fetchRssFeed(feed: typeof RSS_FEEDS[0]): Promise<NewsFeedItem[]> {
+export async function fetchRssFeed(_feed?: any): Promise<NewsFeedItem[]> {
   return [] // Obsolete: backend now handles RSS feed fetching and Gemini AI processing
 }
 

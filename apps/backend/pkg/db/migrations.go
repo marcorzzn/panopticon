@@ -231,10 +231,15 @@ func RunMigrations(pool *pgxpool.Pool) error {
 			integrity_score NUMERIC(5,2) DEFAULT 0.0,
 			source_tier INT DEFAULT 0,
 			audit_log JSONB DEFAULT '{}'::jsonb,
+			parent_hub_id VARCHAR(100),
+			lifecycle_status VARCHAR(50),
 			created_at TIMESTAMPTZ DEFAULT NOW()
 		);
+		ALTER TABLE osint_events ADD COLUMN IF NOT EXISTS parent_hub_id VARCHAR(100);
+		ALTER TABLE osint_events ADD COLUMN IF NOT EXISTS lifecycle_status VARCHAR(50);
 		CREATE INDEX IF NOT EXISTS idx_osint_geom ON osint_events USING GIST(geom);
 		CREATE INDEX IF NOT EXISTS idx_osint_time_cat ON osint_events(event_time DESC, event_category);
+		CREATE INDEX IF NOT EXISTS idx_osint_parent_hub_id ON osint_events(parent_hub_id);
 	`)
 	if err != nil {
 		return err
