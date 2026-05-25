@@ -45,6 +45,7 @@ import {
 import type { WebcamEntity, SatelliteEntity } from '@panopticon/core/types'
 import layersConfig from '../../../../packages/core/src/config/layers.json'
 import persistentConflicts from '../../../../packages/core/src/config/persistent-conflicts.json'
+import licensesConfig from '../../../../packages/core/src/config/licenses.json'
 
 
 
@@ -1024,6 +1025,20 @@ export default function DetailInspector() {
                 </div>
               </div>
 
+              {/* License and Attribution */}
+              {(() => {
+                const lic = (licensesConfig as any)["nasa-firms"]
+                if (!lic) return null
+                return (
+                  <div className="p-2.5 bg-deepest/30 border border-weak rounded text-[8px] text-secondary leading-snug space-y-0.5 font-mono">
+                    <span className="font-bold block text-primary">LICENSE ATTRIBUTION</span>
+                    <div>Source: {lic.attributionString}</div>
+                    <div>License: <span className="uppercase text-accent font-semibold">{lic.licenseType}</span></div>
+                    <div>Usage: {lic.usageLimits}</div>
+                  </div>
+                )
+              })()}
+
               {/* OSINT CYBER RECON BLOCK */}
               <div className="border-t border-weak pt-4 space-y-3 font-mono">
                 <span className="text-[8px] font-bold tracking-widest text-[#00ff00] uppercase block">
@@ -1243,6 +1258,20 @@ export default function DetailInspector() {
                   </a>
                 )}
               </div>
+
+              {/* License and Attribution */}
+              {(() => {
+                const lic = (licensesConfig as any)["usgs-earthquakes"]
+                if (!lic) return null
+                return (
+                  <div className="p-2.5 bg-deepest/30 border border-weak rounded text-[8px] text-secondary leading-snug space-y-0.5 font-mono">
+                    <span className="font-bold block text-primary">LICENSE ATTRIBUTION</span>
+                    <div>Source: {lic.attributionString}</div>
+                    <div>License: <span className="uppercase text-accent font-semibold">{lic.licenseType.replace('_', ' ')}</span></div>
+                    <div>Usage: {lic.usageLimits}</div>
+                  </div>
+                )
+              })()}
 
               {/* OSINT CYBER RECON BLOCK */}
               <div className="border-t border-weak pt-4 space-y-3 font-mono">
@@ -1691,6 +1720,21 @@ export default function DetailInspector() {
                   {sat.tleLine1}<br />{sat.tleLine2}
                 </div>
               </div>
+
+              {/* License and Attribution */}
+              {(() => {
+                const licId = sat.id === 'noaa-20' ? 'noaa-swpc' : 'celestrak-gp'
+                const lic = (licensesConfig as any)[licId]
+                if (!lic) return null
+                return (
+                  <div className="p-2.5 bg-deepest/30 border border-weak rounded text-[8px] text-secondary leading-snug space-y-0.5 font-mono">
+                    <span className="font-bold block text-primary">LICENSE ATTRIBUTION</span>
+                    <div>Source: {lic.attributionString}</div>
+                    <div>License: <span className="uppercase text-accent font-semibold">{lic.licenseType.replace('_', ' ')}</span></div>
+                    <div>Usage: {lic.usageLimits}</div>
+                  </div>
+                )
+              })()}
 
               {/* OSINT CYBER RECON BLOCK */}
               <div className="border-t border-weak pt-4 space-y-3 font-mono">
