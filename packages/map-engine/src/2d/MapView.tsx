@@ -1424,12 +1424,14 @@ export default function MapView({
           layout={{ visibility: isLayerVisible('news-events') }}
           paint={{
             'circle-radius': [
-              'case',
-              ['==', ['get', 'type'], 'hub'], 26,
-              ['==', ['get', 'type'], 'persistent'], 20,
-              ['==', ['get', 'type'], 'spoke'], 12,
-              ['==', ['get', 'type'], 'context'], 22,
-              14
+              'interpolate',
+              ['linear'],
+              ['coalesce', ['get', 'severity'], 3],
+              1, 12,
+              2, 16,
+              3, 20,
+              4, 24,
+              5, 30
             ],
             'circle-color': [
               'case',
@@ -1440,7 +1442,19 @@ export default function MapView({
               [
                 'match',
                 ['get', 'category'],
+                'Conflict', '#ff3b30',
+                'conflict', '#ff3b30',
                 'geopolitical', '#ff3b30',
+                'Protest', '#ff9500',
+                'protest', '#ff9500',
+                'Natural Disaster', '#ff4500',
+                'natural disaster', '#ff4500',
+                'Politics', '#af52de',
+                'politics', '#af52de',
+                'Global Entertainment', '#34c759',
+                'global entertainment', '#34c759',
+                'Economy', '#007aff',
+                'economy', '#007aff',
                 'cyber', '#00f0ff',
                 'maritime', '#007aff',
                 'hazard', '#ff9500',
@@ -1461,12 +1475,14 @@ export default function MapView({
           layout={{ visibility: isLayerVisible('news-events') }}
           paint={{
             'circle-radius': [
-              'case',
-              ['==', ['get', 'type'], 'hub'], 10.5,
-              ['==', ['get', 'type'], 'persistent'], 7.5,
-              ['==', ['get', 'type'], 'spoke'], 4.5,
-              ['==', ['get', 'type'], 'context'], 8.5,
-              5.5
+              'interpolate',
+              ['linear'],
+              ['coalesce', ['get', 'severity'], 3],
+              1, 4.5,
+              2, 6.0,
+              3, 7.5,
+              4, 9.0,
+              5, 11.5
             ],
             'circle-color': [
               'case',
@@ -1477,7 +1493,19 @@ export default function MapView({
               [
                 'match',
                 ['get', 'category'],
+                'Conflict', '#ff3b30',
+                'conflict', '#ff3b30',
                 'geopolitical', '#ff3b30',
+                'Protest', '#ff9500',
+                'protest', '#ff9500',
+                'Natural Disaster', '#ff4500',
+                'natural disaster', '#ff4500',
+                'Politics', '#af52de',
+                'politics', '#af52de',
+                'Global Entertainment', '#34c759',
+                'global entertainment', '#34c759',
+                'Economy', '#007aff',
+                'economy', '#007aff',
                 'cyber', '#00f0ff',
                 'maritime', '#007aff',
                 'hazard', '#ff9500',

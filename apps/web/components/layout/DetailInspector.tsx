@@ -1370,44 +1370,116 @@ export default function DetailInspector() {
             sweepCountdown = `${hoursLeft}H ${minsLeft}M`
           }
 
+          const getSourceColor = (src: string) => {
+            const s = (src || '').toLowerCase()
+            if (s.includes('reuters')) return 'text-red-500 border-red-500/30 bg-red-500/10'
+            if (s.includes('ap') || s.includes('press')) return 'text-orange-400 border-orange-400/30 bg-orange-400/10'
+            if (s.includes('ansa')) return 'text-green-400 border-green-400/30 bg-green-400/10'
+            if (s.includes('bbc')) return 'text-purple-400 border-purple-400/30 bg-purple-400/10'
+            if (s.includes('bloomberg')) return 'text-yellow-500 border-yellow-500/30 bg-yellow-500/10'
+            if (s.includes('ft') || s.includes('financial')) return 'text-pink-400 border-pink-400/30 bg-pink-400/10'
+            return 'text-accent border-accent/30 bg-accent/10'
+          }
+
+          const formatZuluTime = (ts: string) => {
+            if (!ts) return 'N/A'
+            try {
+              const d = new Date(ts)
+              return d.toISOString().replace('T', ' ').slice(0, 19) + ' Z'
+            } catch {
+              return 'N/A'
+            }
+          }
+
+          const getRelativeTime = (ts: string) => {
+            if (!ts) return 'N/A'
+            try {
+              const ms = Date.now() - new Date(ts).getTime()
+              const mins = Math.floor(ms / 60000)
+              if (mins < 1) return 'JUST NOW'
+              if (mins < 60) return `${mins}M AGO`
+              const hrs = Math.floor(mins / 60)
+              if (hrs < 24) return `${hrs}H AGO`
+              const days = Math.floor(hrs / 24)
+              return `${days}D AGO`
+            } catch {
+              return 'N/A'
+            }
+          }
+
           return (
-            <div className="space-y-4 font-mono">
-              <div className={`p-3 bg-deepest/60 border ${catColors.border} rounded flex flex-col gap-1 items-center justify-center`}>
-                <BookOpen className={`w-7 h-7 ${catColors.text}`} />
-                <span className={`text-[10px] font-bold tracking-wider ${catColors.text} mt-1 uppercase`}>
+            <div className="space-y-4 font-mono select-none">
+              {/* Header Title with Glassmorphism */}
+              <div className={`p-3 bg-surface/50 backdrop-blur-md border ${catColors.border} rounded flex flex-col gap-1 items-center justify-center text-center`}>
+                <BookOpen className={`w-7 h-7 ${catColors.text} animate-pulse`} />
+                <span className={`text-[10px] font-bold tracking-wider ${catColors.text} mt-1.5 uppercase`}>
                   {ne.eventType ? `${ne.eventType} ` : ''}{ne.category} INTEL REPORT
                 </span>
-                <span className="text-[9px] text-secondary text-center leading-normal max-w-[200px] truncate">
-                  Source: {ne.source || 'Public Feed'}
+                
+                {/* Source Badge and Reliability Indicator */}
+                <div className="flex flex-wrap gap-1.5 items-center justify-center mt-2">
+                  <span className={`px-2 py-0.5 border rounded text-[8px] font-bold uppercase tracking-wider ${getSourceColor(ne.source)}`}>
+                    {ne.source ? `[${ne.source.toUpperCase()}]` : '[WIRE FEED]'}
+                  </span>
+                  <div className="flex items-center gap-1 px-2 py-0.5 border border-green-500/25 bg-green-950/20 text-accent rounded text-[8px] font-bold">
+                    <Check className="w-2.5 h-2.5" />
+                    <span>HIGH RELIABILITY</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Severity & Timestamps HUD Grid */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className={`p-2.5 border rounded flex flex-col justify-between ${sevColors}`}>
+                  <span className="text-[7.5px] opacity-80 uppercase font-bold tracking-wider">Telemetry Severity</span>
+                  <span className="text-xs font-bold mt-1 uppercase">
+                    Level {ne.severity || 3} / 5
+                  </span>
+                </div>
+
+                <div className="p-2.5 bg-surface/40 backdrop-blur-sm border border-weak rounded flex flex-col justify-between text-secondary">
+                  <span className="text-[7.5px] uppercase font-bold tracking-wider">Local Elapsed</span>
+                  <span className="text-xs font-bold text-accent mt-1">
+                    {getRelativeTime(ne.timestamp)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Zulu Time Block */}
+              <div className="p-2.5 bg-surface/40 backdrop-blur-sm border border-weak rounded flex flex-col text-secondary">
+                <span className="text-[7.5px] uppercase font-bold tracking-wider">Zulu Clock Timestamp</span>
+                <span className="text-[10px] font-bold text-primary mt-1 tracking-widest uppercase">
+                  {formatZuluTime(ne.timestamp)}
                 </span>
               </div>
 
-              {/* Severity and Timestamp */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className={`p-2.5 border rounded flex flex-col ${sevColors}`}>
-                  <span className="text-[8px] text-secondary uppercase">Severity Level</span>
-                  <span className="text-xs font-bold mt-0.5 uppercase">
-                    {ne.severity || 'low'}
-                  </span>
-                </div>
-
-                <div className="p-2.5 bg-deepest/45 border border-weak rounded flex flex-col text-secondary">
-                  <span className="text-[8px] uppercase">Incident Age</span>
-                  <span className="text-xs font-bold text-primary mt-0.5">
-                    {ne.timestamp ? new Date(ne.timestamp).toLocaleTimeString() : 'N/A'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Title & Summary */}
-              <div className="p-3 bg-deepest/45 border border-weak rounded space-y-2">
-                <span className="text-[8.5px] font-bold text-primary tracking-wide block uppercase border-b border-weak pb-1.5 leading-tight">
+              {/* Monospace Title and Gemini Short Summary Panel */}
+              <div className="p-3 bg-surface/50 backdrop-blur-md border border-weak rounded space-y-2">
+                <span className="text-[9px] font-bold text-primary tracking-wide block uppercase border-b border-weak pb-2 leading-tight">
                   {ne.title}
                 </span>
-                <p className="text-[9px] text-secondary leading-normal">
-                  {ne.summary}
-                </p>
+                
+                {/* Glassmorphic monospace summary box */}
+                <div className="bg-[#03060d]/50 p-2.5 border border-weak/45 rounded font-mono text-[8.5px] text-secondary leading-normal relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-accent/40 rounded-bl" />
+                  <p className="whitespace-pre-line tracking-wide">
+                    {ne.short_summary || ne.summary}
+                  </p>
+                </div>
               </div>
+
+              {/* Source verification URL link */}
+              {ne.link && (
+                <a
+                  href={ne.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-accent/10 hover:bg-accent/20 border border-accent/25 hover:border-accent text-accent hover:text-white text-[9px] font-bold rounded tracking-wider uppercase transition-all w-full cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>DECRYPT & SECURELY TRANSMIT FULL REPORT</span>
+                </a>
+              )}
 
               {/* Instant ended status overlay */}
               {ne.eventType === 'instant' && ne.isEnded && (

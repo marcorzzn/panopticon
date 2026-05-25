@@ -48,6 +48,7 @@ func SetupRouter() *chi.Mux {
 			r.Use(AuthMiddleware)
 			r.Post("/generate-brief", GenerateBriefHandler)
 			r.Post("/geocode", GeocodeHandler)
+			r.Post("/enrich-news", EnrichNewsHandler)
 		})
 	})
 

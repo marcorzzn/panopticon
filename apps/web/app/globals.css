@@ -1,22 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --color-deepest: var(--color-bg-deepest);
-  --color-surface: var(--color-bg-surface);
-  --color-elevated: var(--color-bg-elevated);
-  --color-weak: var(--color-border-weak);
-  --color-text-primary: var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
-  --color-text-heading: var(--color-text-heading);
-  --color-accent: var(--color-accent);
-  --color-accent-hover: var(--color-accent-hover);
-  --color-accent-active: var(--color-accent-active);
-  --color-bg-deepest: var(--color-bg-deepest);
-  --color-bg-base: var(--color-bg-base);
-  --color-bg-surface: var(--color-bg-surface);
-  --color-bg-elevated: var(--color-bg-elevated);
-  --color-bg-hover: var(--color-bg-hover);
-  --color-bg-active: var(--color-bg-active);
+  --color-deepest: var(--pan-bg-base);
+  --color-surface: var(--pan-bg-surface);
+  --color-elevated: var(--pan-bg-raised);
+  --color-weak: var(--pan-border-default);
+  --color-text-primary: var(--pan-text-primary);
+  --color-text-secondary: var(--pan-text-secondary);
+  --color-text-heading: var(--pan-text-primary);
+  --color-accent: var(--pan-text-accent);
+  --color-accent-hover: var(--pan-btn-primary-hover);
+  --color-accent-active: var(--pan-btn-active-bg);
+  --color-bg-deepest: var(--pan-bg-base);
+  --color-bg-base: var(--pan-bg-base);
+  --color-bg-surface: var(--pan-bg-surface);
+  --color-bg-elevated: var(--pan-bg-raised);
+  --color-bg-hover: var(--pan-bg-interactive);
+  --color-bg-active: var(--pan-bg-interactive);
 
   /* v3.0 colors */
   --color-pan-base: var(--pan-bg-base);

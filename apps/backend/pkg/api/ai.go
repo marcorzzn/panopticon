@@ -371,3 +371,217 @@ Respond ONLY with a valid JSON array [longitude, latitude] or null. Do not inclu
 
 	writeJSON(w, http.StatusOK, GeocodeResponse{Coordinates: coords})
 }
+
+// EnrichNewsRequest wraps incoming news title and description
+type EnrichNewsRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+// EnrichNewsResponse represents the structured geocoded intelligence details
+type EnrichNewsResponse struct {
+	Lat               float64 `json:"lat"`
+	Lng               float64 `json:"lng"`
+	Category          string  `json:"category"`
+	Severity          int     `json:"severity"`
+	ShortSummary      string  `json:"short_summary"`
+	ExactLocationName string  `json:"exact_location_name"`
+}
+
+// EnrichNewsHandler processes raw news dispatches and geo-enriches them via server-side Gemini
+func EnrichNewsHandler(w http.ResponseWriter, r *http.Request) {
+	// 1. Validate Rate Limiting strictly
+	ip := getClientIP(r)
+	if !aiRateLimiter.Allow(ip) {
+		log.Printf("[RATE LIMIT] EnrichNews blocked for IP: %s", ip)
+		http.Error(w, "AI quota exceeded: Too many requests. Please try again later.", http.StatusTooManyRequests)
+		return
+	}
+
+	// 2. Read environment API key securely
+	apiKey := os.Getenv("GEMINI_API_KEY")
+	
+	// Decode request body
+	var req EnrichNewsRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if strings.TrimSpace(req.Title) == "" {
+		http.Error(w, "Title is required", http.StatusBadRequest)
+		return
+	}
+
+	// Fallback function to execute when Gemini fails or is not configured
+	executeFallback := func(reason string) {
+		log.Printf("[AI ENRICH FALLBACK] Executing geocode fallback. Reason: %s", reason)
+		titleLower := strings.ToLower(req.Title)
+		descLower := strings.ToLower(req.Description)
+		combined := titleLower + " " + descLower
+
+		// Default values
+		lng, lat := 0.0, 0.0
+		locName := "Global Recon Network"
+		category := "Politics"
+		severity := 3
+
+		centroids := map[string][2]float64{
+			"ukraine":        {31.1656, 48.3794},
+			"russia":         {105.3188, 61.5240},
+			"united states":  {-95.7129, 37.0902},
+			"china":          {104.1954, 35.8617},
+			"taiwan":         {120.9605, 23.6978},
+			"israel":         {34.8516, 31.0461},
+			"gaza":           {34.45, 31.43},
+			"iran":           {53.6880, 32.4279},
+			"syria":          {38.9968, 34.8021},
+			"lebanon":        {35.8623, 33.8547},
+			"yemen":          {48.5164, 15.5527},
+			"red sea":        {38.5, 20.0},
+			"somalia":        {46.1996, 5.1521},
+			"sudan":          {30.2186, 12.8628},
+			"united kingdom": {-2.2426, 55.3781},
+			"germany":        {10.4515, 51.1657},
+			"france":         {2.2137, 46.2276},
+			"italy":          {12.5674, 41.8719},
+			"japan":          {138.2529, 36.2048},
+			"south korea":    {127.7669, 35.9078},
+			"north korea":    {127.5101, 40.3399},
+			"venezuela":      {-66.5897, 6.4238},
+			"philippines":    {121.7740, 12.8797},
+			"panama":         {-80.7821, 8.5380},
+			"suez":           {32.54, 29.96},
+		}
+
+		for key, coords := range centroids {
+			if strings.Contains(combined, key) {
+				lng, lat = coords[0], coords[1]
+				locName = strings.Title(key)
+				break
+			}
+		}
+
+		// Quick keyword mapping for category & severity
+		if strings.Contains(combined, "conflict") || strings.Contains(combined, "war") || strings.Contains(combined, "clash") || strings.Contains(combined, "strike") || strings.Contains(combined, "bomb") || strings.Contains(combined, "military") {
+			category = "Conflict"
+			severity = 4
+		} else if strings.Contains(combined, "protest") || strings.Contains(combined, "riot") || strings.Contains(combined, "demonstr") {
+			category = "Protest"
+			severity = 3
+		} else if strings.Contains(combined, "earthquake") || strings.Contains(combined, "flood") || strings.Contains(combined, "hurricane") || strings.Contains(combined, "storm") || strings.Contains(combined, "fire") || strings.Contains(combined, "hazard") {
+			category = "Natural Disaster"
+			severity = 4
+		} else if strings.Contains(combined, "economy") || strings.Contains(combined, "market") || strings.Contains(combined, "trade") || strings.Contains(combined, "stock") || strings.Contains(combined, "tariff") {
+			category = "Economy"
+			severity = 2
+		} else if strings.Contains(combined, "movie") || strings.Contains(combined, "music") || strings.Contains(combined, "entertainment") || strings.Contains(combined, "celebrity") {
+			category = "Global Entertainment"
+			severity = 1
+		}
+
+		shortSummary := req.Description
+		if len(shortSummary) > 150 {
+			shortSummary = shortSummary[:147] + "..."
+		}
+
+		writeJSON(w, http.StatusOK, EnrichNewsResponse{
+			Lat:               lat,
+			Lng:               lng,
+			Category:          category,
+			Severity:          severity,
+			ShortSummary:      shortSummary,
+			ExactLocationName: locName,
+		})
+	}
+
+	if apiKey == "" {
+		executeFallback("GEMINI_API_KEY environment variable is not configured")
+		return
+	}
+
+	prompt := fmt.Sprintf(`You are a GIS intelligence analyst. Read the following news dispatch. Extract the exact location (city, region, or country) where the event is taking place. Categorize the event (Conflict, Protest, Natural Disaster, Politics, Global Entertainment, Economy). Assign a severity level from 1 to 5. Provide the GPS coordinates (Latitude, Longitude) of the event's location. Return EXACTLY and ONLY a JSON object using this schema: { "lat": number, "lng": number, "category": string, "severity": number, "short_summary": string, "exact_location_name": string }.
+
+Title: %s
+Description: %s`, req.Title, req.Description)
+
+	// Context with strict 15-second timeout
+	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
+	defer cancel()
+
+	// Prepare Gemini Request
+	geminiReqBody := map[string]interface{}{
+		"contents": []map[string]interface{}{
+			{
+				"parts": []map[string]interface{}{
+					{"text": prompt},
+				},
+			},
+		},
+	}
+
+	jsonData, err := json.Marshal(geminiReqBody)
+	if err != nil {
+		executeFallback(fmt.Sprintf("JSON marshal error: %v", err))
+		return
+	}
+
+	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=%s", apiKey)
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		executeFallback(fmt.Sprintf("HTTP request creation error: %v", err))
+		return
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	httpResp, err := client.Do(httpReq)
+	if err != nil {
+		executeFallback(fmt.Sprintf("Gemini API call execution error: %v", err))
+		return
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		respBytes, _ := io.ReadAll(httpResp.Body)
+		executeFallback(fmt.Sprintf("Gemini API returned status %d. Details: %s", httpResp.StatusCode, string(respBytes)))
+		return
+	}
+
+	var geminiResp struct {
+		Candidates []struct {
+			Content struct {
+				Parts []struct {
+					Text string `json:"text"`
+				} `json:"parts"`
+			} `json:"content"`
+		} `json:"candidates"`
+	}
+
+	if err := json.NewDecoder(httpResp.Body).Decode(&geminiResp); err != nil {
+		executeFallback(fmt.Sprintf("Gemini response decode error: %v", err))
+		return
+	}
+
+	if len(geminiResp.Candidates) == 0 || len(geminiResp.Candidates[0].Content.Parts) == 0 {
+		executeFallback("Gemini returned empty parts")
+		return
+	}
+
+	rawResult := geminiResp.Candidates[0].Content.Parts[0].Text
+	cleaned := cleanJSONResponse(rawResult)
+
+	var res EnrichNewsResponse
+	if err := json.Unmarshal([]byte(cleaned), &res); err != nil {
+		executeFallback(fmt.Sprintf("Error unmarshalling cleaned JSON: %v. Raw text was: %s", err, cleaned))
+		return
+	}
+
+	// Just in case the LLM swaps latitude/longitude or returns coordinates that are zero
+	if res.Lat == 0.0 && res.Lng == 0.0 {
+		executeFallback("Gemini returned coordinates [0, 0]")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, res)
+}
