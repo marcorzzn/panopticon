@@ -163,167 +163,59 @@ function findCountryCentroid(title: string, summary: string): [number, number] |
   return undefined
 }
 
-/**
- * Fetch and parse a single RSS feed via AllOrigins CORS proxy
- */
 export async function fetchRssFeed(feed: typeof RSS_FEEDS[0]): Promise<NewsFeedItem[]> {
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feed.url)}`
-  
+  return [] // Obsolete: backend now handles RSS feed fetching and Gemini AI processing
+}
+
+/**
+ * Fetch Gemini-processed OSINT events from the Panopticon backend
+ */
+export async function fetchRssEvents(): Promise<NewsFeedItem[]> {
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'
   try {
-    const response = await fetch(proxyUrl)
-    if (!response.ok) return []
+    const response = await fetch(`${backendUrl}/api/v1/osint`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    })
     
-    const json = await response.json()
-    const xmlText = json.contents
-    if (!xmlText) return []
+    if (!response.ok) {
+      console.warn(`[OSINT ERROR] Backend returned status ${response.status}`)
+      return []
+    }
     
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(xmlText, 'text/xml')
-    const items = doc.querySelectorAll('item')
-    const parsed: NewsFeedItem[] = []
+    const data = await response.json()
+    if (!data || !Array.isArray(data)) {
+      return []
+    }
     
-    // Limit to top 8 items per feed to avoid UI clutter
-    const topItems = Array.from(items).slice(0, 8)
-    
-    topItems.forEach((item, idx) => {
-      const title = item.querySelector('title')?.textContent || 'Operational Intel Brief'
-      const summary = (item.querySelector('description')?.textContent || item.querySelector('encoded')?.textContent || 'OSINT field dispatch logs.').replace(/<[^>]*>/g, '').trim()
-      const url = item.querySelector('link')?.textContent || feed.url
-      const pubDate = item.querySelector('pubDate')?.textContent || item.querySelector('date')?.textContent || new Date().toISOString()
-      
-      // Parse geocodes from XML namespaces
-      let coordinates: [number, number] | undefined = undefined
-      
-      // 1. Try georss:point (Format: "lat lon")
-      const georssPoint = item.getElementsByTagName('georss:point')[0]?.textContent || item.getElementsByTagNameNS('http://www.georss.org/georss', 'point')[0]?.textContent
-      if (georssPoint) {
-        const parts = georssPoint.trim().split(/\s+/)
-        if (parts.length === 2) {
-          const lat = parseFloat(parts[0]!)
-          const lon = parseFloat(parts[1]!)
-          if (!isNaN(lat) && !isNaN(lon)) {
-            coordinates = [lon, lat]
-          }
-        }
-      }
-      
-      // 2. Try geo:lat / geo:long
-      if (!coordinates) {
-        const latVal = item.getElementsByTagName('geo:lat')[0]?.textContent || item.getElementsByTagNameNS('http://www.w3.org/2003/01/geo/wgs84_pos#', 'lat')[0]?.textContent
-        const lonVal = item.getElementsByTagName('geo:long')[0]?.textContent || item.getElementsByTagNameNS('http://www.w3.org/2003/01/geo/wgs84_pos#', 'long')[0]?.textContent
-        if (latVal && lonVal) {
-          const lat = parseFloat(latVal)
-          const lon = parseFloat(lonVal)
-          if (!isNaN(lat) && !isNaN(lon)) {
-            coordinates = [lon, lat]
-          }
-        }
-      }
-      
-      // 3. Fallback: Keyword Centroid Geocoding Matcher
-      if (!coordinates) {
-        coordinates = findCountryCentroid(title, summary)
-      }
-      
-      // Determine severity based on keyword content
+    const parsed: NewsFeedItem[] = data.map((item: any) => {
       let severity: 'low' | 'moderate' | 'high' | 'critical' = 'low'
-      const threatText = `${title} ${summary}`.toLowerCase()
-      if (threatText.includes('kill') || threatText.includes('bomb') || threatText.includes('terror') || threatText.includes('die') || threatText.includes('assassinated')) {
-        severity = 'critical'
-      } else if (threatText.includes('clash') || threatText.includes('armed') || threatText.includes('strike') || threatText.includes('cyber') || threatText.includes('hijack')) {
-        severity = 'high'
-      } else if (threatText.includes('alert') || threatText.includes('warn') || threatText.includes('disaster') || threatText.includes('accident')) {
-        severity = 'moderate'
+      if (['low', 'moderate', 'high', 'critical'].includes(item.severity)) {
+        severity = item.severity
       }
 
-      // --- 4. DOT DISPLAY RULES AUTO-CLASSIFICATION & SPATIAL HUBS LINKING ---
-      let eventType: 'instant' | 'persistent' | 'spoke' = 'instant'
-      let parentHubId: string | undefined = undefined
-      let updates: { timestamp: string; text: string }[] | undefined = undefined
-      
-      // A. Persistent detection (ongoing hazards/blockades)
-      const persistentKeywords = ['ongoing', 'active wildfire', 'continuous blockade', 'prolonged outage', 'containment active', 'uncontrolled fire', 'persistent drought']
-      const isPersistent = persistentKeywords.some(kw => threatText.includes(kw))
-      
-      if (isPersistent) {
-        eventType = 'persistent'
-        const pubTime = new Date(pubDate).getTime()
-        updates = [
-          { timestamp: new Date(pubTime - 24 * 3600 * 1000).toISOString(), text: `Initial threat perimeter registered by orbiting satellite sensors.` },
-          { timestamp: new Date(pubTime - 12 * 3600 * 1000).toISOString(), text: `Regional containment efforts initiated, operational status remains uncontrolled.` },
-          { timestamp: new Date(pubTime).toISOString(), text: `Latest tactical brief: ${summary.length > 80 ? summary.substring(0, 80) + '...' : summary}` }
-        ]
-      } else {
-        // B. Spoke detection (clashes, shelling, airstrikes within 300km of a conflict hub)
-        const conflictKeywords = ['clash', 'bomb', 'strike', 'firefight', 'ambush', 'shelling', 'airstrike', 'missile', 'combat', 'artillery', 'warfare']
-        const hasConflictKeywords = conflictKeywords.some(kw => threatText.includes(kw))
-        
-        if (hasConflictKeywords && coordinates) {
-          const [lon, lat] = coordinates
-          // Look for nearest conflict hub in persistentConflicts
-          let nearestHub: any = null
-          let minDistance = Infinity
-          
-          for (const hub of persistentConflicts) {
-            const dist = Math.sqrt(Math.pow(lon - hub.lon, 2) + Math.pow(lat - hub.lat, 2))
-            if (dist < minDistance) {
-              minDistance = dist
-              nearestHub = hub
-            }
-          }
-          
-          // If within 3.0 degrees (~300km)
-          if (nearestHub && minDistance <= 3.0) {
-            eventType = 'spoke'
-            parentHubId = nearestHub.id
-            // Introduce millimetric precision offset around coordinates so spokes spread out orbitally
-            // This ensures dots are scattered near the hub center instead of overlapping on country centroids!
-            const idxOffset = idx + 1
-            const angle = (idxOffset / 8) * 2 * Math.PI
-            const radius = 0.05 + (idxOffset % 3) * 0.04 // ~5km to 15km offset
-            const offsetLon = Math.cos(angle) * radius
-            const offsetLat = Math.sin(angle) * radius
-            coordinates = [
-              parseFloat((lon + offsetLon).toFixed(6)),
-              parseFloat((lat + offsetLat).toFixed(6))
-            ]
-          }
-        }
-      }
-      
-      parsed.push({
-        id: `rss-${feed.name}-${idx}-${Date.now()}`,
-        category: feed.category,
-        source: feed.name,
-        title,
-        summary: summary.length > 200 ? `${summary.substring(0, 200)}...` : summary,
-        timestamp: new Date(pubDate).toISOString(),
-        coordinates,
-        url,
+      return {
+        id: item.id,
+        category: item.category as NewsCategory,
+        source: item.source || 'Intelligence Wire',
+        title: item.title || 'OSINT Dispatch',
+        summary: item.summary || '',
+        timestamp: item.timestamp || new Date().toISOString(),
+        coordinates: item.coordinates,
+        url: item.url,
         severity,
-        eventType,
-        parentHubId,
-        updates
-      })
+        eventType: item.eventType || 'instant',
+        parentHubId: item.parentHubId,
+        raw_english_translation: item.raw_english_translation,
+        source_reliability: item.source_reliability,
+      } as NewsFeedItem
     })
     
     return parsed
   } catch (e) {
-    console.warn(`[RSS ERROR] Failed to fetch feed ${feed.name}:`, e)
+    console.error('[OSINT ERROR] Failed to fetch OSINT events from backend:', e)
     return []
   }
-}
-
-/**
- * Crawl all authoritative RSS feeds in parallel and aggregate them
- */
-export async function fetchRssEvents(): Promise<NewsFeedItem[]> {
-  const promises = RSS_FEEDS.map((feed) => fetchRssFeed(feed))
-  const resultsArray = await Promise.all(promises)
-  const merged = resultsArray.flat()
-  
-  // Sort descending by timestamp
-  merged.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-  
-  return merged
 }

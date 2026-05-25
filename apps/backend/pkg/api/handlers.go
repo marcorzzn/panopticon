@@ -131,6 +131,103 @@ func GetGdeltEventsHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, events)
 }
 
+// 3.5. Get OSINT Events (Gemini processed news)
+func GetOsintEventsHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	rows, err := db.Pool.Query(ctx, `
+		SELECT id, headline, event_category, severity, ST_X(geom::geometry), ST_Y(geom::geometry), event_time, associated_sources, audit_log
+		FROM osint_events
+		ORDER BY event_time DESC
+		LIMIT 100;
+	`)
+	if err != nil {
+		http.Error(w, "Database query failed", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var events []map[string]interface{}
+	for rows.Next() {
+		var id, headline, category, severity string
+		var lng, lat float64
+		var eventTime time.Time
+		var sourcesJSON []byte
+		var auditJSON []byte
+
+		err := rows.Scan(&id, &headline, &category, &severity, &lng, &lat, &eventTime, &sourcesJSON, &auditJSON)
+		if err != nil {
+			http.Error(w, "Error scanning database row", http.StatusInternalServerError)
+			return
+		}
+		
+		var auditLog map[string]interface{}
+		if len(auditJSON) > 0 {
+			_ = json.Unmarshal(auditJSON, &auditLog)
+		}
+
+		var sources []ingestion.AssociatedSource
+		if len(sourcesJSON) > 0 {
+			_ = json.Unmarshal(sourcesJSON, &sources)
+		}
+
+		sourceName := "Unknown"
+		sourceURL := ""
+		shortSummary := ""
+		if len(sources) > 0 {
+			sourceURL = sources[0].SourceURL
+			shortSummary = sources[0].Snippet
+		}
+		if publisher, ok := auditLog["wire_publisher"].(string); ok {
+			sourceName = publisher
+		}
+
+		eventType := "instant"
+		if et, ok := auditLog["event_type"].(string); ok && et != "" {
+			eventType = et
+		}
+
+		var coords []float64
+		if lat != 0.0 || lng != 0.0 {
+			coords = []float64{lng, lat}
+		}
+
+		event := map[string]interface{}{
+			"id":          id,
+			"title":       headline,
+			"category":    category,
+			"severity":    severity,
+			"coordinates": coords,
+			"timestamp":   eventTime.Format(time.RFC3339),
+			"source":      sourceName,
+			"url":         sourceURL,
+			"summary":     shortSummary,
+			"eventType":   eventType,
+		}
+
+		if parentHubId, ok := auditLog["parent_hub_id"].(string); ok && parentHubId != "" {
+			event["parentHubId"] = parentHubId
+		}
+
+		if rawEng, ok := auditLog["raw_english_translation"].(string); ok && rawEng != "" {
+			event["raw_english_translation"] = rawEng
+		}
+
+		if reliability, ok := auditLog["source_reliability"].(string); ok && reliability != "" {
+			event["source_reliability"] = reliability
+		}
+
+		events = append(events, event)
+	}
+
+	if events == nil {
+		events = make([]map[string]interface{}, 0)
+	}
+
+	writeJSON(w, http.StatusOK, events)
+}
+
 // 4. Highly Compacted Aviation states stream: [ [icao24, lat, lon, heading, alt, vel], ... ]
 type CompactAviationResponse struct {
 	Timestamp int64           `json:"timestamp"`

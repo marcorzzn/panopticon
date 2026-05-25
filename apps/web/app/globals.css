@@ -54,8 +54,8 @@
 
   /* Typography color hierarchy */
   --pan-text-primary:   rgba(255, 255, 255, 0.96);   /* Active headlines, tabular values */
-  --pan-text-secondary: rgba(255, 255, 255, 0.78);   /* General description, metadata labels */
-  --pan-text-muted:     #58a6ff;   /* Secondary tags, informational labels */
+  --pan-text-secondary: rgba(255, 255, 255, 0.88);   /* General description, metadata labels */
+  --pan-text-muted:     #8ab4f8;   /* Secondary tags, informational labels */
   --pan-text-accent:    #00c88c;   /* Verified active green status */
   --pan-text-warning:   #f0a000;   /* Degraded status alerts */
   --pan-text-danger:    #ff4f4f;   /* Critical telemetry alerts */
@@ -65,7 +65,7 @@
   --pan-btn-primary-text:  #f0f3f6;
   --pan-btn-primary-hover: #1f5aa0;
   --pan-btn-secondary-bg:  #161b22;
-  --pan-btn-secondary-text:#8b949e;
+  --pan-btn-secondary-text:#c9d1d9;
   --pan-btn-secondary-hover:#21262d;
   --pan-btn-active-bg:     #0c2d1c;
   --pan-btn-active-text:   #00c88c;

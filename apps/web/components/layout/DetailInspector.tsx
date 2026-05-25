@@ -27,7 +27,8 @@ import {
   Shield,
   Satellite,
   Clipboard,
-  Check
+  Check,
+  AlertTriangle
 } from 'lucide-react'
 import { useMapStore, useNewsStore, getMapMarkers } from '@panopticon/core/stores'
 import {
@@ -1421,10 +1422,17 @@ export default function DetailInspector() {
                   <span className={`px-2 py-0.5 border rounded text-[8px] font-bold uppercase tracking-wider ${getSourceColor(ne.source)}`}>
                     {ne.source ? `[${ne.source.toUpperCase()}]` : '[WIRE FEED]'}
                   </span>
-                  <div className="flex items-center gap-1 px-2 py-0.5 border border-green-500/25 bg-green-950/20 text-accent rounded text-[8px] font-bold">
-                    <Check className="w-2.5 h-2.5" />
-                    <span>HIGH RELIABILITY</span>
-                  </div>
+                  {ne.source_reliability === 'unverified' ? (
+                    <div className="flex items-center gap-1 px-2 py-0.5 border border-status-warning/50 bg-status-warning-bg text-status-warning-text rounded text-[8px] font-bold">
+                      <AlertTriangle className="w-2.5 h-2.5" />
+                      <span>UNVERIFIED SOURCE</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 px-2 py-0.5 border border-green-500/25 bg-green-950/20 text-accent rounded text-[8px] font-bold">
+                      <Check className="w-2.5 h-2.5" />
+                      <span>HIGH RELIABILITY</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1453,17 +1461,20 @@ export default function DetailInspector() {
                 </span>
               </div>
 
-              {/* Monospace Title and Gemini Short Summary Panel */}
+              {/* Monospace Title and Raw Translation Panel */}
               <div className="p-3 bg-surface/50 backdrop-blur-md border border-weak rounded space-y-2">
                 <span className="text-[9px] font-bold text-primary tracking-wide block uppercase border-b border-weak pb-2 leading-tight">
                   {ne.title}
                 </span>
                 
+                <span className="text-[7.5px] font-bold tracking-widest text-accent uppercase block mt-1">
+                  RAW SOURCE (ENGLISH TRANSLATION)
+                </span>
                 {/* Glassmorphic monospace summary box */}
                 <div className="bg-[#03060d]/50 p-2.5 border border-weak/45 rounded font-mono text-[8.5px] text-secondary leading-normal relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-accent/40 rounded-bl" />
                   <p className="whitespace-pre-line tracking-wide">
-                    {ne.short_summary || ne.summary}
+                    {ne.raw_english_translation || ne.summary}
                   </p>
                 </div>
               </div>

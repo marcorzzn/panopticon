@@ -24,28 +24,39 @@ import {
   Network,
   Cpu,
   Database,
-  LockKeyhole
+  LockKeyhole,
+  Users,
+  Trophy,
+  Book,
+  Megaphone,
+  Rocket
 } from 'lucide-react'
 import { useMapStore } from '@panopticon/core/stores'
+import layersConfig from '@panopticon/core/src/config/layers.json'
+
+const iconMap: Record<string, React.FC<any>> = {
+  Layers, Thermometer, Activity, Flame, Globe, Radio, Eye, AlertTriangle,
+  Plane, Wind, ShieldAlert, Satellite, Sun, Rss, Shield, Lock, MapPin,
+  Network, Cpu, Database, LockKeyhole, Users, Trophy, Book, Megaphone, Rocket
+}
 
 interface LayerRowProps {
   id: string
   label: string
-  icon: React.ReactNode
+  iconName: string
   description: string
   locked?: boolean
 }
 
-function LayerRow({ id, label, icon, description, locked }: LayerRowProps) {
+function LayerRow({ id, label, iconName, description, locked }: LayerRowProps) {
   const { layerStates, toggleLayer } = useMapStore()
   
-  // Layer is active by default if not explicitly turned off (except for custom add-ons)
-  const isCustom = id.includes('-add-')
-  const isVisible = isCustom
-    ? layerStates[id]?.visible === true
-    : layerStates[id]?.visible !== false
+  // Layer is active by default if not explicitly turned off
+  const isVisible = layerStates[id]?.visible !== false
   const entityCount = layerStates[id]?.entityCount ?? 0
   const error = layerStates[id]?.error
+
+  const IconComponent = iconMap[iconName] || Layers
 
   const handleClick = () => {
     if (locked) return
@@ -75,7 +86,7 @@ function LayerRow({ id, label, icon, description, locked }: LayerRowProps) {
                   : 'bg-[var(--pan-bg-raised)] text-[var(--pan-text-secondary)] border border-[var(--pan-border-default)]'
             }`}
           >
-            {icon}
+            <IconComponent className="w-3.5 h-3.5" />
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-semibold tracking-wide text-[var(--pan-text-primary)] uppercase flex items-center gap-1.5">
@@ -127,46 +138,30 @@ function LayerRow({ id, label, icon, description, locked }: LayerRowProps) {
 export default function LayerPanel() {
   const { setLayerVisible } = useMapStore()
   
-  const [conflictOpen, setConflictOpen] = React.useState(true)
-  const [humanOpen, setHumanOpen] = React.useState(true)
-  const [hazardOpen, setHazardOpen] = React.useState(true)
-  const [maritimeOpen, setMaritimeOpen] = React.useState(true)
-  const [aviationOpen, setAviationOpen] = React.useState(true)
-  const [osintOpen, setOsintOpen] = React.useState(true)
-  const [spaceOpen, setSpaceOpen] = React.useState(true)
-  const [infraOpen, setInfraOpen] = React.useState(true)
+  // Group layers based on the central configuration
+  const groupedLayers = React.useMemo(() => {
+    const groups: Record<string, typeof layersConfig> = {}
+    layersConfig.forEach(layer => {
+      if (!groups[layer.group]) groups[layer.group] = []
+      groups[layer.group].push(layer)
+    })
+    return groups
+  }, [])
 
-  const activeLayerIds = [
-    'earthquakes',
-    'weather',
-    'wildfires',
-    'airquality',
-    'terminator',
-    'gdelt',
-    'acled',
-    'aircraft',
-    'webcams',
-    'recon',
-    'space',
-    'iss-position',
-    'space-weather',
-    'active-conflicts',
-    'conflict-hybrid-warfare',
-    'terrorism-internal-security',
-    'cyber-information-warfare',
-    'political-crises-geopolitics',
-    'geophysical-climate-events',
-    'biological-health-ecological',
-    'economic-financial-strategic-resources',
-    'industrial-infrastructure-disasters',
-    'refugee-movements',
-    'ais-vessels',
-    'undersea-cables',
-    'no-fly-zones',
-    'power-grid',
-    'nuclear-facilities',
-    'pipeline-networks'
-  ]
+  // Manage open states for each group
+  const [openGroups, setOpenGroups] = React.useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {}
+    Object.keys(groupedLayers).forEach(group => {
+      initial[group] = true
+    })
+    return initial
+  })
+
+  const toggleGroup = (group: string) => {
+    setOpenGroups(prev => ({ ...prev, [group]: !prev[group] }))
+  }
+
+  const activeLayerIds = layersConfig.map(l => l.id)
 
   const handleActivateAll = () => {
     activeLayerIds.forEach(id => {
@@ -215,346 +210,38 @@ export default function LayerPanel() {
 
       {/* Layer Groups Container */}
       <div className="flex-1 overflow-y-auto custom-scrollbar bg-[var(--pan-bg-base)]">
-        
-        {/* GROUP 1: CONFLICT & SECURITY */}
-        <div className="flex flex-col">
-          <div
-            onClick={() => setConflictOpen(!conflictOpen)}
-            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
-          >
-            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
-              Conflict & Security
-            </span>
-            {conflictOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
-          </div>
-
-          {conflictOpen && (
-            <div className="flex flex-col">
-              <LayerRow
-                id="active-conflicts"
-                label="Active Conflicts"
-                icon={<Shield className="w-3.5 h-3.5" />}
-                description="Semi-permanent active wars and strategic occupation maps"
-              />
-              <LayerRow
-                id="gdelt"
-                label="GDELT Geopol Events"
-                icon={<Globe className="w-3.5 h-3.5" />}
-                description="Real-time geo-located conflict and cooperative dispatches"
-              />
-              <LayerRow
-                id="acled"
-                label="ACLED Conflict Reports"
-                icon={<ShieldAlert className="w-3.5 h-3.5" />}
-                description="Tactical armed engagement and violent confrontation telemetry"
-              />
-              <LayerRow
-                id="conflict-hybrid-warfare"
-                label="Conflict & Hybrid Warfare"
-                icon={<ShieldAlert className="w-3.5 h-3.5" />}
-                description="AI-categorized geopolitical conflict events"
-              />
-              <LayerRow
-                id="terrorism-internal-security"
-                label="Terrorism & Internal Security"
-                icon={<AlertTriangle className="w-3.5 h-3.5" />}
-                description="AI-categorized internal security and terror events"
-              />
-              <LayerRow
-                id="cyber-information-warfare"
-                label="Cyber & Information Warfare"
-                icon={<Network className="w-3.5 h-3.5" />}
-                description="AI-categorized cyberattacks and data breaches"
-              />
-              <LayerRow
-                id="political-crises-geopolitics"
-                label="Political Crises & Geopolitics"
-                icon={<Globe className="w-3.5 h-3.5" />}
-                description="AI-categorized political unrest and crises"
-              />
-              <LayerRow
-                id="geophysical-climate-events"
-                label="Geophysical & Climate Events"
-                icon={<Activity className="w-3.5 h-3.5" />}
-                description="AI-categorized natural disasters and climate anomalies"
-              />
-              <LayerRow
-                id="biological-health-ecological"
-                label="Biological, Health & Ecological"
-                icon={<Activity className="w-3.5 h-3.5" />}
-                description="AI-categorized disease outbreaks and health emergencies"
-              />
-              <LayerRow
-                id="economic-financial-strategic-resources"
-                label="Economic & Financial"
-                icon={<Activity className="w-3.5 h-3.5" />}
-                description="AI-categorized economic crises and market events"
-              />
-              <LayerRow
-                id="industrial-infrastructure-disasters"
-                label="Industrial Disasters"
-                icon={<AlertTriangle className="w-3.5 h-3.5" />}
-                description="AI-categorized industrial accidents and infrastructure failures"
-              />
+        {Object.entries(groupedLayers).map(([groupName, layers]) => (
+          <div key={groupName} className="flex flex-col border-b border-[var(--pan-border-default)]">
+            <div
+              onClick={() => toggleGroup(groupName)}
+              className="px-4 py-2 bg-[var(--pan-bg-surface)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
+            >
+              <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
+                {groupName}
+              </span>
+              {openGroups[groupName] ? (
+                <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" />
+              ) : (
+                <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />
+              )}
             </div>
-          )}
-        </div>
 
-        {/* GROUP 2: HUMANITARIAN & CRISIS */}
-        <div className="flex flex-col border-t border-[var(--pan-border-default)]">
-          <div
-            onClick={() => setHumanOpen(!humanOpen)}
-            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
-          >
-            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
-              Humanitarian & Crisis
-            </span>
-            {humanOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
+            {openGroups[groupName] && (
+              <div className="flex flex-col border-t border-[var(--pan-border-default)]">
+                {layers.map(layer => (
+                  <LayerRow
+                    key={layer.id}
+                    id={layer.id}
+                    label={layer.name}
+                    iconName={layer.icon}
+                    description={layer.description}
+                    locked={false}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-
-          {humanOpen && (
-            <div className="flex flex-col">
-              <LayerRow
-                id="humanitarian-crises"
-                label="Humanitarian Crises"
-                icon={<AlertTriangle className="w-3.5 h-3.5" />}
-                description="UN OCHA verified relief dispatches and persistent emergency alerts"
-              />
-              <LayerRow
-                id="refugee-movements"
-                label="Refugee Movements"
-                icon={<MapPin className="w-3.5 h-3.5" />}
-                description="Authoritative UNHCR geolocated displacement points"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* GROUP 3: NATURAL HAZARDS */}
-        <div className="flex flex-col border-t border-[var(--pan-border-default)]">
-          <div
-            onClick={() => setHazardOpen(!hazardOpen)}
-            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
-          >
-            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
-              Natural Hazards
-            </span>
-            {hazardOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
-          </div>
-
-          {hazardOpen && (
-            <div className="flex flex-col">
-              <LayerRow
-                id="earthquakes"
-                label="USGS Earthquakes"
-                icon={<Activity className="w-3.5 h-3.5" />}
-                description="Real-time global seismic epicenters"
-              />
-              <LayerRow
-                id="wildfires"
-                label="NASA FIRMS Wildfires"
-                icon={<Flame className="w-3.5 h-3.5" />}
-                description="Active thermal hotspot anomaly vectors"
-              />
-              <LayerRow
-                id="weather"
-                label="Extreme Weather"
-                icon={<Thermometer className="w-3.5 h-3.5" />}
-                description="NOAA and global storm tracking alerts"
-              />
-              <LayerRow
-                id="airquality"
-                label="OpenAQ Air Quality"
-                icon={<Wind className="w-3.5 h-3.5" />}
-                description="Real-time global particulate matter readings"
-              />
-              <LayerRow
-                id="terminator"
-                label="Solar Terminator"
-                icon={<Sun className="w-3.5 h-3.5" />}
-                description="Visual daylight boundary shadows"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* GROUP 4: MARITIME & LOGISTICS */}
-        <div className="flex flex-col border-t border-[var(--pan-border-default)]">
-          <div
-            onClick={() => setMaritimeOpen(!maritimeOpen)}
-            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
-          >
-            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
-              Maritime & Logistics
-            </span>
-            {maritimeOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
-          </div>
-
-          {maritimeOpen && (
-            <div className="flex flex-col">
-              <LayerRow
-                id="ais-vessels"
-                label="AIS Vessel Tracking"
-                icon={<Shield className="w-3.5 h-3.5" />}
-                description="Real-time commercial and military vessel positions via AISHub"
-              />
-              <LayerRow
-                id="maritime-incidents"
-                label="Maritime Incidents"
-                icon={<AlertTriangle className="w-3.5 h-3.5" />}
-                description="Hostile vessels, piracy, and sea lane blockages"
-              />
-              <LayerRow
-                id="undersea-cables"
-                label="Undersea Fiber Cables"
-                icon={<Network className="w-3.5 h-3.5" />}
-                description="Global subsea communication fiber networks"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* GROUP 5: AIRSPACE & AVIATION */}
-        <div className="flex flex-col border-t border-[var(--pan-border-default)]">
-          <div
-            onClick={() => setAviationOpen(!aviationOpen)}
-            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
-          >
-            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
-              Airspace & Aviation
-            </span>
-            {aviationOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
-          </div>
-
-          {aviationOpen && (
-            <div className="flex flex-col">
-              <LayerRow
-                id="aircraft"
-                label="OpenSky ADS-B Feeds"
-                icon={<Plane className="w-3.5 h-3.5" />}
-                description="Real-time aircraft tracking transponder beacons"
-              />
-              <LayerRow
-                id="aviation-incidents"
-                label="Aviation Incidents"
-                icon={<AlertTriangle className="w-3.5 h-3.5" />}
-                description="Grounding orders, flight anomalies, and military intercepts"
-              />
-              <LayerRow
-                id="no-fly-zones"
-                label="No-Fly Zones"
-                icon={<Lock className="w-3.5 h-3.5" />}
-                description="Tactical military and civil airspace restrictions"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* GROUP 6: SURVEILLANCE & OSINT */}
-        <div className="flex flex-col border-t border-[var(--pan-border-default)]">
-          <div
-            onClick={() => setOsintOpen(!osintOpen)}
-            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
-          >
-            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
-              Surveillance & OSINT
-            </span>
-            {osintOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
-          </div>
-
-          {osintOpen && (
-            <div className="flex flex-col">
-              <LayerRow
-                id="webcams"
-                label="Global CCTV Network"
-                icon={<Eye className="w-3.5 h-3.5" />}
-                description="AMOS webcams and verified public EarthCam live feeds"
-              />
-              <LayerRow
-                id="recon"
-                label="OSINT Cyber Recon"
-                icon={<Radio className="w-3.5 h-3.5" />}
-                description="Tactical network hops and port traceback scanners"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* GROUP 7: SPACE & ORBITAL */}
-        <div className="flex flex-col border-t border-[var(--pan-border-default)]">
-          <div
-            onClick={() => setSpaceOpen(!spaceOpen)}
-            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
-          >
-            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
-              Space & Orbital
-            </span>
-            {spaceOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
-          </div>
-
-          {spaceOpen && (
-            <div className="flex flex-col">
-              <LayerRow
-                id="space"
-                label="Satellite Tracking"
-                icon={<Satellite className="w-3.5 h-3.5" />}
-                description="Active NORAD satellite sweeps and ground propagations"
-              />
-              <LayerRow
-                id="iss-position"
-                label="ISS Real-time Position"
-                icon={<Cpu className="w-3.5 h-3.5" />}
-                description="Precise geocoded flight path coordinates of the Space Station"
-              />
-              <LayerRow
-                id="space-weather"
-                label="Space Weather"
-                icon={<Sun className="w-3.5 h-3.5" />}
-                description="Planetary K-index, Bz IMF, and solar wind velocities"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* GROUP 8: INFRASTRUCTURE & ENERGY */}
-        <div className="flex flex-col border-t border-[var(--pan-border-default)] border-b border-[var(--pan-border-default)]">
-          <div
-            onClick={() => setInfraOpen(!infraOpen)}
-            className="px-4 py-2 bg-[var(--pan-bg-surface)] border-b border-[var(--pan-border-default)] flex items-center justify-between cursor-pointer hover:bg-[var(--pan-bg-interactive)]"
-          >
-            <span className="font-semibold text-[9px] tracking-widest text-[var(--pan-text-muted)] block uppercase font-mono">
-              Infrastructure & Energy
-            </span>
-            {infraOpen ? <ChevronDown className="w-3 h-3 text-[var(--pan-text-secondary)]" /> : <ChevronRight className="w-3 h-3 text-[var(--pan-text-secondary)]" />}
-          </div>
-
-          {infraOpen && (
-            <div className="flex flex-col">
-              <LayerRow
-                id="power-grid"
-                label="Power Grid Status"
-                icon={<Database className="w-3.5 h-3.5" />}
-                description="Global high-voltage transmission lines and active load nodes"
-                locked={false}
-              />
-              <LayerRow
-                id="nuclear-facilities"
-                label="Nuclear Facilities"
-                icon={<Activity className="w-3.5 h-3.5" />}
-                description="Strategic nuclear reactors and enrichment facilities (PRIS)"
-                locked={false}
-              />
-              <LayerRow
-                id="pipeline-networks"
-                label="Pipeline Networks"
-                icon={<Network className="w-3.5 h-3.5" />}
-                description="Transnational strategic gas and oil pipeline routes"
-                locked={false}
-              />
-            </div>
-          )}
-        </div>
-
+        ))}
       </div>
     </div>
   )

@@ -26,7 +26,7 @@ import { X, HelpCircle } from 'lucide-react'
 import DashboardLayout from '@/components/layout/DashboardLayout'
 import EarthquakePanel from '@/components/panels/EarthquakePanel'
 import SpaceWeatherPanel from '@/components/panels/SpaceWeatherPanel'
-import SystemStatusWidget from '@/components/layout/SystemStatusWidget'
+
 
 // Dynamically import MapView to disable SSR (MapLibre Gl relies on browser APIs)
 const MapView = dynamic(
@@ -63,42 +63,8 @@ export default function Home() {
   const presetIndexRef = React.useRef(0)
 
   const globalRefreshPaused = useAppStore((s) => s.globalRefreshPaused)
-  const [secondsSinceUpdate, setSecondsSinceUpdate] = React.useState(0)
-  const { mutate } = useSWRConfig()
-
-  // High-frequency client-side polling timer
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      setSecondsSinceUpdate((prev) => prev + 1)
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
-
-  // Auto-mutate all feeds on high-frequency interval if not paused
-  React.useEffect(() => {
-    if (globalRefreshPaused) return
-
-    const keys = [
-      'usgs-earthquakes-core',
-      'opensky-aircraft-core',
-      'nasa-wildfires-core',
-      'openaq-airquality-core',
-      'acled-conflicts-core',
-      'webcams-core',
-      'space-satellites-core',
-      'rss-news-wire-core'
-    ]
-
-    const pollingInterval = setInterval(async () => {
-      await Promise.all([
-        ...keys.map(k => mutate(k)),
-        mutate(['gdelt-events-core', 'protest'])
-      ])
-      setSecondsSinceUpdate(0)
-    }, 15000) // 15s high-frequency polling sweep
-
-    return () => clearInterval(pollingInterval)
-  }, [globalRefreshPaused, mutate])
+  // Auto-polling removed per constraints (Item 10).
+  // Live Feed & Refresh Mechanism is now driven strictly by explicit UI actions (Refresh Feed button).
 
   // ── 1. BACKGROUND SWR POLLING PIPELINE ────────────────────────────────────
 
@@ -107,7 +73,6 @@ export default function Home() {
     'usgs-earthquakes-core',
     fetchEarthquakes,
     {
-      refreshInterval: globalRefreshPaused ? 0 : 60000,
       revalidateOnFocus: false,
     }
   )
@@ -117,7 +82,6 @@ export default function Home() {
     'global-weather-core',
     fetchGlobalWeatherGrid,
     {
-      refreshInterval: globalRefreshPaused ? 0 : 300000,
       revalidateOnFocus: false,
     }
   )
@@ -127,7 +91,6 @@ export default function Home() {
     ['gdelt-events-core', 'protest'],
     () => fetchGdeltEvents('protest'),
     {
-      refreshInterval: globalRefreshPaused ? 0 : 900000,
       revalidateOnFocus: false,
     }
   )
@@ -137,7 +100,6 @@ export default function Home() {
     'opensky-aircraft-core',
     fetchAircraft,
     {
-      refreshInterval: globalRefreshPaused ? 0 : 20000,
       revalidateOnFocus: false,
     }
   )
@@ -147,7 +109,6 @@ export default function Home() {
     'nasa-wildfires-core',
     fetchWildfires,
     {
-      refreshInterval: globalRefreshPaused ? 0 : 300000,
       revalidateOnFocus: false,
     }
   )
@@ -157,7 +118,6 @@ export default function Home() {
     'openaq-airquality-core',
     fetchAirQuality,
     {
-      refreshInterval: globalRefreshPaused ? 0 : 60000,
       revalidateOnFocus: false,
     }
   )
@@ -167,7 +127,6 @@ export default function Home() {
     'acled-conflicts-core',
     fetchAcledEvents,
     {
-      refreshInterval: globalRefreshPaused ? 0 : 60000,
       revalidateOnFocus: false,
     }
   )
@@ -177,7 +136,6 @@ export default function Home() {
     'webcams-core',
     fetchWebcams,
     {
-      refreshInterval: globalRefreshPaused ? 0 : 3000,
       revalidateOnFocus: false,
     }
   )
@@ -187,7 +145,6 @@ export default function Home() {
     'space-satellites-core',
     fetchSatellites,
     {
-      refreshInterval: globalRefreshPaused ? 0 : 2000, // Poll every 2 seconds matching the Go propagator
       revalidateOnFocus: false,
     }
   )
@@ -197,7 +154,6 @@ export default function Home() {
     'rss-news-wire-core',
     fetchRssEvents,
     {
-      refreshInterval: globalRefreshPaused ? 0 : 45000, // 45s refresh loop
       revalidateOnFocus: false,
     }
   )
@@ -213,7 +169,6 @@ export default function Home() {
     'power-grid-core',
     fetchPowerGrid,
     {
-      refreshInterval: globalRefreshPaused ? 0 : 300000,
       revalidateOnFocus: false,
     }
   )
@@ -222,7 +177,6 @@ export default function Home() {
     'nuclear-facilities-core',
     fetchNuclearFacilities,
     {
-      refreshInterval: globalRefreshPaused ? 0 : 300000,
       revalidateOnFocus: false,
     }
   )
@@ -231,7 +185,6 @@ export default function Home() {
     'pipeline-networks-core',
     fetchPipelineNetworks,
     {
-      refreshInterval: globalRefreshPaused ? 0 : 300000,
       revalidateOnFocus: false,
     }
   )
@@ -411,7 +364,7 @@ export default function Home() {
 
   return (
     <>
-      <SystemStatusWidget secondsSinceUpdate={secondsSinceUpdate} />
+
 
       <DashboardLayout
         earthquakePanel={<EarthquakePanel />}

@@ -133,7 +133,7 @@ export default function TopBar() {
   }, [theme])
 
   return (
-    <header className="h-12 w-full flex items-center justify-between px-4 bg-surface border-b border-weak z-30 select-none shadow-md">
+    <header className="h-12 w-full flex items-center justify-between px-4 bg-surface border-b border-weak z-50 select-none shadow-md">
       {/* LEFT: Branding */}
       <div className="flex items-center gap-3">
         <div className="relative flex items-center justify-center w-6 h-6 rounded bg-[var(--pan-btn-active-bg)] border border-[var(--pan-border-accent)] shadow-sm">
@@ -156,20 +156,6 @@ export default function TopBar() {
 
       {/* RIGHT: Systems Grid & UI Toggles */}
       <div className="flex items-center gap-4">
-        {/* Force Refresh Button */}
-        <Tooltip content="Force immediate revalidation of all active OSINT caches">
-          <button
-            onClick={handleForceRefresh}
-            disabled={isRefreshing}
-            aria-label="Force immediate revalidation of all active OSINT caches"
-            className={`flex items-center justify-center p-1.5 rounded border border-[var(--pan-border-default)] hover:border-[var(--pan-border-strong)] text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] bg-[var(--pan-btn-secondary-bg)] hover:bg-[var(--pan-btn-secondary-hover)] transition-all ${
-              isRefreshing ? 'opacity-50 pointer-events-none' : ''
-            }`}
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </button>
-        </Tooltip>
-
         {/* Theme Cycler */}
         <Tooltip content={`Cycle interface theme (Current: ${theme})`}>
           <button
@@ -177,7 +163,7 @@ export default function TopBar() {
             aria-label={`Cycle interface theme (Current: ${theme})`}
             className="p-1.5 rounded border border-[var(--pan-border-default)] hover:border-[var(--pan-border-strong)] text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] bg-[var(--pan-btn-secondary-bg)] hover:bg-[var(--pan-btn-secondary-hover)] transition-all"
           >
-            <SunMoon className="w-4 h-4" />
+            <SunMoon className="w-3.5 h-3.5" />
           </button>
         </Tooltip>
 
@@ -194,7 +180,7 @@ export default function TopBar() {
                 : 'border-[var(--pan-border-default)] hover:border-[var(--pan-border-strong)] text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] bg-[var(--pan-btn-secondary-bg)] hover:bg-[var(--pan-btn-secondary-hover)]'
             }`}
           >
-            <Cpu className="w-4 h-4" />
+            <Cpu className="w-3.5 h-3.5" />
           </button>
         </Tooltip>
 

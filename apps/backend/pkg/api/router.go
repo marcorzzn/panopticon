@@ -21,6 +21,7 @@ func SetupRouter() *chi.Mux {
 		r.Get("/sources", GetSourcesHandler)
 		r.Get("/earthquakes", GetEarthquakesHandler)
 		r.Get("/gdelt", GetGdeltEventsHandler)
+		r.Get("/osint", GetOsintEventsHandler)
 		
 		// Highly optimized flat telemetry streams
 		r.Get("/aviation/states", GetAviationStatesHandler)

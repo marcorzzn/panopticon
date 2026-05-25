@@ -14,14 +14,8 @@ export default function StatusBar() {
   const { data: satellites = [] } = useSWR<SatelliteEntity[]>('space-satellites-core')
   const { data: vessels = [] } = useSWR<any[]>('ais-vessels-core') // Placeholder for AIS
 
-  // Sys ping could use latency from SWR, but we'll mock actual API latency logic for now using performance.now() if needed, or just random actual API speed ranges 
-  const [sysPing, setSysPing] = React.useState(24)
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      setSysPing(Math.floor(Math.random() * 20 + 15)) // 15-35ms
-    }, 5000)
-    return () => clearInterval(timer)
-  }, [])
+  // Remove fake ping and use static generic health value until fully integrated
+  const sysPing = 45
 
   // Count active layers
   const activeLayersCount = React.useMemo(() => {
@@ -102,8 +96,8 @@ export default function StatusBar() {
           </div>
           <div className="w-px h-3 bg-[var(--pan-border-default)] hidden md:block" />
           <div className="hidden md:flex items-center gap-1.5 text-[var(--pan-text-accent)] font-bold">
-            <Radio className="w-3 h-3 animate-pulse" />
-            <span>CYBER JAMMING: 12.4%</span>
+            <Shield className="w-3 h-3 animate-pulse" />
+            <span>SECURE LINK</span>
           </div>
         </div>
 

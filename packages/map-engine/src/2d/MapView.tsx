@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Map, Source, Layer, NavigationControl, ScaleControl } from 'react-map-gl/maplibre'
+import { Map, Source, Layer, NavigationControl, ScaleControl, Popup } from 'react-map-gl/maplibre'
 import type { MapRef } from 'react-map-gl/maplibre'
 import { useMapStore, useAppStore, useNewsStore, getMapMarkers } from '@panopticon/core/stores'
 import { GridSpatialIndex, type SpatialEntry } from '@panopticon/core/utils'
@@ -69,6 +69,7 @@ export default function MapView({
 
   const { theme } = useAppStore()
   const { newsEvents } = useNewsStore()
+  const [hoverInfo, setHoverInfo] = React.useState<any>(null)
 
   const activeLayers = React.useMemo(() => {
     const set = new Set<string>()
@@ -806,17 +807,21 @@ export default function MapView({
 
     const features = event.features || []
     if (features.length > 0) {
-      const hoveredId = features[0].properties.id
+      const feature = features[0]
+      const hoveredId = feature.properties.id
       if (hoveredId) {
         setHoveredEntityId(hoveredId)
+        setHoverInfo({ feature, lngLat })
         return
       }
     }
     setHoveredEntityId(null)
+    setHoverInfo(null)
   }
 
   const onMouseLeave = () => {
     setHoveredEntityId(null)
+    setHoverInfo(null)
   }
 
   return (
@@ -1817,6 +1822,45 @@ export default function MapView({
               paint={{ 'line-color': '#00ffff', 'line-width': 2, 'line-dasharray': [2, 2], 'line-opacity': 0.7 }}
             />
           </Source>
+        )}
+
+        {/* ── 13. HOVER TOOLTIP POPUP ───────────────────────── */}
+        {hoverInfo && hoverInfo.feature.properties.isNews && (
+          <Popup
+            longitude={hoverInfo.lngLat.lng}
+            latitude={hoverInfo.lngLat.lat}
+            closeButton={false}
+            closeOnClick={false}
+            anchor="bottom"
+            maxWidth="300px"
+            className="z-50 pointer-events-none"
+          >
+            <div className="bg-deepest/95 backdrop-blur-md border border-weak rounded p-2.5 text-xs font-mono shadow-2xl flex flex-col gap-2 pointer-events-none min-w-[250px]">
+              {/* Category / Type Header */}
+              <div className="flex justify-between items-center pb-1.5 border-b border-weak">
+                <span className="text-accent font-bold uppercase text-[9px] tracking-widest">{hoverInfo.feature.properties.category || 'OSINT EVENT'}</span>
+                <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wider ${hoverInfo.feature.properties.type === 'hub' ? 'bg-[#af52de]/20 text-[#af52de] border border-[#af52de]/30' : hoverInfo.feature.properties.type === 'persistent' ? 'bg-[#ff9500]/20 text-[#ff9500] border border-[#ff9500]/30' : 'bg-secondary/20 text-secondary border border-weak'}`}>
+                  {hoverInfo.feature.properties.type ? hoverInfo.feature.properties.type.toUpperCase() : 'UNKNOWN'}
+                </span>
+              </div>
+              
+              {/* Title / English Translation */}
+              <div className="text-primary font-semibold text-[11px] leading-tight break-words">
+                {hoverInfo.feature.properties.label}
+              </div>
+
+              {/* Source & Reliability Warning */}
+              {hoverInfo.feature.properties.source && (
+                <div className="flex items-center gap-1.5 pt-1 border-t border-weak/50">
+                  <span className="text-secondary text-[9px] uppercase tracking-wider">SRC:</span>
+                  <span className="text-accent text-[9px] truncate max-w-[120px]">{hoverInfo.feature.properties.source}</span>
+                  <span className="ml-auto px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wider bg-[#e8b00f]/20 text-[#e8b00f] border border-[#e8b00f]/30 flex items-center gap-1">
+                    ⚠️ UNVERIFIED
+                  </span>
+                </div>
+              )}
+            </div>
+          </Popup>
         )}
       </Map>
     </div>
