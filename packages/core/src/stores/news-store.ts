@@ -461,7 +461,7 @@ export interface NewsStore {
 }
 
 export const useNewsStore = create<NewsStore>((set) => ({
-  newsEvents: [],
+  newsEvents: initialNewsEvents(),
   setNewsEvents: (events) => set({ newsEvents: events }),
   
   // 72-Hour Drift Expiration Sweep

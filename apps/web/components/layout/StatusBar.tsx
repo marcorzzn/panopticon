@@ -5,6 +5,7 @@ import { ShieldCheck, MapPin, Eye, Zap, Radio, Plane, Shield, Satellite, Activit
 import { useMapStore } from '@panopticon/core/stores'
 import useSWR from 'swr'
 import type { AircraftEntity, SatelliteEntity } from '@panopticon/core/types'
+import layersConfig from '@panopticon/core/src/config/layers.json'
 
 export default function StatusBar() {
   const { cursorLng, cursorLat, layerStates, bounds } = useMapStore()
@@ -17,18 +18,18 @@ export default function StatusBar() {
   // Remove fake ping and use static generic health value until fully integrated
   const sysPing = 45
 
-  // Count active layers
+  // Count active layers using layers.json configurations
   const activeLayersCount = React.useMemo(() => {
     let activeCount = 0
-    Object.keys(layerStates).forEach(id => {
-      if (layerStates[id]?.visible !== false) activeCount++
+    layersConfig.forEach((layer) => {
+      if (layerStates[layer.id]?.visible === true) activeCount++
     })
     return activeCount
   }, [layerStates])
 
   // Helper to count entities within bounds
   const getVisibleCount = (data: any[], layerId: string) => {
-    if (layerStates[layerId]?.visible === false) return 'N/A'
+    if (layerStates[layerId]?.visible === false) return 0
     if (!bounds || bounds.length !== 4 || !data || data.length === 0) return 0
     
     const [w, s, e, n] = bounds
@@ -108,7 +109,7 @@ export default function StatusBar() {
           <div className="flex items-center gap-1">
             <Plane className="w-3.5 h-3.5 text-[var(--pan-marker-aviation)]" />
             <span className="text-[var(--pan-text-secondary)] uppercase">ADS-B:</span>
-            <span className={`font-bold tabular-nums ${airplaneCount === 'N/A' ? 'text-[var(--pan-text-secondary)]' : 'text-[var(--pan-text-primary)]'}`}>{airplaneCount}</span>
+            <span className="font-bold tabular-nums text-[var(--pan-text-primary)]">{airplaneCount}</span>
           </div>
 
           <div className="w-px h-2.5 bg-[var(--pan-border-default)]" />
@@ -117,7 +118,7 @@ export default function StatusBar() {
           <div className="flex items-center gap-1">
             <Shield className="w-3 h-3 text-[var(--pan-marker-maritime)]" />
             <span className="text-[var(--pan-text-secondary)] uppercase">AIS:</span>
-            <span className={`font-bold tabular-nums ${vesselCount === 'N/A' ? 'text-[var(--pan-text-secondary)]' : 'text-[var(--pan-text-primary)]'}`}>{vesselCount}</span>
+            <span className="font-bold tabular-nums text-[var(--pan-text-primary)]">{vesselCount}</span>
           </div>
 
           <div className="w-px h-2.5 bg-[var(--pan-border-default)]" />
@@ -126,7 +127,7 @@ export default function StatusBar() {
           <div className="flex items-center gap-1">
             <Satellite className="w-3.5 h-3.5 text-[var(--pan-marker-space)]" />
             <span className="text-[var(--pan-text-secondary)] uppercase">SPACE:</span>
-            <span className={`font-bold tabular-nums ${satelliteCount === 'N/A' ? 'text-[var(--pan-text-secondary)]' : 'text-[var(--pan-text-primary)]'}`}>{satelliteCount}</span>
+            <span className="font-bold tabular-nums text-[var(--pan-text-primary)]">{satelliteCount}</span>
           </div>
 
           <div className="w-px h-2.5 bg-[var(--pan-border-default)]" />

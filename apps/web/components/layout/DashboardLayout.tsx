@@ -9,7 +9,6 @@ import LayerPanel from './LayerPanel'
 import IntelPanel from './IntelPanel'
 import DetailInspector from './DetailInspector'
 import ReconToolkit from './ReconToolkit'
-import AiBriefConsole from './AiBriefConsole'
 
 interface DashboardLayoutProps {
   children: React.ReactNode // Map view is passed here
@@ -216,8 +215,6 @@ export default function DashboardLayout({
       {/* Recon Toolkit Drawer */}
       <ReconToolkit />
 
-      {/* AI Intelligence Brief Console */}
-      <AiBriefConsole />
     </div>
   )
 }

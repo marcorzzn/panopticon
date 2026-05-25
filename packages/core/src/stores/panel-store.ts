@@ -13,7 +13,6 @@ export interface PanelStore {
   intelPanelOpen: boolean
   bottomPanelOpen: boolean
   reconToolkitOpen: boolean
-  aiBriefOpen: boolean
 
   // ── Panel sizes — flat numbers (percentages of viewport) ──────────────
   layerPanelSize: number
@@ -34,7 +33,6 @@ export interface PanelStore {
   toggleIntelPanel: () => void
   toggleBottomPanel: () => void
   toggleReconToolkit: () => void
-  toggleAiBrief: () => void
   toggleMapFullscreen: () => void
   setLayerPanelSize: (size: number) => void
   setIntelPanelSize: (size: number) => void
@@ -57,7 +55,6 @@ const DEFAULTS = {
   intelPanelOpen: false,
   bottomPanelOpen: false,
   reconToolkitOpen: false,
-  aiBriefOpen: false,
   layerPanelSize: 18,
   intelPanelSize: 22,
   bottomPanelSize: 30,
@@ -89,9 +86,6 @@ export const usePanelStore = create<PanelStore>()(
       toggleReconToolkit: () =>
         set((s) => ({ reconToolkitOpen: !s.reconToolkitOpen })),
 
-      toggleAiBrief: () =>
-        set((s) => ({ aiBriefOpen: !s.aiBriefOpen })),
-
       toggleMapFullscreen: () =>
         set((s) => ({
           mapFullscreen: !s.mapFullscreen,
@@ -103,7 +97,6 @@ export const usePanelStore = create<PanelStore>()(
                 intelPanelOpen: false,
                 bottomPanelOpen: false,
                 reconToolkitOpen: false,
-                aiBriefOpen: false,
               }),
         })),
 
@@ -128,7 +121,6 @@ export const usePanelStore = create<PanelStore>()(
           intelPanelOpen: false,
           bottomPanelOpen: false,
           reconToolkitOpen: false,
-          aiBriefOpen: false,
         }),
 
       resetLayout: () => set({ ...DEFAULTS }),
@@ -141,7 +133,6 @@ export const usePanelStore = create<PanelStore>()(
         intelPanelOpen: state.intelPanelOpen,
         bottomPanelOpen: state.bottomPanelOpen,
         reconToolkitOpen: state.reconToolkitOpen,
-        aiBriefOpen: state.aiBriefOpen,
         layerPanelSize: state.layerPanelSize,
         intelPanelSize: state.intelPanelSize,
         bottomPanelSize: state.bottomPanelSize,

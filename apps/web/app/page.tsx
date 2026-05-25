@@ -57,7 +57,6 @@ export default function Home() {
   const toggleMapFullscreen = usePanelStore((s) => s.toggleMapFullscreen)
   const collapseAll = usePanelStore((s) => s.collapseAll)
   const toggleReconToolkit = usePanelStore((s) => s.toggleReconToolkit)
-  const toggleAiBrief = usePanelStore((s) => s.toggleAiBrief)
 
   const [showHelp, setShowHelp] = React.useState(false)
   const presetIndexRef = React.useRef(0)
@@ -160,8 +159,21 @@ export default function Home() {
 
   const setNewsEvents = useNewsStore((s) => s.setNewsEvents)
   React.useEffect(() => {
-    setNewsEvents(rssEvents)
-    setLayerEntityCount('news-events', rssEvents.length)
+    if (rssEvents && rssEvents.length > 0) {
+      // Merge feed items safely by ID to preserve default curated alerts
+      const currentEvents = useNewsStore.getState().newsEvents
+      const existingMap = new Map(currentEvents.map(e => [e.id, e]))
+      rssEvents.forEach(item => {
+        existingMap.set(item.id, item)
+      })
+      const merged = Array.from(existingMap.values())
+      setNewsEvents(merged)
+      setLayerEntityCount('news-events', merged.length)
+    } else {
+      // If backend feed is empty, retain all current/curated store items
+      const currentEvents = useNewsStore.getState().newsEvents
+      setLayerEntityCount('news-events', currentEvents.length)
+    }
   }, [rssEvents, setNewsEvents, setLayerEntityCount])
 
   // Infrastructure & Energy (Phase 8 Additions)
@@ -294,10 +306,6 @@ export default function Home() {
           e.preventDefault()
           toggleLayer('gdelt')
           break
-        case 'a':
-          e.preventDefault()
-          toggleAiBrief() // [A] = AI Brief Drawer Toggle
-          break
         case 'c':
           e.preventDefault()
           toggleLayer('acled')
@@ -355,7 +363,6 @@ export default function Home() {
     toggleLayerPanel,
     toggleIntelPanel,
     toggleReconToolkit,
-    toggleAiBrief,
     collapseAll,
     setSelectedEntityId,
     setViewState,
@@ -408,7 +415,6 @@ export default function Home() {
               {[
                 { key: 'F', desc: 'Toggle Fullscreen Map' },
                 { key: 'S', desc: 'Toggle OSINT Recon Toolkit' },
-                { key: 'A', desc: 'Toggle AI Brief Console' },
                 { key: 'R', desc: 'Cycle Geographical presets' },
                 { key: 'L', desc: 'Toggle Left Layers Drawer' },
                 { key: 'I', desc: 'Toggle Right Intel & CII sidebar' },

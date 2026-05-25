@@ -1,0 +1,22 @@
+{
+  "usgs-earthquakes": {
+    "licenseType": "public_domain",
+    "attributionString": "U.S. Geological Survey (USGS)",
+    "usageLimits": "Unrestricted public use"
+  },
+  "nasa-firms": {
+    "licenseType": "CC-BY",
+    "attributionString": "NASA FIRMS / MODIS / VIIRS",
+    "usageLimits": "Requires attribution under standard terms"
+  },
+  "celestrak-gp": {
+    "licenseType": "CC-BY-SA",
+    "attributionString": "CelesTrak / NORAD GP elements data",
+    "usageLimits": "Attribution and share-alike terms apply"
+  },
+  "noaa-swpc": {
+    "licenseType": "public_domain",
+    "attributionString": "NOAA Space Weather Prediction Center",
+    "usageLimits": "Unrestricted public use"
+  }
+}

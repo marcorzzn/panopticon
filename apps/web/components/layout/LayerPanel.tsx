@@ -51,8 +51,8 @@ interface LayerRowProps {
 function LayerRow({ id, label, iconName, description, locked }: LayerRowProps) {
   const { layerStates, toggleLayer } = useMapStore()
   
-  // Layer is active by default if not explicitly turned off
-  const isVisible = layerStates[id]?.visible !== false
+  // Layer is active strictly if visible is set to true
+  const isVisible = layerStates[id]?.visible === true
   const entityCount = layerStates[id]?.entityCount ?? 0
   const error = layerStates[id]?.error
 
@@ -141,17 +141,46 @@ export default function LayerPanel() {
   // Group layers based on the central configuration
   const groupedLayers = React.useMemo(() => {
     const groups: Record<string, any[]> = {}
+    
+    const getGroupForMacroArea = (macroArea: number): string => {
+      if (macroArea <= 4) return 'Natural & Environmental'
+      if (macroArea <= 6) return 'Health & Agriculture'
+      if (macroArea <= 8) return 'Security & Geopolitics'
+      if (macroArea === 9 || macroArea === 15) return 'Cyber & Space Operations'
+      if (macroArea === 10 || macroArea === 14) return 'Finance & Logistics'
+      return 'Energy & Infrastructure'
+    }
+
+    const descriptions: Record<string, string> = {
+      geophysical_hazards: "Real-time global seismic and volcanic anomalies",
+      meteorological_hydrological: "NOAA and global storm tracking alerts",
+      wildfires_forest: "Active thermal hotspot anomaly vectors",
+      climate_environmental: "Ecosystem and particulate air quality monitoring",
+      health_epidemics: "ECDC, WHO novel pathogen and outbreak tracking",
+      agriculture_food_water: "Global crop failure and reservoir depletion alerts",
+      conflict_security_warfare: "ACLED tactical troop movement and military telemetry",
+      geopolitics_governance_rights: "Elections, political arrests and UN displacement data",
+      cyber_information_digital: "Threat intelligence, scada compromise and BGP routing",
+      economic_financial_trade: "Market indices, bank runs and port congestion",
+      energy_strategic_resources: "Oil/gas flows, rolling blackouts and megamines",
+      industrial_nuclear_cbrn: "Chemical spills, radiation spikes and hazmat events",
+      critical_infrastructure_urban: "Urban network disruptions and bridge stability checks",
+      transportation_mobility: "OpenSky ADS-B flights and maritime AIS tracking",
+      space_aerospace: "Celestrak GP orbital elements and solar storms"
+    }
+
     layersConfig.forEach((layer: any) => {
-      const slug = layer.slug || layer.id
-      const displayName = layer.displayName || layer.name
-      const group = layer.group
+      const lid = layer.id
+      const label = layer.label
+      const group = getGroupForMacroArea(layer.macroArea)
+      const desc = descriptions[lid] || "Operational situational awareness feed"
 
       if (!groups[group]) groups[group] = []
       groups[group].push({
-        id: slug,
-        name: displayName,
+        id: lid,
+        name: label,
         icon: layer.icon,
-        description: layer.description
+        description: desc
       })
     })
     return groups
@@ -170,7 +199,7 @@ export default function LayerPanel() {
     setOpenGroups(prev => ({ ...prev, [group]: !prev[group] }))
   }
 
-  const activeLayerIds = layersConfig.map((l: any) => l.slug || l.id)
+  const activeLayerIds = layersConfig.map((l: any) => l.id)
 
   const handleActivateAll = () => {
     activeLayerIds.forEach(id => {
@@ -192,11 +221,6 @@ export default function LayerPanel() {
         <div className="flex items-center gap-2 text-[var(--pan-text-primary)] font-display text-xs font-bold uppercase tracking-wider">
           <Layers className="w-4 h-4 text-[var(--pan-text-accent)]" />
           <span>Operational Domains</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[8px] font-mono font-semibold uppercase px-1.5 py-0.5 rounded border border-[var(--pan-text-accent)] border-opacity-35 text-[var(--pan-text-accent)] bg-[var(--pan-text-accent)] bg-opacity-[0.03] shadow-[0_0_8px_rgba(0,200,140,0.3)]">
-            LIVE COUNTS
-          </span>
         </div>
       </div>
 

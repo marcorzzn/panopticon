@@ -32,16 +32,16 @@ export interface LayerConfig {
 // Convert universal configuration schemas into LayerConfigs dynamically (zero hardcoding)
 export const getMappedLayersConfig = (): LayerConfig[] => {
   return (layersConfig as any[]).map((cfg) => {
-    const slug = cfg.slug || cfg.id
-    const displayName = cfg.displayName || cfg.name
-    const color = cfg.color || (cfg.paint && cfg.paint['circle-color']) || '#3498db'
-    const defaultPinType = cfg.defaultPinType || 'instant'
+    const id = cfg.id
+    const displayName = cfg.label || cfg.displayName || cfg.name || id
+    const color = cfg.color || '#3498db'
+    const defaultPinType = cfg.defaultPinType || 'ephemeral'
 
     const paint: any = {
-      'circle-radius': slug === 'webcams' ? 6 : slug === 'aircraft' ? 5 : 6,
+      'circle-radius': 6,
       'circle-color': color,
       'circle-stroke-width': 1.5,
-      'circle-stroke-color': slug === 'aircraft' ? '#000000' : '#ffffff'
+      'circle-stroke-color': '#ffffff'
     }
 
     const layout = {
@@ -49,15 +49,15 @@ export const getMappedLayersConfig = (): LayerConfig[] => {
     }
 
     return {
-      id: slug,
+      id,
       name: displayName,
       source_type: 'GeoJSON',
       paint,
       layout,
-      minZoom: slug === 'airquality' ? 3 : slug === 'webcams' || slug === 'recon' ? 2 : 1,
+      minZoom: 1,
       maxZoom: 20,
       opacity: 0.9,
-      tier: defaultPinType === 'hub-spoke' ? -3 : defaultPinType === 'persistent' ? -1 : 0,
+      tier: defaultPinType === 'hub' ? -3 : defaultPinType === 'persistent' ? -1 : 0,
       legend: {
         type: 'circle',
         label: displayName,

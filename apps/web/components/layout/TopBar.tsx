@@ -8,7 +8,6 @@ import {
   Maximize2,
   Minimize2,
   Globe,
-  Cpu,
   SunMoon,
   Terminal,
   RefreshCw,
@@ -30,7 +29,7 @@ function Tooltip({ content, children }: { content: string; children: React.React
     })
     timeoutRef.current = setTimeout(() => {
       setVisible(true)
-    }, 400) // 400ms delay
+    }, 150) // 150ms delay
   }
 
   const handleMouseLeave = () => {
@@ -104,8 +103,6 @@ export default function TopBar() {
     toggleMapFullscreen,
     reconToolkitOpen,
     toggleReconToolkit,
-    aiBriefOpen,
-    toggleAiBrief,
   } = usePanelStore()
 
   const { theme, setTheme } = useAppStore()
@@ -166,21 +163,6 @@ export default function TopBar() {
         </Tooltip>
 
 
-
-        {/* AI Brief Drawer */}
-        <Tooltip content="Toggle daily AI strategic brief overlay [A]">
-          <button
-            onClick={toggleAiBrief}
-            aria-label="Toggle daily AI strategic brief overlay"
-            className={`p-1.5 rounded border transition-all ${
-              aiBriefOpen 
-                ? 'bg-[var(--pan-btn-active-bg)] border-[var(--pan-btn-active-border)] text-[var(--pan-btn-active-text)]' 
-                : 'border-[var(--pan-border-default)] hover:border-[var(--pan-border-strong)] text-[var(--pan-text-secondary)] hover:text-[var(--pan-text-primary)] bg-[var(--pan-btn-secondary-bg)] hover:bg-[var(--pan-btn-secondary-hover)]'
-            }`}
-          >
-            <Cpu className="w-3.5 h-3.5" />
-          </button>
-        </Tooltip>
 
         <div className="w-px h-5 bg-border-weak" />
 

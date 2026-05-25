@@ -1,0 +1,69 @@
+{
+  "geophysical_hazards": [
+    "emsc-backup",
+    "gfz-geofon-secondary",
+    "phivolcs-mirror"
+  ],
+  "meteorological_hydrological": [
+    "wmo-severeweather-mirror",
+    "noaa-nhc-backup",
+    "copernicus-glofas-secondary"
+  ],
+  "wildfires_forest": [
+    "copernicus-effis-backup",
+    "inpe-queimadas-mirror",
+    "cwfis-backup"
+  ],
+  "climate_environmental": [
+    "esa-cci-mirror",
+    "noaa-ncei-climate",
+    "copernicus-cams-backup"
+  ],
+  "health_epidemics": [
+    "ecdc-mirror",
+    "paho-backup",
+    "africacdc-secondary"
+  ],
+  "agriculture_food_water": [
+    "fao-giews-mirror",
+    "wfp-hungermap-backup"
+  ],
+  "conflict_security_warfare": [
+    "ucdp-ged-mirror",
+    "un-peacekeeping-secondary"
+  ],
+  "geopolitics_governance_rights": [
+    "ohchr-uhri-mirror",
+    "unhcr-refugees-backup"
+  ],
+  "cyber_information_digital": [
+    "cisa-kev-mirror",
+    "cert-eu-backup"
+  ],
+  "economic_financial_trade": [
+    "bis-stats-backup",
+    "worldbank-api-mirror"
+  ],
+  "energy_strategic_resources": [
+    "eia-petroleum-mirror",
+    "iaea-pris-backup"
+  ],
+  "industrial_nuclear_cbrn": [
+    "iaea-iec-backup",
+    "opcw-verification-mirror"
+  ],
+  "critical_infrastructure_urban": [
+    "unosat-mapping-backup",
+    "ripe-reachability-mirror"
+  ],
+  "transportation_mobility": [
+    "icao-notams-backup",
+    "emsa-ais-mirror"
+  ],
+  "space_aerospace": [
+    "ESA Space Weather Service Network APIs",
+    "NOAA NCEI space-weather archive (https://www.ncei.noaa.gov/)",
+    "NASA Earthdata / JPL (https://www.earthdata.nasa.gov/)",
+    "ICAO API Data Service for launch NOTAMs (https://applications.icao.int/dataservices/default.aspx)"
+  ]
+}

@@ -1,182 +1,286 @@
 [
   {
-    "slug": "earthquakes",
-    "displayName": "USGS Earthquakes",
-    "group": "Natural Hazards",
+    "id": "geophysical_hazards",
+    "label": "Geophysical Hazards",
+    "macroArea": 1,
+    "color": "#e74c3c",
     "icon": "Activity",
-    "description": "Real-time global seismic epicenters",
-    "color": "#e74c3c",
-    "defaultPinType": "instant",
-    "sources": ["usgs-earthquakes", "reuters", "ap"]
+    "defaultPinType": "ephemeral",
+    "tier0Sources": [
+      "usgs-earthquakes",
+      "emsc-earthquakes",
+      "gfz-geofon",
+      "jma-earthquakes",
+      "phivolcs-earthquakes",
+      "smithsonian-gvp",
+      "usgs-volcanoes",
+      "jma-volcanoes",
+      "phivolcs-volcanoes",
+      "ingv-volcanoes",
+      "noaa-tsunami",
+      "incois-tsunami",
+      "nasa-landslide",
+      "jma-landslide"
+    ],
+    "priorityClass": "P0",
+    "maxDetectionLatencyMs": 60000
   },
   {
-    "slug": "weather",
-    "displayName": "Extreme Weather",
-    "group": "Natural Hazards",
+    "id": "meteorological_hydrological",
+    "label": "Meteorological & Hydrological",
+    "macroArea": 2,
+    "color": "#3498db",
     "icon": "Thermometer",
-    "description": "NOAA and global storm tracking alerts",
-    "color": "#3498db",
     "defaultPinType": "persistent",
-    "sources": ["noaa-weather", "reuters", "ap"]
+    "tier0Sources": [
+      "wmo-severeweather",
+      "jma-weather",
+      "wmo-typhoon",
+      "jma-typhoon",
+      "noaa-nhc",
+      "copernicus-glofas",
+      "copernicus-gfm",
+      "copernicus-rapid",
+      "copernicus-climate",
+      "noaa-cdo",
+      "fao-aquastat"
+    ],
+    "priorityClass": "P1",
+    "maxDetectionLatencyMs": 120000
   },
   {
-    "slug": "wildfires",
-    "displayName": "NASA FIRMS Wildfires",
-    "group": "Natural Hazards",
-    "icon": "Flame",
-    "description": "Active thermal hotspot anomaly vectors",
+    "id": "wildfires_forest",
+    "label": "Wildfires & Forest",
+    "macroArea": 3,
     "color": "#e67e22",
+    "icon": "Flame",
     "defaultPinType": "persistent",
-    "sources": ["nasa-firms", "reuters", "ap"]
+    "tier0Sources": [
+      "nasa-firms",
+      "copernicus-effis",
+      "inpe-queimadas",
+      "nifc-inciweb",
+      "gfw-alerts",
+      "cwfis-catalogue"
+    ],
+    "priorityClass": "P0",
+    "maxDetectionLatencyMs": 90000
   },
   {
-    "slug": "airquality",
-    "displayName": "OpenAQ Air Quality",
-    "group": "Natural Hazards",
+    "id": "climate_environmental",
+    "label": "Climate & Environmental",
+    "macroArea": 4,
+    "color": "#2ecc71",
     "icon": "Wind",
-    "description": "Real-time global particulate matter readings",
-    "color": "#9b59b6",
-    "defaultPinType": "instant",
-    "sources": ["openaq-airquality", "reuters", "ap"]
-  },
-  {
-    "slug": "gdelt",
-    "displayName": "GDELT Geopol Events",
-    "group": "Conflict & Security",
-    "icon": "Globe",
-    "description": "Real-time geo-located conflict and cooperative dispatches",
-    "color": "#3498db",
-    "defaultPinType": "instant",
-    "sources": ["gdelt", "reuters", "ap"]
-  },
-  {
-    "slug": "acled",
-    "displayName": "ACLED Conflict Reports",
-    "group": "Conflict & Security",
-    "icon": "ShieldAlert",
-    "description": "Tactical armed engagement and violent confrontation telemetry",
-    "color": "#e74c3c",
-    "defaultPinType": "instant",
-    "sources": ["acled", "reuters", "ap"]
-  },
-  {
-    "slug": "active-conflicts",
-    "displayName": "Active Conflicts",
-    "group": "Conflict & Security",
-    "icon": "Shield",
-    "description": "Semi-permanent active wars and strategic occupation maps",
-    "color": "#ff1a1a",
-    "defaultPinType": "hub-spoke",
-    "sources": ["reuters", "ap", "ukraine-hydra-feed"]
-  },
-  {
-    "slug": "humanitarian-displacement",
-    "displayName": "Refugee & Displacement",
-    "group": "Humanitarian & Crisis",
-    "icon": "MapPin",
-    "description": "Authoritative UNHCR geolocated displacement points",
-    "color": "#34c759",
     "defaultPinType": "persistent",
-    "sources": ["unhcr", "reuters", "ap"]
+    "tier0Sources": [
+      "copernicus-cds",
+      "esa-cci",
+      "noaa-ncei",
+      "nasa-earthdata",
+      "gbif-api",
+      "obis-data",
+      "noaa-coral",
+      "copernicus-marine",
+      "copernicus-cams",
+      "eea-airquality"
+    ],
+    "priorityClass": "P3",
+    "maxDetectionLatencyMs": 3600000
   },
   {
-    "slug": "mass-gatherings-entertainment",
-    "displayName": "Mass Gatherings & Ent",
-    "group": "Events & Gatherings",
-    "icon": "Users",
-    "description": "Concerts, festivals, and large entertainment gatherings",
+    "id": "health_epidemics",
+    "label": "Health & Epidemics",
+    "macroArea": 5,
     "color": "#ff2d55",
-    "defaultPinType": "instant",
-    "sources": ["reuters", "ap"]
+    "icon": "Thermometer",
+    "defaultPinType": "persistent",
+    "tier0Sources": [
+      "who-gho",
+      "ecdc-dashboards",
+      "paho-portal",
+      "africacdc-tools"
+    ],
+    "priorityClass": "P1",
+    "maxDetectionLatencyMs": 600000
   },
   {
-    "slug": "sports-major-events",
-    "displayName": "Sports & Major Events",
-    "group": "Events & Gatherings",
-    "icon": "Trophy",
-    "description": "Olympics, World Cups, and international sports events",
-    "color": "#ffcc00",
-    "defaultPinType": "instant",
-    "sources": ["reuters", "ap"]
-  },
-  {
-    "slug": "religious-pilgrimage-gatherings",
-    "displayName": "Religious Pilgrimages",
-    "group": "Events & Gatherings",
-    "icon": "Book",
-    "description": "Hajj, Kumbh Mela, and other major religious gatherings",
-    "color": "#5ac8fa",
-    "defaultPinType": "instant",
-    "sources": ["reuters", "ap"]
-  },
-  {
-    "slug": "labor-social-movements",
-    "displayName": "Labor & Social Movements",
-    "group": "Events & Gatherings",
-    "icon": "Megaphone",
-    "description": "Strikes, widespread union protests, and social movements",
-    "color": "#ff9500",
-    "defaultPinType": "instant",
-    "sources": ["reuters", "ap"]
-  },
-  {
-    "slug": "science-space-exploration",
-    "displayName": "Science & Space",
-    "group": "Space & Orbital",
-    "icon": "Rocket",
-    "description": "Rocket launches, astronomical events, and scientific milestones",
-    "color": "#af52de",
-    "defaultPinType": "instant",
-    "sources": ["reuters", "ap"]
-  },
-  {
-    "slug": "aircraft",
-    "displayName": "OpenSky ADS-B Feeds",
-    "group": "Airspace & Aviation",
-    "icon": "Plane",
-    "description": "Real-time aircraft tracking transponder beacons",
+    "id": "agriculture_food_water",
+    "label": "Agriculture, Food & Water",
+    "macroArea": 6,
     "color": "#f1c40f",
-    "defaultPinType": "instant",
-    "sources": ["opensky-aviation"]
+    "icon": "Book",
+    "defaultPinType": "persistent",
+    "tier0Sources": [
+      "fao-giews",
+      "fao-fpma",
+      "wfp-hungermap",
+      "fao-aquastat-ag",
+      "copernicus-glofas-discharge"
+    ],
+    "priorityClass": "P2",
+    "maxDetectionLatencyMs": 600000
   },
   {
-    "slug": "space",
-    "displayName": "Satellite Tracking",
-    "group": "Space & Orbital",
-    "icon": "Satellite",
-    "description": "Active NORAD satellite sweeps and ground propagations",
-    "color": "#00f0ff",
-    "defaultPinType": "instant",
-    "sources": ["noaa-satellites"]
+    "id": "conflict_security_warfare",
+    "label": "Conflict, Security & Warfare",
+    "macroArea": 7,
+    "color": "#c0392b",
+    "icon": "ShieldAlert",
+    "defaultPinType": "hub",
+    "tier0Sources": [
+      "acled-conflict",
+      "ucdp-ged",
+      "un-peacekeeping",
+      "unsc-sanctions",
+      "sipri-arms"
+    ],
+    "priorityClass": "P0",
+    "maxDetectionLatencyMs": 60000
   },
   {
-    "slug": "ais-vessels",
-    "displayName": "AIS Vessel Tracking",
-    "group": "Maritime & Logistics",
-    "icon": "Shield",
-    "description": "Real-time commercial and military vessel positions",
-    "color": "#1565c0",
-    "defaultPinType": "instant",
-    "sources": ["ais-vessels"]
-  },
-  {
-    "slug": "webcams",
-    "displayName": "Global CCTV Network",
-    "group": "Surveillance & OSINT",
-    "icon": "Eye",
-    "description": "AMOS webcams and verified public EarthCam live feeds",
-    "color": "#1abc9c",
-    "defaultPinType": "instant",
-    "sources": ["webcams"]
-  },
-  {
-    "slug": "recon",
-    "displayName": "OSINT Cyber Recon",
-    "group": "Surveillance & OSINT",
-    "icon": "Radio",
-    "description": "Tactical network hops and port traceback scanners",
+    "id": "geopolitics_governance_rights",
+    "label": "Geopolitics, Governance & Rights",
+    "macroArea": 8,
     "color": "#9b59b6",
-    "defaultPinType": "instant",
-    "sources": ["recon"]
+    "icon": "Globe",
+    "defaultPinType": "persistent",
+    "tier0Sources": [
+      "idea-elections",
+      "ohchr-uhri",
+      "unhcr-refugees",
+      "unosat-emergency",
+      "ilostat-sdmx"
+    ],
+    "priorityClass": "P2",
+    "maxDetectionLatencyMs": 900000
+  },
+  {
+    "id": "cyber_information_digital",
+    "label": "Cyber, Info & Digital",
+    "macroArea": 9,
+    "color": "#16a085",
+    "icon": "Radio",
+    "defaultPinType": "ephemeral",
+    "tier0Sources": [
+      "nvd-cve",
+      "cisa-kev",
+      "cert-eu",
+      "euvd-db",
+      "first-csirt",
+      "enisa-resources",
+      "caida-ioda",
+      "ripe-atlas",
+      "routeviews-bgp"
+    ],
+    "priorityClass": "P1",
+    "maxDetectionLatencyMs": 300000
+  },
+  {
+    "id": "economic_financial_trade",
+    "label": "Economic, Financial & Trade",
+    "macroArea": 10,
+    "color": "#27ae60",
+    "icon": "Database",
+    "defaultPinType": "persistent",
+    "tier0Sources": [
+      "imf-data",
+      "bis-stats",
+      "worldbank-api",
+      "wto-stats",
+      "wits-rest",
+      "fatf-stats",
+      "icao-stats",
+      "opensky-stats"
+    ],
+    "priorityClass": "P2",
+    "maxDetectionLatencyMs": 600000
+  },
+  {
+    "id": "energy_strategic_resources",
+    "label": "Energy & Strategic Resources",
+    "macroArea": 11,
+    "color": "#f39c12",
+    "icon": "Cpu",
+    "defaultPinType": "persistent",
+    "tier0Sources": [
+      "iea-data",
+      "iea-electricity",
+      "eia-petroleum",
+      "irena-stats",
+      "usgs-minerals",
+      "iaea-pris",
+      "iaea-data",
+      "iaea-incident"
+    ],
+    "priorityClass": "P2",
+    "maxDetectionLatencyMs": 600000
+  },
+  {
+    "id": "industrial_nuclear_cbrn",
+    "label": "Industrial, Nuclear & CBRN",
+    "macroArea": 12,
+    "color": "#d35400",
+    "icon": "AlertTriangle",
+    "defaultPinType": "persistent",
+    "tier0Sources": [
+      "eu-emars",
+      "iaea-iec",
+      "opcw-verification",
+      "ilo-osh"
+    ],
+    "priorityClass": "P0",
+    "maxDetectionLatencyMs": 60000
+  },
+  {
+    "id": "critical_infrastructure_urban",
+    "label": "Critical Infrastructure",
+    "macroArea": 13,
+    "color": "#7f8c8d",
+    "icon": "Network",
+    "defaultPinType": "persistent",
+    "tier0Sources": [
+      "copernicus-ems-mapping",
+      "unosat-mapping",
+      "unasign-geotagged",
+      "copernicus-glofas-dams",
+      "caida-network",
+      "ripe-reachability",
+      "undata-urban"
+    ],
+    "priorityClass": "P1",
+    "maxDetectionLatencyMs": 300000
+  },
+  {
+    "id": "transportation_mobility",
+    "label": "Transportation & Mobility",
+    "macroArea": 14,
+    "color": "#bdc3c7",
+    "icon": "Plane",
+    "defaultPinType": "ephemeral",
+    "tier0Sources": [
+      "opensky-live",
+      "icao-notams",
+      "emsa-ais",
+      "imo-feeds",
+      "unece-transport"
+    ],
+    "priorityClass": "P1",
+    "maxDetectionLatencyMs": 180000
+  },
+  {
+    "id": "space_aerospace",
+    "label": "Space & Aerospace",
+    "macroArea": 15,
+    "color": "#af52de",
+    "icon": "Rocket",
+    "defaultPinType": "ephemeral",
+    "tier0Sources": [
+      "noaa-swpc-data",
+      "celestrak-gp",
+      "space-track"
+    ],
+    "priorityClass": "P1",
+    "maxDetectionLatencyMs": 300000
   }
 ]

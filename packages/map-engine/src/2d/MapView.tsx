@@ -71,14 +71,6 @@ export default function MapView({
   const { newsEvents } = useNewsStore()
   const [hoverInfo, setHoverInfo] = React.useState<any>(null)
 
-  const activeLayers = React.useMemo(() => {
-    const set = new Set<string>()
-    for (const [key, state] of Object.entries(layerStates)) {
-      if (state.visible) set.add(key)
-    }
-    return set
-  }, [layerStates])
-
   // Instantiate and load spatial index for webcams
   const spatialIndex = React.useMemo(() => {
     const index = new GridSpatialIndex()
@@ -740,11 +732,7 @@ export default function MapView({
 
   // Layer visibility helpers
   const isLayerVisible = (layerId: string) => {
-    const isCustom = layerId.includes('-add-')
-    if (isCustom) {
-      return layerStates[layerId]?.visible === true ? 'visible' : 'none'
-    }
-    return layerStates[layerId]?.visible !== false ? 'visible' : 'none'
+    return layerStates[layerId]?.visible === true ? 'visible' : 'none'
   }
 
   // Handle click on map entities
@@ -1400,19 +1388,11 @@ export default function MapView({
             id="news-spoke-lines-layer"
             type="line"
             layout={{
-              visibility: 'visible',
+              visibility: isLayerVisible('news-events'),
               'line-join': 'round',
               'line-cap': 'round',
             }}
-            filter={[
-              'all',
-              ['==', ['get', 'isNews'], true],
-              [
-                'any',
-                ['literal', activeLayers.has('news-events')],
-                ['in', ['get', 'layerId'], ['literal', Array.from(activeLayers)]]
-              ]
-            ]}
+            filter={['==', ['get', 'isNews'], true]}
             paint={{
               'line-color': '#af52de',
               'line-width': 1.2,
@@ -1428,16 +1408,8 @@ export default function MapView({
           id="news-events-glow-layer"
           type="circle"
           source="panopticon-events-source"
-          filter={[
-            'all',
-            ['==', ['get', 'isNews'], true],
-            [
-              'any',
-              ['literal', activeLayers.has('news-events')],
-              ['in', ['get', 'layerId'], ['literal', Array.from(activeLayers)]]
-            ]
-          ]}
-          layout={{ visibility: 'visible' }}
+          filter={['==', ['get', 'isNews'], true]}
+          layout={{ visibility: isLayerVisible('news-events') }}
           paint={{
             'circle-radius': [
               'interpolate',
@@ -1478,16 +1450,8 @@ export default function MapView({
           id="news-events-layer"
           type="circle"
           source="panopticon-events-source"
-          filter={[
-            'all',
-            ['==', ['get', 'isNews'], true],
-            [
-              'any',
-              ['literal', activeLayers.has('news-events')],
-              ['in', ['get', 'layerId'], ['literal', Array.from(activeLayers)]]
-            ]
-          ]}
-          layout={{ visibility: 'visible' }}
+          filter={['==', ['get', 'isNews'], true]}
+          layout={{ visibility: isLayerVisible('news-events') }}
           paint={{
             'circle-radius': [
               'interpolate',
@@ -1543,15 +1507,10 @@ export default function MapView({
           filter={[
             'all',
             ['==', ['get', 'isNews'], true],
-            ['!=', ['get', 'type'], 'context'],
-            [
-              'any',
-              ['literal', activeLayers.has('news-events')],
-              ['in', ['get', 'layerId'], ['literal', Array.from(activeLayers)]]
-            ]
+            ['!=', ['get', 'type'], 'context']
           ]}
           layout={{
-            visibility: 'visible',
+            visibility: isLayerVisible('news-events'),
             'text-field': [
               'case',
               ['==', ['get', 'type'], 'hub'], '📚',

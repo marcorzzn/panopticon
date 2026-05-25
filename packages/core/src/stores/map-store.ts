@@ -4,6 +4,8 @@ import type { ViewState, BoundingBox, ReconScanEntity } from '../types/geo'
 import { DEFAULT_VIEW_STATE } from '../types/geo'
 import type { LayerState } from '../types/layer'
 
+import layersConfig from '../config/layers.json'
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -70,6 +72,37 @@ const DEFAULT_LAYER_STATE: Omit<LayerState, 'layerId'> = {
   error: null,
 }
 
+const buildInitialLayerStates = (): Record<string, LayerState> => {
+  const states: Record<string, LayerState> = {}
+  layersConfig.forEach((layer) => {
+    states[layer.id] = {
+      layerId: layer.id,
+      visible: true,
+      opacity: 1,
+      loading: false,
+      lastRefreshAt: null,
+      entityCount: 0,
+      error: null,
+    }
+  })
+  // Ensure special overlays/layers are also initialized as visible
+  const specialLayers = ['news-events', 'power-grid', 'nuclear', 'pipelines']
+  specialLayers.forEach((id) => {
+    if (!states[id]) {
+      states[id] = {
+        layerId: id,
+        visible: true,
+        opacity: 1,
+        loading: false,
+        lastRefreshAt: null,
+        entityCount: 0,
+        error: null,
+      }
+    }
+  })
+  return states
+}
+
 /**
  * Ensure a LayerState record exists for the given layer ID.
  * Returns the existing or newly-initialised record.
@@ -121,7 +154,7 @@ export const useMapStore = create<MapStore>()(
       set((s) => ({ mode: s.mode === '2d' ? '3d' : '2d' })),
 
     // ── Layer states ───────────────────────────────────────────────────────
-    layerStates: {} as Record<string, LayerState>,
+    layerStates: buildInitialLayerStates(),
 
     setLayerVisible: (layerId, visible) =>
       set((s) => ({
