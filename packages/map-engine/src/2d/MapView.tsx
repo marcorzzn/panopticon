@@ -732,7 +732,53 @@ export default function MapView({
 
   // Layer visibility helpers
   const isLayerVisible = (layerId: string) => {
-    return layerStates[layerId]?.visible === true ? 'visible' : 'none'
+    let targetId = layerId
+    switch (layerId) {
+      case 'earthquakes':
+        targetId = 'geophysical_hazards'
+        break
+      case 'weather':
+        targetId = 'meteorological_hydrological'
+        break
+      case 'wildfires':
+        targetId = 'wildfires_forest'
+        break
+      case 'airquality':
+      case 'climate':
+        targetId = 'climate_environmental'
+        break
+      case 'health':
+        targetId = 'health_epidemics'
+        break
+      case 'acled':
+      case 'active-conflicts':
+        targetId = 'conflict_security_warfare'
+        break
+      case 'nuclear':
+        targetId = 'industrial_nuclear_cbrn'
+        break
+      case 'power-grid':
+      case 'pipelines':
+      case 'infrastructure':
+        targetId = 'critical_infrastructure_urban'
+        break
+      case 'aircraft':
+        targetId = 'transportation_mobility'
+        break
+      case 'space':
+        targetId = 'space_aerospace'
+        break
+      case 'webcams':
+      case 'recon':
+        targetId = 'cyber_information_digital'
+        break
+    }
+    const state = layerStates[targetId]
+    if (state === undefined) {
+      if (layerId === 'terminator') return 'visible'
+      return 'none'
+    }
+    return state.visible === true ? 'visible' : 'none'
   }
 
   // Handle click on map entities

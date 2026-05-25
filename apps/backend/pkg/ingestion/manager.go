@@ -69,6 +69,8 @@ func (m *Manager) Start() {
 	go m.runAirQualityPoller()
 	go m.runAcledPoller()
 	go m.runNewsWirePoller()
+	go m.runSpacePoller()
+	go m.runWebcamPoller()
 
 	// 3. Start stale telemetry pruning daemon
 	go m.runPruningDaemon()
